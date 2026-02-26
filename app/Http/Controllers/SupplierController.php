@@ -12,7 +12,7 @@ class SupplierController extends Controller
      */
     public function index()
     {
-        return view('livewire.⚡-supplier-dashboard');
+        return view('dashboard');
     }
 
     /**

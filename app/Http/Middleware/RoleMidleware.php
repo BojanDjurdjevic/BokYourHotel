@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMidleware
 {
-    public function handle(Request $request, Closure $next, string $role)
+    public function handle(Request $request, Closure $next)
     {
         $user = Auth::user();
 
@@ -18,7 +18,7 @@ class RoleMidleware
         }
 
         
-        if ($user->role !== $role && $user->role !== 'superadmin') {
+        if ($user->role !== 'supplier' && $user->role !== 'superadmin') {
             abort(403, 'Unauthorized');
         }
 

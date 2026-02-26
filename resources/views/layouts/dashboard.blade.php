@@ -9,5 +9,6 @@
 
     @if(in_array(auth()->user()->role, ['admin','superadmin']))
         @include('layouts.partials.sidebar-admin')
+        <livewire:supplier-dashboard />
     @endif
 </aside>

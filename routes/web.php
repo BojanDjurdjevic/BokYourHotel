@@ -24,10 +24,12 @@ Route::middleware('auth')->group(function () {
         return view('dashboard');
     })->name('dashboard');
     
-    Route::middleware(['role:supplier', RoleMidleware::class])->group(function () {
-        Route::middleware(['auth', 'role:supplier'])
-        ->get('/supplier/dashboard', SupplierController::class)
-        ->name('supplier.dashboard');
+    Route::middleware( RoleMidleware::class)->prefix('supplier')->group(function () {
+        Route::controller(SupplierController::class)->group(function() {
+            Route::get('/dashboard', 'index')
+            ->name('supplier.dashboard');
+        });
+        
     });
 
     Route::middleware(['role:admin', RoleMidleware::class])->group(function () {
