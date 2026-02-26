@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Middleware\RoleMidleware;
+use App\Livewire\SupplierDashboard;
 use Illuminate\Support\Facades\Route;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,16 +23,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
-
-    Route::middleware(['role:supplier'])->group(function () {
-        
+    
+    Route::middleware(['role:supplier', RoleMidleware::class])->group(function () {
+        Route::middleware(['auth', 'role:supplier'])
+        ->get('/supplier/dashboard', SupplierController::class)
+        ->name('supplier.dashboard');
     });
 
-    Route::middleware(['role:admin'])->group(function () {
+    Route::middleware(['role:admin', RoleMidleware::class])->group(function () {
         Route::get('/admin/dashboard', function () {
             return 'Admin dashboard';
         })->name('admin.dashboard');
-    });
+    }); 
 });
 
 require __DIR__.'/auth.php';
