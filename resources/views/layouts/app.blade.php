@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html x-data="{ dark: true }" :class="dark ? 'dark' : ''">
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 <head>
     <meta charset="utf-8">
