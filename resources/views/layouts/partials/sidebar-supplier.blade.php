@@ -1,6 +1,4 @@
-<nav class="space-y-3 text-md p-3 bg-gray-900 rounded-lg
-    flex justify-evenly align-center"
->
+<nav class="space-y-3 text-md p-3 {{ $bgColor }} rounded-lg">
 
     <a href="#" class="block text-gray-300 hover:text-white transition">
         Overview

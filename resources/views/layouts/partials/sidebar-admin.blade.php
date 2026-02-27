@@ -1,4 +1,4 @@
-<nav class="space-y-3 text-sm">
+<nav class="space-y-3 text-sm {{ $bgColor }}">
 
     <a href="#" class="block text-gray-400 hover:text-white transition">
         Dashboard
