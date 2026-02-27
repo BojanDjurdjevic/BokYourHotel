@@ -4,17 +4,24 @@
         if(auth()->user()->role == 'superadmin') $bgColor = 'bg-purple-900';
         else $bgColor = 'bg-emerald-900';
     @endphp
-    <aside class="w-64 {{ $bgColor }} border-r border-gray-800 p-6 hidden md:block rounded-lg">
-        <h2 class="text-lg font-semibold mb-8">
-            {{ ucfirst(auth()->user()->role) }} Panel
-        </h2>
+    <div class="flex justify-between items-center">
+        <aside class="w-64 {{ $bgColor }} border-r border-gray-800 p-6 hidden md:block rounded-xl">
+            <h2 class="text-lg font-semibold mb-8">
+                {{ ucfirst(auth()->user()->role) }} Panel
+            </h2>
 
-        @if(auth()->user()->role === 'supplier')
-            @include('layouts.partials.sidebar-supplier', compact('bgColor'))
-        @endif
+            @if(auth()->user()->role === 'supplier')
+                @include('layouts.partials.sidebar-supplier', compact('bgColor'))
+            @endif
 
-        @if(in_array(auth()->user()->role, ['admin','superadmin']))
-            @include('layouts.partials.sidebar-admin', compact('bgColor'))
-        @endif
-    </aside>
+            @if(in_array(auth()->user()->role, ['admin','superadmin']))
+                @include('layouts.partials.sidebar-admin', compact('bgColor'))
+            @endif
+        </aside>
+        <main>
+            @if(auth()->user()->role === 'supplier')
+               <livewire:supplier-dashboard />
+            @endif
+        </main>
+    </div>
 </x-app-layout>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Middleware\SuperMiddleware;
 use App\Http\Middleware\SuppMidleware;
 use Illuminate\Support\Facades\Route;
 
@@ -31,9 +32,9 @@ Route::middleware('auth')->group(function () {
         
     });
 
-    Route::middleware([ SuppMidleware::class])->group(function () {
+    Route::middleware(SuperMiddleware::class)->group(function () {
         Route::get('/admin/dashboard', function () {
-            return 'Admin dashboard';
+            return view('layouts.dashboard');
         })->name('admin.dashboard');
     }); 
 });
