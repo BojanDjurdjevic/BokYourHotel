@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class RoleMidleware
+class SuperMiddleware
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
 
@@ -18,10 +18,9 @@ class RoleMidleware
         }
 
         
-        if ($user->role !== 'supplier' && $user->role !== 'superadmin') {
+        if ($user->role !== 'superadmin') {
             abort(403, 'Unauthorized');
         }
-
         return $next($request);
     }
 }

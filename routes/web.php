@@ -2,8 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SupplierController;
-use App\Http\Middleware\RoleMidleware;
-use App\Livewire\SupplierDashboard;
+use App\Http\Middleware\SuppMidleware;
 use Illuminate\Support\Facades\Route;
 
 
@@ -24,7 +23,7 @@ Route::middleware('auth')->group(function () {
         return view('dashboard');
     })->name('dashboard');
     
-    Route::middleware( RoleMidleware::class)->prefix('supplier')->group(function () {
+    Route::middleware( SuppMidleware::class)->prefix('supplier')->group(function () {
         Route::controller(SupplierController::class)->group(function() {
             Route::get('/dashboard', 'index')
             ->name('supplier.dashboard');
@@ -32,7 +31,7 @@ Route::middleware('auth')->group(function () {
         
     });
 
-    Route::middleware(['role:admin', RoleMidleware::class])->group(function () {
+    Route::middleware([ SuppMidleware::class])->group(function () {
         Route::get('/admin/dashboard', function () {
             return 'Admin dashboard';
         })->name('admin.dashboard');
