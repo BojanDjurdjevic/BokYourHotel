@@ -4,7 +4,7 @@
 
 @php
 $classes = match($variant) {
-    'primary' => 'bg-indigo-600 hover:bg-indigo-500 text-white',
+    'primary' => 'bg-emerald-700 hover:bg-emerald-500 text-white',
     'secondary' => 'bg-gray-800 hover:bg-gray-700 text-gray-200',
     'danger' => 'bg-red-600 hover:bg-red-500 text-white',
     default => 'bg-indigo-600 hover:bg-indigo-500 text-white',

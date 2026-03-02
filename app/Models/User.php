@@ -39,7 +39,7 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin' || $this->role === 'superadmin';
+        return $this->role === 'admin' || $this->role === 'admin';
     }
 
     public function isSupplier(): bool

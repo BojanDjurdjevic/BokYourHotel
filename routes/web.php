@@ -24,12 +24,24 @@ Route::middleware('auth')->group(function () {
         return view('dashboard');
     })->name('dashboard');
     
-    Route::middleware( SuppMidleware::class)->prefix('supplier')->group(function () {
+    Route::middleware( SuppMidleware::class)->prefix('supplier')->name('supplier.')->group(function () {
         Route::controller(SupplierController::class)->group(function() {
             Route::get('/dashboard', 'index')
-            ->name('supplier.dashboard');
+            ->name('dashboard');
+            
         });
-        
+        Route::get('/hotels', function() {
+             return view('supplier.hotels');
+        })->name('hotels');
+        Route::get('/bookings', function() {
+             return view('supplier.bookings.confirmed');
+        })->name('bookings');
+        Route::get('/pending', function() {
+             return view('supplier.bookings.pending');
+        })->name('pending');
+        Route::get('/revenue', function() {
+             return view('supplier.revenue');
+        })->name('revenue');
     });
 
     Route::middleware(SuperMiddleware::class)->group(function () {
