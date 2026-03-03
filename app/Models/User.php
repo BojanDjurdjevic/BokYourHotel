@@ -51,4 +51,9 @@ class User extends Authenticatable
     {
         return $this->role === 'superadmin';
     }
+
+    public function hotels()
+    {
+        $this->hasMany(Hotel::class, 'supplier_id');
+    }
 }
