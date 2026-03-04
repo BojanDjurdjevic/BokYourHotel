@@ -15,8 +15,24 @@ class Room extends Model
         'total_units',
     ];
 
+    public function hotel()
+    {
+        return $this->belongsTo(Hotel::class);
+    }
+
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(RoomImage::class);
+    }
+
+    public function featuredImage()
+    {
+        return $this->hasOne(RoomImage::class)
+            ->where('is_featured', true);
     }
 }

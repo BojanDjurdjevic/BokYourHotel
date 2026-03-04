@@ -12,4 +12,20 @@ class Hotel extends Model
         'name', 'city',
         'address', 'description',
     ];
+
+    public function rooms()
+    {
+        return $this->hasMany(Room::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(HotelImage::class);
+    }
+
+    public function featuredImage()
+    {
+        return $this->hasOne(HotelImage::class)
+            ->where('is_featured', true);
+    }
 }
