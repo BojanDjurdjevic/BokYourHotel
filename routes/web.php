@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Supplier\HotelController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Middleware\SuperMiddleware;
 use App\Http\Middleware\SuppMidleware;
@@ -42,6 +43,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/revenue', function() {
              return view('supplier.revenue');
         })->name('revenue');
+
+        //Resource:
+
+        Route::resource('hotels', HotelController::class);
     });
 
     Route::middleware(SuperMiddleware::class)->group(function () {
