@@ -37,23 +37,28 @@ class User extends Authenticatable
         ];
     }
 
+    const ROLE_SUPERADMIN = 'superadmin';
+    const ROLE_ADMIN = 'admin';
+    const ROLE_SUPPLIER = 'supplier';
+    const ROLE_USER = 'user';
+
     public function isAdmin(): bool
     {
-        return $this->role === 'admin' || $this->role === 'admin';
+        return $this->role === self::ROLE_SUPERADMIN || $this->role === self::ROLE_ADMIN;
     }
 
     public function isSupplier(): bool
     {
-        return $this->role === 'supplier';
+        return $this->role === self::ROLE_SUPPLIER;
     }
 
     public function isSuperAdmin(): bool
     {
-        return $this->role === 'superadmin';
+        return $this->role === self::ROLE_SUPERADMIN;
     }
 
     public function hotels()
     {
-        $this->hasMany(Hotel::class, 'supplier_id');
+        $this->hasMany(Hotel::class);
     }
 }

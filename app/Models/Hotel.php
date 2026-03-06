@@ -28,4 +28,10 @@ class Hotel extends Model
         return $this->hasOne(HotelImage::class)
             ->where('is_featured', true);
     }
+
+    
+    public function supplier()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }
