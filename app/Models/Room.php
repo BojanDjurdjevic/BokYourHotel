@@ -35,4 +35,20 @@ class Room extends Model
         return $this->hasOne(RoomImage::class)
             ->where('is_featured', true);
     }
+
+    public function roomType()
+    {
+        return $this->belongsTo(RoomType::class);
+    }
+
+    public function bedType()
+    {
+        return $this->belongsTo(BedType::class);
+    }
+    public function boardTypes()
+    {
+        return $this->belongsToMany(BoardType::class, 'room_board_types')
+            ->withPivot('price')
+            ->withTimestamps();
+    }
 }
