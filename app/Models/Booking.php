@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
@@ -16,6 +17,10 @@ class Booking extends Model
         'total_price',
         'status',
         'locked_until',
+    ];
+
+    protected $casts = [
+        'status' => BookingStatus::class,
     ];
 
     public function room()
