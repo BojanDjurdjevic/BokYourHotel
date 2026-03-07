@@ -42,6 +42,11 @@ class User extends Authenticatable
     const ROLE_SUPPLIER = 'supplier';
     const ROLE_USER = 'user';
 
+    public function scopeSuppliers($query)
+    {
+        return $query->where('role', 'supplier');
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_SUPERADMIN || $this->role === self::ROLE_ADMIN;
@@ -59,6 +64,6 @@ class User extends Authenticatable
 
     public function hotels()
     {
-        $this->hasMany(Hotel::class);
+        return $this->hasMany(Hotel::class, 'supplier_id');
     }
 }

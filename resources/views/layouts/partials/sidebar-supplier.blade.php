@@ -7,7 +7,7 @@
         Overview
     </a>
 
-    <a href="{{ route('supplier.hotels') }}" 
+    <a href="{{ route('supplier.myhotels') }}" 
         class="block text-gray-300 hover:text-white transition"
         wire:navigate    
     >

@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Supplier;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Hotel;
 
 class HotelController extends Controller
 {
     public function index()
     {
+        //dd(auth()->user()->hotels());
         $hotels = auth()->user()
             ->hotels()
             ->latest()

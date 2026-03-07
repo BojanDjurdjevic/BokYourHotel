@@ -31,9 +31,9 @@ Route::middleware('auth')->group(function () {
             ->name('dashboard');
             
         });
-        Route::get('/hotels', function() {
+        Route::get('/myhotels', function() {
              return view('supplier.hotels.index');
-        })->name('hotels');
+        })->name('myhotels');
         Route::get('/bookings', function() {
              return view('supplier.bookings.confirmed');
         })->name('bookings');

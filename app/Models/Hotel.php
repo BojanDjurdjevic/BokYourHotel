@@ -32,6 +32,6 @@ class Hotel extends Model
     
     public function supplier()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'supplier_id');
     }
 }
