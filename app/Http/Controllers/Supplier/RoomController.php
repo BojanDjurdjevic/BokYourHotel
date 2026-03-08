@@ -56,7 +56,7 @@ class RoomController extends Controller
         $bedTypes = BedType::all();
         $boardTypes = BoardType::all();
 
-        return view('supplier.hotels.rooms.edit', compact(
+        return view('supplier.rooms.edit', compact(
             'room',
             'hotel',
             'roomTypes',

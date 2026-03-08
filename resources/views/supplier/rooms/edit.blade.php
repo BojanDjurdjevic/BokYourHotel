@@ -5,7 +5,7 @@
     Edit Room
     </h1>
 
-    <form method="POST" action="{{ route('supplier.rooms.update', $room) }}">
+    <form method="POST" action="{{ route('supplier.hotels.rooms.update', [$hotel, $room]) }}">
     @csrf
     @method('PUT')
 
@@ -107,9 +107,9 @@
     >
     </div>
 
-    <button class="bg-blue-600 text-white px-4 py-2 rounded">
+    <x-button class="primary">
     Update Room
-    </button>
+    </x-button>
 
     </form>
 
