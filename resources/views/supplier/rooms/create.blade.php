@@ -14,6 +14,60 @@
     </div>
 
     <div class="mb-4">
+    <label>Room Type</label>
+
+    <select name="room_type_id" class="w-full border p-2 rounded">
+
+    @foreach($roomTypes as $type)
+
+    <option value="{{ $type->id }}">
+    {{ $type->name }}
+    </option>
+
+    @endforeach
+
+    </select>
+    </div>
+
+    <div class="mb-4">
+    <label>Bed Type</label>
+
+    <select name="bed_type_id" class="w-full border p-2 rounded">
+
+    @foreach($bedTypes as $bed)
+
+    <option value="{{ $bed->id }}">
+    {{ $bed->name }}
+    </option>
+
+    @endforeach
+
+    </select>
+    </div>
+
+    <div class="mb-6">
+
+    <label class="block mb-2">Board Types</label>
+
+    @foreach($boardTypes as $board)
+
+    <label class="block">
+
+    <input
+    type="checkbox"
+    name="board_types[]"
+    value="{{ $board->id }}"
+    >
+
+    {{ $board->name }}
+
+    </label>
+
+    @endforeach
+
+    </div>
+
+    <div class="mb-4">
     <label>Capacity</label>
     <input type="number" name="capacity" class="w-full border p-2 rounded">
     </div>

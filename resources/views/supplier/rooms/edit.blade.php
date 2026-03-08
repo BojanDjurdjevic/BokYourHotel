@@ -19,6 +19,63 @@
     >
     </div>
 
+    <div>
+        <select name="room_type_id" class="w-full border p-2 rounded">
+
+        @foreach($roomTypes as $type)
+
+        <option
+        value="{{ $type->id }}"
+        @selected($room->room_type_id == $type->id)
+        >
+
+        {{ $type->name }}
+
+        </option>
+
+        @endforeach
+
+        </select>
+    </div>
+
+    <div>
+        <select name="bed_type_id" class="w-full border p-2 rounded">
+
+        @foreach($bedTypes as $bed)
+
+        <option
+        value="{{ $bed->id }}"
+        @selected($room->bed_type_id == $bed->id)
+        >
+
+        {{ $bed->name }}
+
+        </option>
+
+        @endforeach
+
+        </select>
+    </div>
+
+    <div>
+        @foreach($boardTypes as $board)
+
+        <label class="block">
+
+        <input
+        type="checkbox"
+        name="board_types[]"
+        value="{{ $board->id }}"
+        @checked($room->boardTypes->contains($board->id))
+        >
+
+        {{ $board->name }}
+
+        </label>
+
+        @endforeach
+    </div>
+
     <div class="mb-4">
     <label>Capacity</label>
     <input
