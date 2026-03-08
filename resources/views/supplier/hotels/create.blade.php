@@ -11,16 +11,20 @@
         action="{{ route('supplier.hotels.store') }}"
         class="space-y-6"
         >
+            @if ($errors)
+                <p class="text-red-600">{{ $errors->first() }}</p>
+            @endif
 
             @csrf
 
             <div>
                 <label class="block text-sm mb-2">Hotel Name</label>
                 <input
-                type="text"
-                name="name"
-                class="w-full rounded-lg bg-gray-900 border-gray-700"
-                required
+                    type="text"
+                    name="name"
+                    class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
+                    required
+                    value="{{ old('name') }}"
                 >
                 </div>
 
@@ -29,20 +33,22 @@
                 <div>
                 <label class="block text-sm mb-2">City</label>
                 <input
-                type="text"
-                name="city"
-                class="w-full rounded-lg bg-gray-900 border-gray-700"
-                required
+                    type="text"
+                    name="city"
+                    class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
+                    required
+                    value="{{ old('city') }}"
                 >
             </div>
 
             <div>
                 <label class="block text-sm mb-2">Country</label>
                 <input
-                type="text"
-                name="country"
-                class="w-full rounded-lg bg-gray-900 border-gray-700"
-                required
+                    type="text"
+                    name="country"
+                    class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
+                    required
+                    value="{{ old('country') }}"
                 >
                 </div>
 
@@ -51,18 +57,20 @@
                 <div>
                 <label class="block text-sm mb-2">Address</label>
                 <input
-                type="text"
-                name="address"
-                class="w-full rounded-lg bg-gray-900 border-gray-700"
+                    type="text"
+                    name="address"
+                    class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
+                    value="{{ old('address') }}"
                 >
             </div>
 
             <div>
                 <label class="block text-sm mb-2">Description</label>
                 <textarea
-                name="description"
-                rows="4"
-                class="w-full rounded-lg bg-gray-900 border-gray-700"
+                    name="description"
+                    rows="4"
+                    class="w-full rounded-lg bg-gray-900 border-gray-700"
+                    value="{{ old('description') }}"
                 ></textarea>
                 </div>
 

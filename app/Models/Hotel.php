@@ -8,8 +8,8 @@ class Hotel extends Model
 {
     protected $table = "hotels";
 
-    protected $filable = [
-        'name', 'city',
+    protected $fillable = [
+        'name', 'city', 'country',
         'address', 'description',
     ];
 

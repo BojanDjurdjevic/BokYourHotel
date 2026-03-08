@@ -30,13 +30,13 @@ class HotelController extends Controller
     {
         $data = $request->validated();
 
-        dd($data);
+        $name = $data['name'];
 
         auth()->user()->hotels()->create($data);
 
         return redirect()
-            ->route('supplier.hotels')
-            ->with('success','Hotel created');
+            ->route('supplier.hotels.index')
+            ->with('success',"New hotel $name successfully created!");
     }
 
     /**
