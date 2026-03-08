@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function () {
         return view('dashboard');
     })->name('dashboard');
     
-    Route::middleware( SuppMidleware::class)->prefix('supplier')->name('supplier.')->group(function () {
+    Route::middleware( ['auth', 'role:supplier'])->prefix('supplier')->name('supplier.')->group(function () {
         Route::controller(SupplierController::class)->group(function() {
             Route::get('/dashboard', 'index')
             ->name('dashboard');
