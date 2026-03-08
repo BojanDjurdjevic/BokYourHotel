@@ -20,6 +20,7 @@
     </div>
 
     <div>
+        <label>Room Type</label>
         <select name="room_type_id" class="w-full border p-2 rounded">
 
         @foreach($roomTypes as $type)
@@ -39,6 +40,7 @@
     </div>
 
     <div>
+        <label>Bed Type</label>
         <select name="bed_type_id" class="w-full border p-2 rounded">
 
         @foreach($bedTypes as $bed)
