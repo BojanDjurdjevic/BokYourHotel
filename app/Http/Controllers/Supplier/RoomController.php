@@ -41,23 +41,24 @@ class RoomController extends Controller
             $request->validated()
         );
 
-        if ($request->board_types) {
-            $room->boardTypes()->sync($request->board_types);
-        }
+        $room->boardTypes()->sync(
+        $request->board_types ?? []
+        );
 
         return redirect()
-            ->route('supplier.rooms.index', $hotel)
+            ->route('supplier.hotels.rooms.index', $hotel)
             ->with('success','Room created');
     }
 
-    public function edit(Room $room)
+    public function edit(Hotel $hotel, Room $room)
     {
         $roomTypes = RoomType::all();
         $bedTypes = BedType::all();
         $boardTypes = BoardType::all();
 
-        return view('supplier.rooms.edit', compact(
+        return view('supplier.hotels.rooms.edit', compact(
             'room',
+            'hotel',
             'roomTypes',
             'bedTypes',
             'boardTypes'
@@ -76,7 +77,7 @@ class RoomController extends Controller
         );
 
         return redirect()
-            ->route('supplier.rooms.index', $room->hotel)
+            ->route('supplier.hotels.rooms.index', $room->hotel)
             ->with('success','Room updated');
     }
 
