@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supplier;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AddHotelRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Hotel;
@@ -25,14 +26,11 @@ class HotelController extends Controller
         return view('supplier.hotels.create');
     }
     
-    public function store(Request $request)
+    public function store(AddHotelRequest $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'country' => 'required|string|max:255',
-            'description' => 'nullable|string'
-        ]);
+        $data = $request->validated();
+
+        dd($data);
 
         auth()->user()->hotels()->create($data);
 

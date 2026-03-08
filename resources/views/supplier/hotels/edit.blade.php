@@ -52,8 +52,15 @@
 
     </div>
 
-    <x-button class="primary">
-    Save Changes
+    <a
+        href="{{ route('supplier.hotels.index') }}"
+        class="px-4 py-2 m-2 bg-gray-700 rounded-lg"
+        >
+        Cancel
+    </a>
+
+    <x-button type="submit" class="primary">
+        Save Changes
     </x-button>
 
     </form>
