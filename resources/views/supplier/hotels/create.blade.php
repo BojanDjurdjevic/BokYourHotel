@@ -72,15 +72,37 @@
                     class="w-full rounded-lg bg-gray-900 border-gray-700"
                     value="{{ old('description') }}"
                 ></textarea>
-                </div>
+            </div>
 
-                <div class="flex justify-end gap-4">
+            <div class="mb-6">
+                <label class="block mb-2">Facilities</label>
+
+                @foreach(config('hotel_facilities') as $facility)
+
+                <label class="block">
+
+                <input
+                    type="checkbox"
+                    name="facilities[]"
+                    value="{{ $facility }}"
+                    @checked(in_array($facility, $hotel->facilities ?? []))
+                >
+
+                {{ ucfirst(str_replace('_',' ',$facility)) }}
+
+                </label>
+
+                @endforeach
+
+            </div>
+
+            <div class="flex justify-end gap-4">
 
                 <a
-                href="{{ route('supplier.hotels.index') }}"
-                class="px-4 py-2 bg-gray-700 rounded-lg"
+                    href="{{ route('supplier.hotels.index') }}"
+                    class="px-4 py-2 bg-gray-700 rounded-lg"
                 >
-                Cancel
+                    Cancel
                 </a>
 
                 <button
@@ -91,7 +113,6 @@
                 </button>
 
             </div>
-
         </form>
 
     </div>

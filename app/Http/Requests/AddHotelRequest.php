@@ -14,7 +14,9 @@ class AddHotelRequest extends FormRequest
             'country' => 'required|string|min:3|max:64',
             'city' => 'required|string|min:3|max:64',
             'address' => 'required|string|max:255',
-            'description' => 'nullable|string'
+            'description' => 'nullable|string',
+            'facilities' => 'nullable|array',
+            'facilities.*' => 'string',
         ];
     }
 }

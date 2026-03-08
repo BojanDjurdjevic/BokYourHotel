@@ -10,13 +10,45 @@
     @method('PUT')
 
     <div class="mb-4">
-    <label class="block mb-1">Hotel Name</label>
+    <label class="block mb-1">Hotel name</label>
 
     <input
-    type="text"
-    name="name"
-    value="{{ old('name', $hotel->name) }}"
-    class="w-full border rounded p-2"
+        type="text"
+        name="name"
+        value="{{ old('name', $hotel->name) }}"
+        class="w-full border rounded p-2"
+    >
+    </div>
+
+    <div class="mb-4">
+    <label class="block mb-1">Hotel city</label>
+
+    <input
+        type="text"
+        name="city"
+        value="{{ old('city', $hotel->city) }}"
+        class="w-full border rounded p-2"
+    >
+    </div>
+
+    <div class="mb-4">
+    <label class="block mb-1">Hotel country</label>
+
+    <input
+        type="text"
+        name="country"
+        value="{{ old('country', $hotel->country) }}"
+        class="w-full border rounded p-2"
+    >
+    </div>
+
+    <div class="mb-4">
+    <label class="block mb-1">Hotel address</label>
+    <input
+        type="text"
+        name="address"
+        value="{{ old('address', $hotel->address) }}"
+        class="w-full border rounded p-2"
     >
     </div>
 
@@ -24,31 +56,31 @@
     <label class="block mb-1">Description</label>
 
     <textarea
-    name="description"
-    class="w-full border rounded p-2"
-    rows="4"
+        name="description"
+        class="w-full border rounded p-2"
+        rows="4"
     >{{ old('description', $hotel->description) }}</textarea>
     </div>
 
     <div class="mb-6">
-    <label class="block mb-2">Facilities</label>
+        <label class="block mb-2">Facilities</label>
 
-    @foreach(config('hotel_facilities') as $facility)
+        @foreach(config('hotel_facilities') as $facility)
 
-    <label class="block">
+        <label class="block">
 
-    <input
-    type="checkbox"
-    name="facilities[]"
-    value="{{ $facility }}"
-    @checked(in_array($facility, $hotel->facilities ?? []))
-    >
+        <input
+            type="checkbox"
+            name="facilities[]"
+            value="{{ $facility }}"
+            @checked(in_array($facility, $hotel->facilities ?? []))
+        >
 
-    {{ ucfirst(str_replace('_',' ',$facility)) }}
+        {{ ucfirst(str_replace('_',' ',$facility)) }}
 
-    </label>
+        </label>
 
-    @endforeach
+        @endforeach
 
     </div>
 
@@ -59,7 +91,7 @@
         Cancel
     </a>
 
-    <x-button type="submit" class="primary">
+    <x-button class="primary">
         Save Changes
     </x-button>
 

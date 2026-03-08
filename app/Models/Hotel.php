@@ -9,8 +9,12 @@ class Hotel extends Model
     protected $table = "hotels";
 
     protected $fillable = [
-        'name', 'city', 'country',
-        'address', 'description',
+        'name', 
+        'city', 
+        'country',
+        'address', 
+        'description',
+        'facilities',
     ];
 
     protected $casts = [
