@@ -5,7 +5,7 @@
     Add Room — {{ $hotel->name }}
     </h1>
 
-    <form method="POST" action="{{ route('supplier.rooms.store', $hotel) }}">
+    <form method="POST" action="{{ route('supplier.hotels.rooms.store', $hotel) }}">
     @csrf
 
     <div class="mb-4">

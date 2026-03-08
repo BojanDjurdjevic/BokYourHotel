@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Supplier\HotelController;
+use App\Http\Controllers\Supplier\RoomController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Middleware\SuperMiddleware;
 use App\Http\Middleware\SuppMidleware;
@@ -30,6 +31,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/dashboard', 'index')
             ->name('dashboard');
             
+            
         });
         Route::get('/myhotels', function() {
              return view('supplier.hotels.index');
@@ -47,6 +49,8 @@ Route::middleware('auth')->group(function () {
         //Resource:
 
         Route::resource('hotels', HotelController::class);
+
+        Route::resource('hotels.rooms', RoomController::class);
     });
 
     Route::middleware(SuperMiddleware::class)->group(function () {
