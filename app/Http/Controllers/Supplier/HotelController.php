@@ -18,8 +18,12 @@ class HotelController extends Controller
             ->with(['rooms', 'images'])
             ->latest()
             ->get();
+        
+        $incompleteHotels = $hotels->filter(
+        fn($hotel) => $hotel->setupProgress() < 100
+        );
 
-        return view('supplier.hotels.index', compact('hotels'));
+        return view('supplier.hotels.index', compact('hotels', 'incompleteHotels'));
     }
 
     public function create()

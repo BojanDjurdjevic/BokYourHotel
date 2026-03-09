@@ -46,18 +46,29 @@
 
 </a>
 
-<div class="border p-4 rounded">
-        <p class="text-sm text-gray-500 mb-2">
-            
-        </p>
+@endforeach
 
-        <a
-            href="{{ route('supplier.hotels.setup.info',$hotel) }}"
-            class="text-blue-600"
-        >
-            Continue Setup
-        </a>
-    </div>
+<h2 class="text-lg font-semibold mb-4">
+Setup Required
+</h2>
+
+@foreach($incompleteHotels as $hotel)
+
+<div class="border p-4 rounded mb-4">
+
+<strong>{{ $hotel->name }}</strong>
+
+<p>
+Progress: {{ $hotel->setupProgress() }}%
+</p>
+
+<a
+href="{{ route('supplier.hotels.setup.info',$hotel) }}"
+>
+Continue Setup
+</a>
+
+</div>
 
 @endforeach
 

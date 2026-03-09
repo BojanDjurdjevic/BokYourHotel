@@ -74,7 +74,7 @@ class Hotel extends Model
             'rooms' => $this->rooms()->exists(),
 
             'inventory' => $this->rooms()
-                ->whereHas('inventories')
+                ->whereHas('inventory')
                 ->exists(),
 
             'images' => $this->images()->exists(),

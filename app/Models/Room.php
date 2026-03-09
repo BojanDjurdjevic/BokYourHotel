@@ -51,4 +51,9 @@ class Room extends Model
             ->withPivot('price')
             ->withTimestamps();
     }
+
+    public function inventory()
+    {
+        return $this->hasMany(RoomInventory::class);
+    }
 }
