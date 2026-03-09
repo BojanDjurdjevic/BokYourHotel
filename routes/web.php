@@ -83,7 +83,7 @@ Route::middleware('auth')->group(function () {
 
         //Resource:
 
-        Route::resource('hotels', HotelController::class)->middleware('can:update,hotel');
+        Route::resource('hotels', HotelController::class);
 
         Route::resource('hotels.rooms', RoomController::class);
     });

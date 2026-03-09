@@ -1,4 +1,4 @@
-<x-layout.dashboard>
+<x-layouts.dashboard>
 
     @include('supplier.hotels.setup._steps')
 
@@ -40,4 +40,4 @@
 
     </div>
 
-</x-layout.dashboard>
+</x-layouts.dashboard>

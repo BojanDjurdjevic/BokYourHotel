@@ -1,24 +1,5 @@
 <x-layouts.dashboard>
 
-<div class="border p-4 rounded">
-
-    <h3 class="font-bold">
-        {{ $hotel->name }}
-    </h3>
-
-    <p class="text-sm text-gray-500">
-        Progress: {{ $hotel->setupProgress() }}%
-    </p>
-
-    <a
-        href="{{ route('supplier.hotels.setup.info',$hotel) }}"
-        class="text-blue-600"
-    >
-        Continue Setup
-    </a>
-
-</div>
-
 <div class="flex justify-between items-center mb-6">
 
     <h1 class="text-2xl font-bold">
@@ -51,6 +32,8 @@
         {{ $hotel->name }}
     </h2>
 
+    
+
     <p class="text-gray-400">
         {{ $hotel->city }}, {{ $hotel->country }}
     </p>
@@ -62,6 +45,19 @@
 </div>
 
 </a>
+
+<div class="border p-4 rounded">
+        <p class="text-sm text-gray-500 mb-2">
+            
+        </p>
+
+        <a
+            href="{{ route('supplier.hotels.setup.info',$hotel) }}"
+            class="text-blue-600"
+        >
+            Continue Setup
+        </a>
+    </div>
 
 @endforeach
 

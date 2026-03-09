@@ -1,4 +1,4 @@
-<x-layout.dashboard>
+<x-layouts.dashboard>
 
     @include('supplier.hotels.setup._steps')
 
@@ -33,4 +33,4 @@
 
     @endif
 
-</x-layout.dashboard>
+</x-layouts.dashboard>

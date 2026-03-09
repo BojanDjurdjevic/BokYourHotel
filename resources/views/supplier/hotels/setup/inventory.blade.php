@@ -1,4 +1,4 @@
-<x-layout.dashboard>
+<x-layouts.dashboard>
 
     @include('supplier.hotels.setup._steps')
 
@@ -10,4 +10,4 @@
         Room availability calendar will be managed here.
     </p>
 
-</x-layout.dashboard>
+</x-layouts.dashboard>
