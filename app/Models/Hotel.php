@@ -65,13 +65,36 @@ class Hotel extends Model
         return $this->images()->exists();
     }
 
-    public function setupProgress(): array
+    public function setupChecklist(): array
     {
         return [
-            'hotel' => true,
-            'rooms' => $this->hasRooms(),
-            'images' => $this->hasImages(),
-            'facilities' => $this->hasFacilities(),
+
+            'info' => !empty($this->name),
+
+            'rooms' => $this->rooms()->exists(),
+
+            'inventory' => $this->rooms()
+                ->whereHas('inventories')
+                ->exists(),
+
+            'images' => $this->images()->exists(),
+
         ];
+    }
+
+    public function setupProgress(): int
+    {
+        $steps = $this->setupChecklist();
+
+        $completed = collect($steps)
+            ->filter()
+            ->count();
+
+        return intval(($completed / count($steps)) * 100);
+    }
+
+    public function canBePublished(): bool
+    {
+        return $this->setupProgress() === 100;
     }
 }

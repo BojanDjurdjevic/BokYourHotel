@@ -32,32 +32,47 @@ class HotelController extends Controller
 
         $name = $data['name'];
 
-        auth()->user()->hotels()->create($data);
+        $hotel = auth()->user()->hotels()->create($data);
 
         return redirect()
-            ->route('supplier.hotels.index')
+            ->route('supplier.hotels.setup.info',$hotel)
             ->with('success',"New hotel $name successfully created!");
     }
 
-    /**
-     * Display the specified resource.
-     */
+    public function publish(Hotel $hotel)
+    {
+        //$this->authorize('update', $hotel);
+
+        if (!$hotel->canBePublished()) {
+
+            return back()->with(
+                'error',
+                'Hotel setup is incomplete.'
+            );
+
+        }
+
+        $hotel->update([
+            'published_at' => now()
+        ]);
+
+        return redirect()
+            ->route('supplier.hotels.index')
+            ->with('success','Hotel published');
+    }
+
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Hotel $hotel)
     {
+        //$this->authorize('update', $hotel);
+
         return view('supplier.hotels.edit', compact('hotel'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(AddHotelRequest $request, Hotel $hotel)
     {
         $hotel->update($request->validated());
@@ -65,9 +80,6 @@ class HotelController extends Controller
         return redirect()->route('supplier.hotels.index')->with('success', "Hotel successfuly updated");
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         //

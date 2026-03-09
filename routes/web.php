@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Supplier\HotelController;
+use App\Http\Controllers\Supplier\HotelSetupController;
 use App\Http\Controllers\Supplier\RoomController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Middleware\SuperMiddleware;
@@ -46,9 +47,43 @@ Route::middleware('auth')->group(function () {
              return view('supplier.revenue');
         })->name('revenue');
 
+        //Setup wizard routes:
+
+        Route::get(
+            '/hotels/{hotel}/setup',
+            [HotelSetupController::class,'info']
+        )->name('hotels.setup.info');
+
+        Route::get(
+            '/hotels/{hotel}/setup/rooms',
+            [HotelSetupController::class,'rooms']
+        )->name('hotels.setup.rooms');
+
+        Route::get(
+            '/hotels/{hotel}/setup/inventory',
+            [HotelSetupController::class,'inventory']
+        )->name('hotels.setup.inventory');
+
+        Route::get(
+            '/hotels/{hotel}/setup/images',
+            [HotelSetupController::class,'images']
+        )->name('hotels.setup.images');
+
+        Route::get(
+            '/hotels/{hotel}/setup/publish',
+            [HotelSetupController::class,'publish']
+        )->name('hotels.setup.publish');
+
+        //Publish:
+
+        Route::post(
+        '/supplier/hotels/{hotel}/publish',
+        [HotelController::class,'publish']
+        )->name('supplier.hotels.publish');
+
         //Resource:
 
-        Route::resource('hotels', HotelController::class);
+        Route::resource('hotels', HotelController::class)->middleware('can:update,hotel');
 
         Route::resource('hotels.rooms', RoomController::class);
     });

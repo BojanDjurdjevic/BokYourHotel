@@ -2,13 +2,15 @@
 
 namespace App\Providers;
 
+use App\Models\Hotel;
+use App\Policies\HotelPolicy;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+    protected $policies = [
+        Hotel::class => HotelPolicy::class,
+    ];
     public function register(): void
     {
         //
