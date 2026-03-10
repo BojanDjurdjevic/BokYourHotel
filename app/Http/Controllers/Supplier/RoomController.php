@@ -37,7 +37,7 @@ class RoomController extends Controller
 
     public function store(RoomRequest $request, Hotel $hotel)
     {
-        //dd($request->all());
+        //dd($request->validated());
         $room = $hotel->rooms()->create(
             $request->validated()
         );

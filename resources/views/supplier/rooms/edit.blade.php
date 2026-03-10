@@ -88,13 +88,13 @@
             $existing = $pivot[$boardType->id] ?? null;
         @endphp
 
-        <div class="flex items-center gap-4 mb-2">
-
+        <div x-data="{ enabled: {{ isset($pivot[$boardType->id]) ? 'true' : 'false' }} }" class="flex items-center gap-4 mb-2">
             <input 
                 type="checkbox"
+                x-model="enabled"
                 name="board_types[{{ $boardType->id }}][enabled]"
                 value="1"
-                {{ $existing ? 'checked' : '' }}
+                class="rounded"
             >
 
             <label>{{ $boardType->name }}</label>
@@ -103,10 +103,10 @@
                 type="number"
                 step="0.01"
                 name="board_types[{{ $boardType->id }}][price]"
-                value="{{ $existing->pivot->price ?? '' }}"
-                class="border rounded px-2 py-1 board-toggle"
+                :disabled="!enabled"
+                value="{{ $pivot[$boardType->id]->pivot->price ?? '' }}"
+                class="border rounded px-2 py-1 board-price"
             >
-
         </div>
 
         @endforeach

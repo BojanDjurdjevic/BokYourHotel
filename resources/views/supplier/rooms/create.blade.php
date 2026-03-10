@@ -49,28 +49,27 @@
 
         <label class="block mb-2">Board Types</label>
 
-        @foreach($boardTypes as $board)
+        @foreach($boardTypes as $boardType)
+            <div x-data="{ enabled: {{ isset($pivot[$boardType->id]) ? 'true' : 'false' }} }" class="flex items-center gap-4 mb-2">
+                <input 
+                    type="checkbox"
+                    x-model="enabled"
+                    name="board_types[{{ $boardType->id }}][enabled]"
+                    value="1"
+                    class="rounded"
+                >
 
-        <div class="flex items-center gap-4 mb-2">
+                <label>{{ $boardType->name }}</label>
 
-            <input 
-                type="checkbox"
-                name="board_types[{{ $board->id }}][enabled]"
-                value="1"
-            >
-
-            <label>{{ $board->name }}</label>
-
-            <input 
-                type="number"
-                step="0.01"
-                name="board_types[{{ $board->id }}][price]"
-                placeholder="Price"
-                class="border rounded px-2 py-1"
-            >
-
-        </div>
-
+                <input 
+                    type="number"
+                    step="0.01"
+                    name="board_types[{{ $boardType->id }}][price]"
+                    :disabled="!enabled"
+                    value="{{ $pivot[$boardType->id]->pivot->price ?? '' }}"
+                    class="border rounded px-2 py-1 board-price"
+                >
+            </div>
         @endforeach
 
         </div>
