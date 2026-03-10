@@ -41,10 +41,26 @@ class RoomController extends Controller
         $room = $hotel->rooms()->create(
             $request->validated()
         );
-
+        /*
         $room->boardTypes()->sync(
         $request->board_types ?? []
-        );
+        ); */
+
+        $syncData = [];
+
+        foreach ($request->board_types ?? [] as $boardTypeId => $data) {
+
+            if (!isset($data['enabled'])) {
+                continue;
+            }
+
+            $syncData[$boardTypeId] = [
+                'price' => $data['price'] ?? 0
+            ];
+        }
+
+        $room->boardTypes()->sync($syncData);
+
         if($hotel->published)
         return redirect()
             ->route('supplier.hotels.setup.inventory', $hotel)

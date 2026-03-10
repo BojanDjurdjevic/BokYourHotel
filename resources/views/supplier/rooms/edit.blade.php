@@ -60,6 +60,7 @@
     </div>
 
     <div>
+        {{--  
         @foreach($boardTypes as $board)
 
         <label class="block">
@@ -74,6 +75,39 @@
         {{ $board->name }}
 
         </label>
+
+        @endforeach 
+        --}}
+        @php
+            $pivot = $room->boardTypes->keyBy('id');
+        @endphp
+
+        @foreach($boardTypes as $boardType)
+
+        @php
+            $existing = $pivot[$boardType->id] ?? null;
+        @endphp
+
+        <div class="flex items-center gap-4 mb-2">
+
+            <input 
+                type="checkbox"
+                name="board_types[{{ $boardType->id }}][enabled]"
+                value="1"
+                {{ $existing ? 'checked' : '' }}
+            >
+
+            <label>{{ $boardType->name }}</label>
+
+            <input 
+                type="number"
+                step="0.01"
+                name="board_types[{{ $boardType->id }}][price]"
+                value="{{ $existing->pivot->price ?? '' }}"
+                class="border rounded px-2 py-1 board-toggle"
+            >
+
+        </div>
 
         @endforeach
     </div>

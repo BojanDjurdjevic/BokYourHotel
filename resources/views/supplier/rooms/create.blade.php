@@ -51,17 +51,25 @@
 
         @foreach($boardTypes as $board)
 
-        <label class="block">
+        <div class="flex items-center gap-4 mb-2">
 
-        <input
-            type="checkbox"
-            name="board_types[]"
-            value="{{ $board->id }}"
-        >
+            <input 
+                type="checkbox"
+                name="board_types[{{ $board->id }}][enabled]"
+                value="1"
+            >
 
-            {{ $board->name }}
+            <label>{{ $board->name }}</label>
 
-        </label>
+            <input 
+                type="number"
+                step="0.01"
+                name="board_types[{{ $board->id }}][price]"
+                placeholder="Price"
+                class="border rounded px-2 py-1"
+            >
+
+        </div>
 
         @endforeach
 
