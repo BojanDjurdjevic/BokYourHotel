@@ -9,6 +9,8 @@ class Room extends Model
     protected $table = "rooms";
     protected $fillable = [
         'hotel_id',
+        'room_type_id',
+        'bed_type_id',
         'name',
         'capacity',
         'price_per_night',

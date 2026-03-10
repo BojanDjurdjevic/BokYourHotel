@@ -2,89 +2,89 @@
     <div class="max-w-2xl mx-auto">
 
     <h1 class="text-2xl font-bold mb-6">
-    Add Room — {{ $hotel->name }}
+        Add Room — {{ $hotel->name }}
     </h1>
 
     <form method="POST" action="{{ route('supplier.hotels.rooms.store', $hotel) }}">
-    @csrf
+        @csrf
 
-    <div class="mb-4">
-    <label>Room Name</label>
-    <input type="text" name="name" class="w-full border p-2 rounded">
-    </div>
+        <div class="mb-4">
+        <label>Room Name</label>
+        <input type="text" name="name" class="w-full border p-2 rounded">
+        </div>
 
-    <div class="mb-4">
-    <label>Room Type</label>
+        <div class="mb-4">
+        <label>Room Type</label>
 
-    <select name="room_type_id" class="w-full border p-2 rounded">
+        <select name="room_type_id" class="w-full border p-2 rounded">
 
-    @foreach($roomTypes as $type)
+        @foreach($roomTypes as $type)
 
-    <option value="{{ $type->id }}">
-    {{ $type->name }}
-    </option>
+        <option value="{{ $type->id }}">
+            {{ $type->name }}
+        </option>
 
-    @endforeach
+        @endforeach
 
-    </select>
-    </div>
+        </select>
+        </div>
 
-    <div class="mb-4">
-    <label>Bed Type</label>
+        <div class="mb-4">
+        <label>Bed Type</label>
 
-    <select name="bed_type_id" class="w-full border p-2 rounded">
+        <select name="bed_type_id" class="w-full border p-2 rounded">
 
-    @foreach($bedTypes as $bed)
+        @foreach($bedTypes as $bed)
 
-    <option value="{{ $bed->id }}">
-    {{ $bed->name }}
-    </option>
+        <option value="{{ $bed->id }}">
+            {{ $bed->name }}
+        </option>
 
-    @endforeach
+        @endforeach
 
-    </select>
-    </div>
+        </select>
+        </div>
 
-    <div class="mb-6">
+        <div class="mb-6">
 
-    <label class="block mb-2">Board Types</label>
+        <label class="block mb-2">Board Types</label>
 
-    @foreach($boardTypes as $board)
+        @foreach($boardTypes as $board)
 
-    <label class="block">
+        <label class="block">
 
-    <input
-    type="checkbox"
-    name="board_types[]"
-    value="{{ $board->id }}"
-    >
+        <input
+            type="checkbox"
+            name="board_types[]"
+            value="{{ $board->id }}"
+        >
 
-    {{ $board->name }}
+            {{ $board->name }}
 
-    </label>
+        </label>
 
-    @endforeach
+        @endforeach
 
-    </div>
+        </div>
 
-    <div class="mb-4">
-    <label>Capacity</label>
-    <input type="number" name="capacity" class="w-full border p-2 rounded">
-    </div>
+        <div class="mb-4">
+            <label>Capacity</label>
+            <input type="number" name="capacity" class="w-full border p-2 rounded">
+        </div>
 
-    <div class="mb-4">
-    <label>Price per Night (€)</label>
-    <input type="number" step="0.01" name="price_per_night" class="w-full border p-2 rounded">
-    </div>
+        <div class="mb-4">
+            <label>Price per Night (€)</label>
+            <input type="number" step="0.01" name="price_per_night" class="w-full border p-2 rounded">
+        </div>
 
-    <div class="mb-6">
-    <label>Total Units</label>
-    <input type="number" name="total_units" class="w-full border p-2 rounded">
-    </div>
+        <div class="mb-6">
+            <label>Total Units</label>
+            <input type="number" name="total_units" class="w-full border p-2 rounded">
+        </div>
 
-    <button class="bg-green-600 text-white px-4 py-2 rounded">
-    Create Room
-    </button>
+        <button class="bg-green-600 text-white px-4 py-2 rounded">
+            Create Room
+        </button>
 
     </form>
 

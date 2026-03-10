@@ -22,6 +22,7 @@ class RoomController extends Controller
 
     public function create(Hotel $hotel)
     {
+        //dd($hotel->supplier_id, auth()->id());
         $roomTypes = RoomType::all();
         $bedTypes = BedType::all();
         $boardTypes = BoardType::all();
@@ -36,7 +37,7 @@ class RoomController extends Controller
 
     public function store(RoomRequest $request, Hotel $hotel)
     {
-
+        //dd($request->all());
         $room = $hotel->rooms()->create(
             $request->validated()
         );
@@ -44,7 +45,11 @@ class RoomController extends Controller
         $room->boardTypes()->sync(
         $request->board_types ?? []
         );
-
+        if($hotel->published)
+        return redirect()
+            ->route('supplier.hotels.setup.inventory', $hotel)
+            ->with('success','Room created');
+        else
         return redirect()
             ->route('supplier.hotels.rooms.index', $hotel)
             ->with('success','Room created');
@@ -65,9 +70,9 @@ class RoomController extends Controller
         ));
     }
 
-    public function update(RoomRequest $request, Room $room)
+    public function update(RoomRequest $request, Hotel $hotel, Room $room)
     {
-
+        //dd($request->validated());
         $room->update(
             $request->validated()
         );

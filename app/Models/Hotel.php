@@ -9,6 +9,7 @@ class Hotel extends Model
     protected $table = "hotels";
 
     protected $fillable = [
+        'supplier_id',
         'name', 
         'city', 
         'country',

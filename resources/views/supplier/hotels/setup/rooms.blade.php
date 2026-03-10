@@ -23,15 +23,15 @@
         <strong>{{ $room->name }}</strong>
 
         <div class="text-sm text-gray-500">
-        Capacity: {{ $room->capacity }}
+            Capacity: {{ $room->capacity }}
         </div>
         </div>
 
         <a
-        href="{{ route('supplier.hotels.rooms.edit', [$hotel,$room]) }}"
-        class="text-blue-600"
+            href="{{ route('supplier.hotels.rooms.edit', [$hotel,$room]) }}"
+            class="text-blue-600"
         >
-        Edit
+            Edit
         </a>
 
         </div>

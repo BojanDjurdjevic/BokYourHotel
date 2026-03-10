@@ -8,9 +8,10 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /*
     protected $policies = [
         Hotel::class => HotelPolicy::class,
-    ];
+    ]; */
     public function register(): void
     {
         //

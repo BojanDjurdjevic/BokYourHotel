@@ -82,7 +82,8 @@ class HotelController extends Controller
     {
         $hotel->update($request->validated());
 
-        return redirect()->route('supplier.hotels.index')->with('success', "Hotel successfuly updated");
+        if($hotel->published) return redirect()->route('supplier.hotels.index')->with('success', "Hotel successfuly updated");
+        else return redirect()->route('supplier.hotels.setup.rooms', $hotel)->with('success', "Hotel successfuly updated");
     }
 
     public function destroy(string $id)

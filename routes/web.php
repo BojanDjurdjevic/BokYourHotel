@@ -74,13 +74,6 @@ Route::middleware('auth')->group(function () {
             [HotelSetupController::class,'publish']
         )->name('hotels.setup.publish');
 
-        //Publish:
-
-        Route::post(
-        '/supplier/hotels/{hotel}/publish',
-        [HotelController::class,'publish']
-        )->name('supplier.hotels.publish');
-
         //Resource:
 
         Route::resource('hotels', HotelController::class);

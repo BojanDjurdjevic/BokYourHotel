@@ -10,27 +10,30 @@ class HotelPolicy
 {
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->role == User::ROLE_SUPPLIER;
     }
 
     public function view(User $user, Hotel $hotel): bool
     {
-        return $user->id === $hotel->supplier_id;
+        return $user->id == $hotel->supplier_id;
     }
 
     public function create(User $user): bool
     {
-        return false;
+        
+        return $user->role == User::ROLE_SUPPLIER;
     }
 
     public function update(User $user, Hotel $hotel): bool
     {
-        return $user->id === $hotel->supplier_id;
+        //dd(auth()user()->id(), $hotel->supplier_id);
+        return $user->id == $hotel->supplier_id;
+        //return true;
     }
 
     public function delete(User $user, Hotel $hotel): bool
     {
-        return $user->id === $hotel->supplier_id;
+        return $user->id == $hotel->supplier_id;
     }
 
     public function restore(User $user, Hotel $hotel): bool
