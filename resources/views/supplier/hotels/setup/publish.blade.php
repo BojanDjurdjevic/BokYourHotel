@@ -23,11 +23,11 @@
 
     @else
 
-    <div class="bg-yellow-100 p-4 rounded">
+    <div class="bg-yellow-400 text-red-700 p-4 rounded">
 
-        Hotel setup is not complete.
+        <b>Hotel setup is not complete.
 
-        Completion: {{ $hotel->setupProgress() }}%
+        Completion: {{ $hotel->setupProgress() }}%</b>
 
     </div>
 

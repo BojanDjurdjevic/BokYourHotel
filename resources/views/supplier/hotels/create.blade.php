@@ -25,36 +25,36 @@
                     class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
                     required
                     value="{{ old('name') }}"
-                >
-                </div>
+                />
+            </div>
 
-                <div class="grid md:grid-cols-2 gap-6">
+            <div class="grid md:grid-cols-2 gap-6">
 
                 <div>
-                <label class="block text-sm mb-2">City</label>
-                <input
-                    type="text"
-                    name="city"
-                    class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
-                    required
-                    value="{{ old('city') }}"
-                >
+                    <label class="block text-sm mb-2">City</label>
+                    <input
+                        type="text"
+                        name="city"
+                        class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
+                        required
+                        value="{{ old('city') }}"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm mb-2">Country</label>
+                    <input
+                        type="text"
+                        name="country"
+                        class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
+                        required
+                        value="{{ old('country') }}"
+                    >
+                </div>
+
             </div>
 
             <div>
-                <label class="block text-sm mb-2">Country</label>
-                <input
-                    type="text"
-                    name="country"
-                    class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
-                    required
-                    value="{{ old('country') }}"
-                >
-                </div>
-
-                </div>
-
-                <div>
                 <label class="block text-sm mb-2">Address</label>
                 <input
                     type="text"
