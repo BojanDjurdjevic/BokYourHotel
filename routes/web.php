@@ -74,6 +74,13 @@ Route::middleware('auth')->group(function () {
             [HotelSetupController::class,'publish']
         )->name('hotels.setup.publish');
 
+        // Post wizard routes:
+
+        Route::post(
+            '/hotels/{hotel}/inventory',
+            [HotelSetupController::class,'storeInventory']
+        )->name('hotels.inventory.store');
+
         //Resource:
 
         Route::resource('hotels', HotelController::class);

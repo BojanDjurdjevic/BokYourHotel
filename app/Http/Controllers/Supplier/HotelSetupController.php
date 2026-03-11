@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Supplier;
 
 use App\Http\Controllers\Controller;
 use App\Models\Hotel;
+use App\Models\RoomInventory;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 
 class HotelSetupController extends Controller
@@ -23,6 +25,44 @@ class HotelSetupController extends Controller
     public function inventory(Hotel $hotel)
     {
         return view('supplier.hotels.setup.inventory', compact('hotel'));
+    }
+
+    public function storeInventory(Request $request, Hotel $hotel)
+    {
+
+        $request->validate([
+            'from' => 'required|date',
+            'to' => 'required|date|after_or_equal:from'
+        ]);
+
+        $period = CarbonPeriod::create(
+            $request->from,
+            $request->to
+        );
+
+        foreach ($hotel->rooms as $room) {
+
+            foreach ($period as $date) {
+
+                RoomInventory::updateOrCreate(
+                    [
+                        'room_id' => $room->id,
+                        'date' => $date->format('Y-m-d')
+                    ],
+                    [
+                        'available' => $room->total_units,
+                        'price' => $room->price_per_night
+                    ]
+                );
+
+            }
+
+        }
+
+        return redirect()
+            ->route('supplier.hotels.setup.images',$hotel)
+            ->with('success','Inventory generated successfully');
+
     }
 
     public function images(Hotel $hotel)

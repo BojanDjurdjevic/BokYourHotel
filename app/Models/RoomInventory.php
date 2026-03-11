@@ -15,6 +15,11 @@ class RoomInventory extends Model
         'price'
     ];
 
+    protected $casts = [
+        'date' => 'date',
+        'price' => 'decimal:2'
+    ];
+
     public function room()
     {
         return $this->belongsTo(Room::class);
