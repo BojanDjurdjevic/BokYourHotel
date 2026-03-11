@@ -59,7 +59,7 @@ class Room extends Model
             ->withTimestamps();
     }
 
-    public function inventory()
+    public function inventories()
     {
         return $this->hasMany(RoomInventory::class);
     }
