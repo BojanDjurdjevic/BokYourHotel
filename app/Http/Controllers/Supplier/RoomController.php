@@ -61,7 +61,7 @@ class RoomController extends Controller
 
         $room->boardTypes()->sync($syncData);
 
-        if($hotel->published)
+        if(!$hotel->published)
         return redirect()
             ->route('supplier.hotels.setup.inventory', $hotel)
             ->with('success','Room created');

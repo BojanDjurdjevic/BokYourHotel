@@ -15,6 +15,11 @@ class Room extends Model
         'capacity',
         'price_per_night',
         'total_units',
+        'facilities'
+    ];
+
+    protected $casts = [
+        'facilities' => 'array'
     ];
 
     public function hotel()

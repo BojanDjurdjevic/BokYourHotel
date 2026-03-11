@@ -28,6 +28,9 @@ class RoomRequest extends FormRequest
             'board_types.*.enabled' => 'sometimes|boolean',
             'board_types.*.price' => 'required_if:board_types.*.enabled,1|numeric|min:0',
             'board_types.*' => 'array', 
+
+            'facilities' => 'nullable|array',
+            'facilities.*' => 'string',
         ];
     }
 }

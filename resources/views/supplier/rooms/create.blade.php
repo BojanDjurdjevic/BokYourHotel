@@ -89,6 +89,19 @@
             <input type="number" name="total_units" class="w-full border p-2 rounded">
         </div>
 
+        <div class="mb-6">
+            @foreach(config('room_facilities') as $facility)
+
+            <label class="flex items-center gap-2">
+                <input type="checkbox"
+                    name="facilities[]"
+                    value="{{ $facility }}">
+                {{ ucfirst($facility) }}
+            </label>
+
+        @endforeach
+        </div>
+
         <button class="bg-green-600 text-white px-4 py-2 rounded">
             Create Room
         </button>
