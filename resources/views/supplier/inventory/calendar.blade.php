@@ -1,5 +1,12 @@
 <x-layouts.dashboard>
 
+<x-button
+    variant="action"
+    href="{{ route('supplier.hotels.setup.inventory', $hotel) }}"
+>
+    <<- Back
+</x-button>
+
 <h1 class="text-xl font-bold mb-6">
     Inventory Calendar
 </h1>
@@ -88,7 +95,7 @@ function inventoryCalendar(roomId,hotelId){
 
 return{
 
-roomId:roomId,
+roomId: roomId ?? {{ $rooms->first()->id }},
 
 month:new Date(),
 
