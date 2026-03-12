@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Supplier;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreInventoryRequest;
 use App\Models\Hotel;
 use App\Models\RoomInventory;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class HotelSetupController extends Controller
 {
@@ -24,46 +26,54 @@ class HotelSetupController extends Controller
 
     public function inventory(Hotel $hotel)
     {
-        return view('supplier.hotels.setup.inventory', compact('hotel'));
+        $rooms = $hotel->rooms()->get();
+
+        return view('supplier.hotels.setup.inventory', [
+            'hotel' => $hotel,
+            'rooms' => $rooms
+        ]);
     }
 
-    public function storeInventory(Request $request, Hotel $hotel)
+    public function storeInventory(StoreInventoryRequest $request, Hotel $hotel)
     {
+        if(!$request->inventory){
+            return back()->withErrors([
+                'inventory' => 'Generate inventory first.'
+            ]);
+        }
+        $data = [];
 
-        $request->validate([
-            'from' => 'required|date',
-            'to' => 'required|date|after_or_equal:from'
-        ]);
+        foreach ($request->inventory as $item) {
 
-        $period = CarbonPeriod::create(
-            $request->from,
-            $request->to
-        );
+            $data[] = [
 
-        foreach ($hotel->rooms as $room) {
+                'room_id' => $request->room_id,
 
-            foreach ($period as $date) {
+                'date' => $item['date'],
 
-                RoomInventory::updateOrCreate(
-                    [
-                        'room_id' => $room->id,
-                        'date' => $date->format('Y-m-d')
-                    ],
-                    [
-                        'available' => $room->total_units,
-                        'price' => $room->price_per_night
-                    ]
-                );
+                'available' => $item['available'],
 
-            }
+                'price' => $item['price'],
+
+                'created_at' => now(),
+                'updated_at' => now()
+
+            ];
 
         }
 
+        RoomInventory::upsert(
+            $data,
+            ['room_id','date'],
+            ['available','price','updated_at']
+        );
+
         return redirect()
             ->route('supplier.hotels.setup.images',$hotel)
-            ->with('success','Inventory generated successfully');
-
+            ->with('success','Inventory generated');
     }
+
+    
 
     public function images(Hotel $hotel)
     {
