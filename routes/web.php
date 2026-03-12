@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Supplier\HotelController;
 use App\Http\Controllers\Supplier\HotelSetupController;
 use App\Http\Controllers\Supplier\RoomController;
+use App\Http\Controllers\Supplier\RoomInventoryController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Middleware\SuperMiddleware;
 use App\Http\Middleware\SuppMidleware;
@@ -63,6 +64,25 @@ Route::middleware('auth')->group(function () {
             '/hotels/{hotel}/setup/inventory',
             [HotelSetupController::class,'inventory']
         )->name('hotels.setup.inventory');
+
+        // Calendar
+
+        Route::get(
+        '/hotels/{hotel}/inventory-calendar',
+        [RoomInventoryController::class,'index']
+        )->name('inventory.calendar');
+
+        Route::get(
+        '/hotels/{hotel}/inventory-calendar/data',
+        [RoomInventoryController::class,'monthData']
+        )->name('inventory.calendar.data');
+
+        Route::post(
+        '/inventory/update-day',
+        [RoomInventoryController::class,'updateDay']
+        )->name('inventory.update');
+
+        // Images
 
         Route::get(
             '/hotels/{hotel}/setup/images',

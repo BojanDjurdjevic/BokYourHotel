@@ -2,6 +2,12 @@
 
 @include('supplier.hotels.setup._steps')
 
+<a href="{{ route('supplier.inventory.calendar', $hotel) }}">
+    <x-button>
+        See inventory calendar
+    </x-button>
+</a>
+
 <h1 class="text-xl font-bold mb-6">
     Inventory Manager
 </h1>
@@ -18,6 +24,12 @@
     @if ($errors)
         <p class="text-red-600">{{ $errors->first() }}</p>
     @endif
+
+    <input
+        type="hidden"
+        name="inventory_json"
+        :value="JSON.stringify(days)"
+    >
 
     {{-- ROOM SELECT --}}
 
@@ -107,7 +119,7 @@
     >
 
         <h2 class="font-semibold mb-4">
-        Preview
+            Preview
         </h2>
 
         <div class="grid grid-cols-7 gap-2 text-center text-sm">
@@ -126,22 +138,24 @@
             €<span x-text="day.price"></span>
         </div>
 
+        {{--  
         <input type="hidden"
             :name="'inventory['+index+'][date]'"
-            :x-value="day.date"
+            :value="day.date"
         >
 
         <input type="hidden"
             :name="'inventory['+index+'][available]'"
-            :x-value="day.available"
+            :value="day.available"
         >
 
         <input type="hidden"
             :name="'inventory['+index+'][price]'"
-            :x-value="day.price"
+            :value="day.price"
         >
-
+        --}}
     </div>
+    
 
     </template>
 
@@ -149,62 +163,65 @@
 
     </div>
 
+    <div class="text-sm text-gray-400">
+        <span x-text="days.length"></span> days will be generated
+    </div>
 
-    <x-button
-        class="primary"
+    <button
         type="submit"
-        class="bg-green-600 text-white px-6 py-2 rounded"
+        :disabled="days.length === 0"
+        class="bg-green-600 text-white px-6 py-2 rounded-lg disabled:opacity-50"
     >
 
         Save inventory
 
-    </x-button>
+    </button>
 
 </form>
 
 
 <script>
 
-function inventoryManager(){
+    function inventoryManager(){
 
-return {
+        return {
 
-room_id:null,
+            room_id:null,
 
-from:null,
-to:null,
+            from:null,
+            to:null,
 
-available:0,
-price:0,
+            available:0,
+            price:0,
 
-days:[],
+            days:[],
 
-generate(){
+            generate() {
 
-this.days = []
+                this.days = []
 
-let start = new Date(this.from)
-let end = new Date(this.to)
+                let start = new Date(this.from)
+                let end = new Date(this.to)
 
-while(start <= end){
+                while(start <= end){
 
-this.days.push({
+                    this.days.push({
 
-date:start.toISOString().slice(0,10),
-available:this.available,
-price:this.price
+                        date:start.toLocaleDateString('en-CA'),
+                        available:this.available,
+                        price:this.price
 
-})
+                    })
 
-start.setDate(start.getDate()+1)
+                    start.setDate(start.getDate()+1)
 
-}
+                }
 
-}
+            }
 
-}
+        }
 
-}
+    }
 
 </script>
 

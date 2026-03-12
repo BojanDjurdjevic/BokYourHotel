@@ -34,16 +34,28 @@ class HotelSetupController extends Controller
         ]);
     }
 
-    public function storeInventory(StoreInventoryRequest $request, Hotel $hotel)
+    public function storeInventory(Request $request, Hotel $hotel)
     {
-        if(!$request->inventory){
+        //dd($request->all());
+
+        $request->validate([
+
+            'room_id' => 'required|exists:rooms,id',
+
+            'inventory_json' => 'required|string'
+
+        ]);
+
+        $inventory = json_decode($request->inventory_json, true);
+
+        if(!$inventory){
             return back()->withErrors([
                 'inventory' => 'Generate inventory first.'
             ]);
         }
         $data = [];
 
-        foreach ($request->inventory as $item) {
+        foreach ($inventory as $item) {
 
             $data[] = [
 
