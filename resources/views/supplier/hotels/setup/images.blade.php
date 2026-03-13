@@ -22,6 +22,6 @@
     </form>
     --}}
 
-    <livewire:hotel-images-manager/>
+    <livewire:supplier.hotel-images-manager/>
 
 </x-layouts.dashboard>

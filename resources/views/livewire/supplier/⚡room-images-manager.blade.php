@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Supplier;
+namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -8,7 +8,8 @@ use App\Models\Room;
 use App\Models\RoomImage;
 use Illuminate\Support\Facades\Storage;
 
-class RoomImagesManager extends Component
+// RoomImagesManager
+new class extends Component
 {
     use WithFileUploads;
 
@@ -63,14 +64,20 @@ class RoomImagesManager extends Component
 
     public function render()
     {
-        $roomImages = $this->room->images()->latest()->get();
+        //$roomImages = $this->room->images()->latest()->get();
 
-        return view('livewire.supplier.room-images-manager', compact('roomImages'));
+        return $this->view([
+            'ime' => 'Boris'
+        ]);
+
+        //return view('livewire.supplier.room-images-manager', compact('roomImages'));
     }
 };
 ?>
 
 <div class="space-y-6">
+
+    <h2 class="text-white">Pozdrav {{ $ime }}</h2>
 
     <div>
         <input type="file" wire:model="images" multiple class="mb-4">
@@ -78,8 +85,8 @@ class RoomImagesManager extends Component
             <span class="text-red-500 text-sm">{{ $message }}</span> 
         @enderror
     </div>
-
-    {{-- PREVIEW --}}
+    
+    {{-- PREVIEW --}}{{--  
     @if($images)
         <div>
             <h3 class="font-semibold mb-2">Preview</h3>
@@ -105,8 +112,8 @@ class RoomImagesManager extends Component
             </button>
         </div>
     @endif
-
-    {{-- EXISTING IMAGES --}}
+--}}
+    {{-- EXISTING IMAGES 
     <div>
         <h3 class="font-semibold mb-2">Uploaded Images</h3>
 
@@ -138,6 +145,6 @@ class RoomImagesManager extends Component
                 </div>
             @endforeach
         </div>
-    </div>
+    </div>--}}
 
 </div>
