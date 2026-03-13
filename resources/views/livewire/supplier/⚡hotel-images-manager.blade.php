@@ -80,8 +80,11 @@ new class extends Component
 
     public function render()
     {
-        $hotelImages = $this->hotel->images()->latest()->get();
-        
+        //$hotelImages = $this->hotel->images()->latest()->get();
+    
+        $hotelImages = $this->hotel
+        ? $this->hotel->images()->latest()->get()
+        : collect();
     
         return $this->view([
             'hotelImages' => $hotelImages,
