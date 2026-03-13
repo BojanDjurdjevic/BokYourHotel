@@ -9,17 +9,27 @@ use App\Models\HotelImage;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\HandleImagesUpload;
 
-class HotelImagesManager extends Component
+// HotelImagesManager
+new class extends Component
 {
+    
     use WithFileUploads, HandleImagesUpload;
 
     public Hotel $hotel;
 
     public array $images = [];
 
+    public string $num = '';
+    public string $name = 'Bojan';
+
     protected $rules = [
         'images.*' => 'image|max:2048'
     ];
+
+    public function mount(Hotel $hotel)
+    {
+        $this->hotel = $hotel;
+    }
 
     public function removeTempImage($index)
     {
@@ -47,6 +57,11 @@ class HotelImagesManager extends Component
         $this->reset('images');
     }
 
+    public function showNum()
+    {
+        $this->num = $this->num == '' ? 'Ćaos' : '';
+    }
+
     public function setFeatured($imageId)
     {
         $this->hotel->images()->update(['is_featured' => false]);
@@ -66,18 +81,26 @@ class HotelImagesManager extends Component
     public function render()
     {
         $hotelImages = $this->hotel->images()->latest()->get();
+        
+    
+        return $this->view([
+            'hotelImages' => $hotelImages,
+            'hotel' => $this->hotel,
+            'ime' => $this->name
+        ]); 
 
-        return view('livewire.supplier.hotel-images-manager', compact('hotelImages'));
+        //return view('hotel-images-manager', compact('hotelImages'));
     }
 };
 ?>
 
 <div class="space-y-6">
+    
     <h1 class="text-red-500">Pozdrav iz livewire</h1>
 
     {{-- File input --}}
     <div>
-        <input type="file" wire:model="images" multiple class="mb-4">
+        <input type="file" wire:model="images" multiple class="mb-4 p-2 bg-gray-700 rounded-lg">
 
         @error('images.*') 
             <span class="text-red-500 text-sm">{{ $message }}</span> 
@@ -106,7 +129,7 @@ class HotelImagesManager extends Component
 
             <button wire:click="upload"
                     wire:loading.attr="disabled"
-                    class="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+                    class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg"
             >
                 Upload All
             </button>
@@ -147,5 +170,18 @@ class HotelImagesManager extends Component
             @endforeach
         </div>
     </div>
+
+    <p class="text-white">{{ $ime }}</p>
+    <p class="text-white">{{ $num }}</p>
+    <x-button
+        variant="danger"
+        wire:click="showNum"
+    >
+        Kaži ćao
+    </x-button>
+
+    <button wire:click="$set('name', 'Matteo')">
+        Change name
+    </button>
 
 </div>

@@ -9,6 +9,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Middleware\SuperMiddleware;
 use App\Http\Middleware\SuppMidleware;
 use Illuminate\Support\Facades\Route;
+use Livewire\Livewire;
 
 
 Route::get('/', function () {
@@ -84,10 +85,13 @@ Route::middleware('auth')->group(function () {
 
         // Images
 
+        //Route::livewire('hotels/{hotel}/setup/images', 'hotel-images-manager');
+
         Route::get(
             '/hotels/{hotel}/setup/images',
             [HotelSetupController::class,'images']
-        )->name('hotels.setup.images');
+        )->name('hotels.setup.images'); 
+        
 
         Route::get(
             '/hotels/{hotel}/setup/publish',

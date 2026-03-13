@@ -5,7 +5,7 @@
     <h1 class="text-xl font-bold mb-6">
         Hotel Images
     </h1>
-
+    {{--  
     <form
         method="POST"
         action="#"
@@ -20,7 +20,8 @@
     </button>
 
     </form>
+    --}}
 
-    <livewire:supplier.⚡-hotel-images-manager :hotel="$hotel" />
+    <livewire:hotel-images-manager/>
 
 </x-layouts.dashboard>
