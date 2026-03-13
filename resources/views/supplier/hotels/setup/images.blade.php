@@ -21,4 +21,6 @@
 
     </form>
 
+    <livewire:supplier.⚡-hotel-images-manager :hotel="$hotel" />
+
 </x-layouts.dashboard>

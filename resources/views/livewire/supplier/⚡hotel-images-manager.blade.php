@@ -7,10 +7,11 @@ use Livewire\WithFileUploads;
 use App\Models\Hotel;
 use App\Models\HotelImage;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\HandleImagesUpload;
 
 class HotelImagesManager extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, HandleImagesUpload;
 
     public Hotel $hotel;
 
@@ -32,16 +33,18 @@ class HotelImagesManager extends Component
 
         foreach ($this->images as $index => $image)
         {
-            $path = $image->store('hotels', 'public');
+            $id = $this->hotel->id;
+            $path = $this->uploadImage($image, "hotels/$id");
+            //$path = $image->store('hotels', 'public');
 
             HotelImage::create([
-                'hotel_id' => $this->hotel->id,
+                'hotel_id' => $id,
                 'path' => $path,
                 'is_featured' => $this->hotel->images()->count() === 0 && $index === 0,
-            ]);            
-
-            $this->reset('images');
+            ]);                      
         }
+
+        $this->reset('images');
     }
 
     public function setFeatured($imageId)
@@ -70,6 +73,7 @@ class HotelImagesManager extends Component
 ?>
 
 <div class="space-y-6">
+    <h1 class="text-red-500">Pozdrav iz livewire</h1>
 
     {{-- File input --}}
     <div>
@@ -101,7 +105,9 @@ class HotelImagesManager extends Component
             </div>
 
             <button wire:click="upload"
-                    class="mt-4 px-4 py-2 bg-blue-600 text-white rounded">
+                    wire:loading.attr="disabled"
+                    class="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+            >
                 Upload All
             </button>
         </div>

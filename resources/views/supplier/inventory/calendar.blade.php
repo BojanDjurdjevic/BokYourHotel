@@ -18,7 +18,7 @@
     class="space-y-6"
 >
 
-<select x-model="roomId" @change="load()" class="border rounded p-2">
+<select x-model="roomId" @change="load()" class="border rounded p-2 bg-gray-800">
 
 @foreach($rooms as $room)
 
@@ -91,109 +91,109 @@ rooms
 
 <script>
 
-function inventoryCalendar(roomId,hotelId){
+    function inventoryCalendar(roomId,hotelId){
 
-return{
+        return{
 
-roomId: roomId ?? {{ $rooms->first()->id }},
+            roomId: roomId ?? {{ $rooms->first()->id }},
 
-month:new Date(),
+            month:new Date(),
 
-days:[],
+            days:[],
 
-get monthLabel(){
+            get monthLabel(){
 
-return this.month.toLocaleDateString(
-'en-US',
-{month:'long',year:'numeric'}
-)
+            return this.month.toLocaleDateString(
+                'en-US',
+                {month:'long',year:'numeric'}
+            )
 
-},
+            },
 
-load(){
+            load() {
 
-fetch(`/supplier/hotels/${hotelId}/inventory-calendar/data?room_id=${this.roomId}&month=${this.month.toISOString()}`)
+                fetch(`/supplier/hotels/${hotelId}/inventory-calendar/data?room_id=${this.roomId}&month=${this.month.toISOString()}`)
 
-.then(r=>r.json())
+                .then(r=>r.json())
 
-.then(data=>{
+                .then(data=>{
 
-this.days=data
+                this.days=data
 
-})
+                })
 
-},
+            },
 
-prevMonth(){
+            prevMonth() {
 
-    this.month = new Date(
-        this.month.getFullYear(),
-        this.month.getMonth()-1,
-        1
-    )
+                this.month = new Date(
+                    this.month.getFullYear(),
+                    this.month.getMonth()-1,
+                    1
+                )
 
-    this.load()
+                this.load()
 
-},
+            },
 
-nextMonth(){
+            nextMonth(){
 
-    this.month = new Date(
-        this.month.getFullYear(),
-        this.month.getMonth()+1,
-        1
-    )
+                this.month = new Date(
+                    this.month.getFullYear(),
+                    this.month.getMonth()+1,
+                    1
+                )
 
-    this.load()
+                this.load()
 
-},
+            },
 
-edit(day){
+            edit(day) {
 
-let available=prompt(
-'Available rooms',
-day.available
-)
+                let available=prompt(
+                    'Available rooms',
+                    day.available
+                )
 
-let price=prompt(
-'Price',
-day.price
-)
+                let price=prompt(
+                    'Price',
+                day.price
+                )
 
-fetch(
-'{{ route("supplier.inventory.update") }}',
-{
+                fetch(
+                    '{{ route("supplier.inventory.update") }}',
+                {
 
-method:'POST',
+                method:'POST',
 
-headers:{
-'Content-Type':'application/json',
-'X-CSRF-TOKEN':document
-.querySelector('meta[name=csrf-token]')
-.content
-},
+                headers:{
+                    'Content-Type':'application/json',
+                    'X-CSRF-TOKEN':document
+                    .querySelector('meta[name=csrf-token]')
+                    .content
+                },
 
-body:JSON.stringify({
+                body:JSON.stringify({
 
-room_id:this.roomId,
-//room_id: roomId,
-date:day.date,
-available:available,
-price:price
+                    room_id:this.roomId,
+                    //room_id: roomId,
+                    date:day.date,
+                    available:available,
+                    price:price
 
-})
+            })
 
-}
+        }
 
-)
+        )
 
-.then(()=>this.load())
+        .then(()=>this.load())
 
-}
+        }
 
-}
+        }
 
-}
+    }
 
 </script>
 
