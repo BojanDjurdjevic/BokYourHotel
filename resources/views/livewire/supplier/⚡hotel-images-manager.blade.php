@@ -37,7 +37,7 @@ new class extends Component
         $this->images = array_values($this->images);
     }
 
-    public function upload()
+    public function uploadImages()
     {
         $this->validate();
 
@@ -47,9 +47,12 @@ new class extends Component
             $path = $this->uploadImage($image, "hotels/$id");
             //$path = $image->store('hotels', 'public');
 
+            $count = $this->hotel->images()->count();
+
             HotelImage::create([
                 'hotel_id' => $id,
                 'path' => $path,
+                'position' => $count,
                 'is_featured' => $this->hotel->images()->count() === 0 && $index === 0,
             ]);                      
         }
@@ -62,6 +65,14 @@ new class extends Component
         $this->num = $this->num == '' ? 'Ćaos' : '';
     }
 
+    public function reorderImages($order)
+    {
+        foreach ($order as $index => $id) {
+            HotelImage::where('id', $id)
+                ->update(['position' => $index]);
+        }
+    }
+    
     public function setFeatured($imageId)
     {
         $this->hotel->images()->update(['is_featured' => false]);
@@ -83,7 +94,7 @@ new class extends Component
         //$hotelImages = $this->hotel->images()->latest()->get();
     
         $hotelImages = $this->hotel
-        ? $this->hotel->images()->latest()->get()
+        ? $this->hotel->images()->orderBy('position')->get()
         : collect();
     
         return $this->view([
@@ -130,9 +141,13 @@ new class extends Component
                 @endforeach
             </div>
 
-            <button wire:click="upload"
+            <span wire:loading wire:target="uploadImages">
+                Uploading...
+            </span>
+
+            <button wire:click="uploadImages"
                     wire:loading.attr="disabled"
-                    class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg"
+                    class="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg"
             >
                 Upload All
             </button>
@@ -144,9 +159,27 @@ new class extends Component
     <div>
         <h3 class="font-semibold mb-2">Uploaded Images</h3>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4"
+            x-data
+            x-init="
+                new Sortable($el,{
+                    animation:150,
+                    onEnd: function(){
+
+                        let order=[...$el.children]
+                            .map(el=>el.dataset.id)
+
+                        $wire.reorderImages(order)
+                    }
+                })
+            "
+            class="grid grid-cols-2 md:grid-cols-4 gap-4"
+        >
             @foreach($hotelImages as $image)
-                <div class="relative border rounded p-2">
+                <div 
+                    data-id="{{ $image->id }}"
+                    class="relative border rounded p-2 cursor-move"
+                >
 
                     <img src="{{ asset('storage/'.$image->path) }}"
                          class="w-full h-32 object-cover rounded">
@@ -188,3 +221,7 @@ new class extends Component
     </button>
 
 </div>
+
+<script
+    
+></script>
