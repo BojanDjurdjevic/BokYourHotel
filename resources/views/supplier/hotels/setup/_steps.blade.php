@@ -26,6 +26,7 @@
 
     <a href="{{ route('supplier.hotels.setup.publish',$hotel) }}">
         Publish
+        {!! $steps['published'] ? '✓' : '' !!}
     </a>
 
 </div>

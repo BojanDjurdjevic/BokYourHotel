@@ -98,4 +98,12 @@ class HotelSetupController extends Controller
     {
         return view('supplier.hotels.setup.publish', compact('hotel'));
     }
+
+    public function publishHotel(Hotel $hotel) 
+    {
+        $hotel->published = 1;
+        $hotel->save(); 
+
+        return redirect()->back()->with('success', "Hotel $hotel->name is successfully published!");
+    }
 }

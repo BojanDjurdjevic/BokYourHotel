@@ -6,31 +6,39 @@
         Publish Hotel
     </h1>
 
-    @if($hotel->canBePublished())
+    @if (!$hotel->published)
 
-    <div class="bg-green-100 p-4 rounded mb-4">
-        Hotel is ready to publish.
-    </div>
+        @if($hotel->canBePublished())
 
-    <form method="POST" action="{{ route('supplier.hotels.publish',$hotel) }}">
-    @csrf
+        <div class="bg-emerald-700 p-4 rounded mb-4">
+            Hotel is ready to publish.
+        </div>
 
-    <button class="bg-green-600 text-white px-6 py-3 rounded">
-        Publish Hotel
-    </button>
+        <form method="POST" action="{{ route('supplier.hotels.setup.publishHotel', $hotel) }}">
+            @csrf
+            @method('PUT')
+            <x-button variant="primary">
+                Publish Hotel
+            </x-button>
 
-    </form>
+        </form>
 
-    @else
+        @else
 
-    <div class="bg-yellow-400 text-red-700 p-4 rounded">
+        <div class="bg-yellow-400 text-red-700 p-4 rounded">
 
-        <b>Hotel setup is not complete.
+            <b>Hotel setup is not complete.
 
-        Completion: {{ $hotel->setupProgress() }}%</b>
+            Completion: {{ $hotel->setupProgress() }}%</b>
 
-    </div>
+        </div>
 
+        @endif
+
+        @else
+        <div class="bg-emerald-700 p-4 rounded mb-4">
+            Hotel is already published.
+        </div>
     @endif
 
 </x-layouts.dashboard>

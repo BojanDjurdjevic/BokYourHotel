@@ -80,6 +80,7 @@ class Hotel extends Model
 
             'images' => $this->images()->exists(),
 
+            'published' => $this->published
         ];
     }
 

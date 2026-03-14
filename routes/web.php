@@ -79,6 +79,11 @@ Route::middleware('auth')->group(function () {
         )->name('inventory.calendar.data');
 
         Route::post(
+            '/hotels/{hotel}/inventory',
+            [HotelSetupController::class,'storeInventory']
+        )->name('hotels.inventory.store');
+
+        Route::post(
         '/inventory/update-day',
         [RoomInventoryController::class,'updateDay']
         )->name('inventory.update');
@@ -98,12 +103,12 @@ Route::middleware('auth')->group(function () {
             [HotelSetupController::class,'publish']
         )->name('hotels.setup.publish');
 
-        // Post wizard routes:
+        Route::put(
+            '/hotels/{hotel}/setup/publish-my-hotel',
+            [HotelSetupController::class, 'publishHotel']
+        )->name('hotels.setup.publishHotel');
 
-        Route::post(
-            '/hotels/{hotel}/inventory',
-            [HotelSetupController::class,'storeInventory']
-        )->name('hotels.inventory.store');
+        
 
         //Resource:
 
