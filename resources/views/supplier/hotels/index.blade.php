@@ -46,7 +46,7 @@
     </p>
 
     <span class="text-sm text-gray-500">
-        Rooms: {{ $hotel->rooms()->count() }}
+        Rooms: {{ $hotel->rooms_count }}
     </span>
 
     @if ($hotel->published)

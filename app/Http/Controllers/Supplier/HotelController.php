@@ -15,6 +15,7 @@ class HotelController extends Controller
         
         $hotels = auth()->user()
             ->hotels()
+            ->withCount('rooms')
             ->with(['rooms', 'images'])
             ->latest()
             ->get();
