@@ -8,6 +8,7 @@ use App\Models\Hotel;
 use App\Models\HotelImage;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\HandleImagesUpload;
+use App\Services\HotelService;
 
 // HotelImagesManager
 new class extends Component
@@ -16,6 +17,7 @@ new class extends Component
     use WithFileUploads, HandleImagesUpload;
 
     public Hotel $hotel;
+    public HotelService $service;
 
     public array $images = [];
 
@@ -23,12 +25,13 @@ new class extends Component
     public string $name = 'Bojan';
 
     protected $rules = [
-        'images.*' => 'image|max:2048'
+        'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048'
     ];
 
     public function mount(Hotel $hotel)
     {
         $this->hotel = $hotel;
+        $this->service = new HotelService();
     }
 
     public function removeTempImage($index)
@@ -41,6 +44,7 @@ new class extends Component
     {
         $this->validate();
 
+        /*
         foreach ($this->images as $index => $image)
         {
             $id = $this->hotel->id;
@@ -56,6 +60,9 @@ new class extends Component
                 'is_featured' => $this->hotel->images()->count() === 0 && $index === 0,
             ]);                      
         }
+        */
+
+        $this->service->uploadImages($this->hotel, $this->images);
 
         $this->reset('images');
     }
