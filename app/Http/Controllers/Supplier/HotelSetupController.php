@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreInventoryRequest;
 use App\Models\Hotel;
 use App\Models\RoomInventory;
+use App\Services\HotelService;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -34,7 +35,7 @@ class HotelSetupController extends Controller
         ]);
     }
 
-    public function storeInventory(Request $request, Hotel $hotel)
+    public function storeInventory(Request $request, Hotel $hotel, HotelService $service)
     {
         //dd($request->all());
 
@@ -44,7 +45,7 @@ class HotelSetupController extends Controller
 
             'inventory_json' => 'required|string'
 
-        ]);
+        ]); 
 
         $inventory = json_decode($request->inventory_json, true);
 
@@ -52,7 +53,8 @@ class HotelSetupController extends Controller
             return back()->withErrors([
                 'inventory' => 'Generate inventory first.'
             ]);
-        }
+        } /*
+
         $data = [];
 
         foreach ($inventory as $item) {
@@ -78,7 +80,9 @@ class HotelSetupController extends Controller
             $data,
             ['room_id','date'],
             ['available','price','updated_at']
-        );
+        ); */
+
+        $service->createInventory($inventory, $request->room_id);
 
         return redirect()
             ->route('supplier.hotels.setup.images',$hotel)
