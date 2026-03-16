@@ -23,10 +23,12 @@
         Images
         {!! $steps['images'] ? '✓' : '' !!}
     </a>
-
-    <a href="{{ route('supplier.hotels.setup.publish',$hotel) }}">
-        Publish
-        {!! $steps['published'] ? '✓' : '' !!}
-    </a>
+    @if (!$hotel->published)
+        <a href="{{ route('supplier.hotels.setup.publish',$hotel) }}">
+            Publish
+            {!! $steps['published'] ? '✓' : '' !!}
+        </a>
+    @endif
+    
 
 </div>

@@ -20,12 +20,17 @@
     @foreach($hotels as $hotel)
 
     <a
-        href="{{ route('supplier.hotels.edit',$hotel) }}"
+        href="{{ route('supplier.hotels.setup.info',$hotel) }}"
         class="flex gap-6 p-4 bg-gray-900 rounded-xl hover:bg-gray-800 transition"
     >
 
     <div class="w-40 h-28 bg-gray-700 rounded-lg overflow-hidden">
-        <img src="/storage/{{ $hotel->featuredImage->path }}" alt="Hotel image">
+        @if ($hotel->featuredImage)
+            <img src="/storage/{{ $hotel->featuredImage->path }}" alt="Hotel image"
+                class="w-full h-full object-cover object-center"
+            />
+        @endif
+        
     </div>
 
     <div class="flex flex-col justify-between">
@@ -43,6 +48,19 @@
     <span class="text-sm text-gray-500">
         Rooms: {{ $hotel->rooms()->count() }}
     </span>
+
+    @if ($hotel->published)
+        <span class="text-xs bg-green-600 px-2 py-1 rounded">
+            Published
+        </span> 
+    @else
+
+        <span class="text-xs bg-amber-600 px-2 py-1 rounded">
+            Draft
+        </span> 
+
+    @endif
+    
 
 </div>
 
