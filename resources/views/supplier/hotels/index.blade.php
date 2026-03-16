@@ -24,7 +24,9 @@
         class="flex gap-6 p-4 bg-gray-900 rounded-xl hover:bg-gray-800 transition"
     >
 
-    <div class="w-40 h-28 bg-gray-700 rounded-lg"></div>
+    <div class="w-40 h-28 bg-gray-700 rounded-lg overflow-hidden">
+        <img src="/storage/{{ $hotel->featuredImage->path }}" alt="Hotel image">
+    </div>
 
     <div class="flex flex-col justify-between">
 

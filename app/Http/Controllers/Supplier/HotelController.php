@@ -12,7 +12,7 @@ class HotelController extends Controller
 {
     public function index()
     {
-        //dd(auth()->user()->hotels());
+        
         $hotels = auth()->user()
             ->hotels()
             ->with(['rooms', 'images'])
@@ -22,6 +22,8 @@ class HotelController extends Controller
         $incompleteHotels = $hotels->filter(
         fn($hotel) => $hotel->setupProgress() < 100
         );
+
+        
 
         return view('supplier.hotels.index', compact('hotels', 'incompleteHotels'));
     }

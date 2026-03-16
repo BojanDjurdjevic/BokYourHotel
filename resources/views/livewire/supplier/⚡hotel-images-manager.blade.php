@@ -17,7 +17,7 @@ new class extends Component
     use WithFileUploads, HandleImagesUpload;
 
     public Hotel $hotel;
-    public HotelService $service;
+    protected HotelService $service;
 
     public array $images = [];
 
@@ -25,13 +25,18 @@ new class extends Component
     public string $name = 'Bojan';
 
     protected $rules = [
-        'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048'
+        'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:4096'
     ];
+
+    public function boot(HotelService $service)
+    {
+        $this->service = $service;
+    }
 
     public function mount(Hotel $hotel)
     {
         $this->hotel = $hotel;
-        $this->service = new HotelService();
+        
     }
 
     public function removeTempImage($index)
