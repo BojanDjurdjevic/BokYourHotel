@@ -115,6 +115,21 @@ Route::middleware('auth')->group(function () {
         Route::resource('hotels', HotelController::class);
 
         Route::resource('hotels.rooms', RoomController::class);
+        // NEW ROOM ROUTES
+        Route::get(
+            '/rooms/{room}/images/index',
+            [HotelSetupController::class,'publish']
+        )->name('rooms.images.index');
+
+        Route::get(
+            '/rooms/{room}/facilities',
+            [HotelSetupController::class,'publish']
+        )->name('rooms.facilities');
+
+        Route::get(
+            '/rooms/{room}/inventory/index',
+            [HotelSetupController::class,'publish']
+        )->name('inventory.index');
     });
 
     Route::middleware(SuperMiddleware::class)->group(function () {

@@ -1,153 +1,100 @@
 <x-layouts.dashboard>
-    <div class="max-w-2xl mx-auto">
 
-    <h1 class="text-2xl font-bold mb-6">
-    Edit Room
-    </h1>
+<div class="max-w-3xl mx-auto">
 
-    <form method="POST" action="{{ route('supplier.hotels.rooms.update', [$hotel, $room]) }}">
-    @csrf
-    @method('PUT')
+@include('supplier.rooms.setup._steps', [
+    'hotel' => $hotel,
+    'room' => $room,
+    'step' => 'info'
+])
 
-    <div class="mb-4">
-    <label>Room Name</label>
-    <input
-    type="text"
-    name="name"
-    value="{{ old('name', $room->name) }}"
-    class="w-full border p-2 rounded"
-    >
-    </div>
+<h1 class="text-2xl font-bold mb-6">
+    {{ $room->exists ? 'Edit Room' : 'Create Room' }}
+</h1>
 
-    <div>
-        <label>Room Type</label>
-        <select name="room_type_id" class="w-full border p-2 rounded">
+<form method="POST"
+    action="{{ $room->exists
+        ? route('supplier.hotels.rooms.update', [$hotel,$room])
+        : route('supplier.hotels.rooms.store', $hotel) }}"
+>
+@csrf
+@if($room->exists) @method('PUT') @endif
 
-        @foreach($roomTypes as $type)
+<!-- NAME -->
+<div class="mb-4">
+<label>Name</label>
+<input type="text" name="name"
+value="{{ old('name', $room->name) }}"
+class="w-full p-2 rounded bg-gray-800">
+</div>
 
-        <option
-        value="{{ $type->id }}"
-        @selected($room->room_type_id == $type->id)
-        >
+<!-- ROOM TYPE -->
+<div class="mb-4">
+<label>Room Type</label>
+<select name="room_type_id" class="w-full p-2 bg-gray-800 rounded">
+@foreach($roomTypes as $type)
+<option value="{{ $type->id }}"
+@selected($room->room_type_id == $type->id)>
+{{ $type->name }}
+</option>
+@endforeach
+</select>
+</div>
 
-        {{ $type->name }}
+<!-- BED TYPE -->
+<div class="mb-4">
+<label>Bed Type</label>
+<select name="bed_type_id" class="w-full p-2 bg-gray-800 rounded">
+@foreach($bedTypes as $bed)
+<option value="{{ $bed->id }}"
+@selected($room->bed_type_id == $bed->id)>
+{{ $bed->name }}
+</option>
+@endforeach
+</select>
+</div>
 
-        </option>
+<!-- CAPACITY -->
+<div class="mb-4">
+<label>Capacity</label>
+<input type="number" name="capacity"
+value="{{ old('capacity', $room->capacity) }}"
+class="w-full p-2 bg-gray-800 rounded">
+</div>
 
-        @endforeach
+<!-- PRICE -->
+<div class="mb-4">
+<label>Base price</label>
+<input type="number" step="0.01"
+name="price_per_night"
+value="{{ old('price_per_night', $room->price_per_night) }}"
+class="w-full p-2 bg-gray-800 rounded">
+</div>
 
-        </select>
-    </div>
+<!-- UNITS -->
+<div class="mb-6">
+<label>Total units</label>
+<input type="number"
+name="total_units"
+value="{{ old('total_units', $room->total_units) }}"
+class="w-full p-2 bg-gray-800 rounded">
+</div>
 
-    <div>
-        <label>Bed Type</label>
-        <select name="bed_type_id" class="w-full border p-2 rounded">
+<div class="flex justify-between">
 
-        @foreach($bedTypes as $bed)
+<a href="{{ route('supplier.hotels.rooms.index', $hotel) }}"
+class="px-4 py-2 bg-gray-700 rounded-lg">
+Cancel
+</a>
 
-        <option
-        value="{{ $bed->id }}"
-        @selected($room->bed_type_id == $bed->id)
-        >
+<button class="px-4 py-2 bg-green-600 rounded-lg">
+Save
+</button>
 
-        {{ $bed->name }}
+</div>
 
-        </option>
+</form>
 
-        @endforeach
+</div>
 
-        </select>
-    </div>
-
-    <div>
-        {{--  
-        @foreach($boardTypes as $board)
-
-        <label class="block">
-
-        <input
-        type="checkbox"
-        name="board_types[]"
-        value="{{ $board->id }}"
-        @checked($room->boardTypes->contains($board->id))
-        >
-
-        {{ $board->name }}
-
-        </label>
-
-        @endforeach 
-        --}}
-        @php
-            $pivot = $room->boardTypes->keyBy('id');
-        @endphp
-
-        @foreach($boardTypes as $boardType)
-
-        @php
-            $existing = $pivot[$boardType->id] ?? null;
-        @endphp
-
-        <div x-data="{ enabled: {{ isset($pivot[$boardType->id]) ? 'true' : 'false' }} }" class="flex items-center gap-4 mb-2">
-            <input 
-                type="checkbox"
-                x-model="enabled"
-                name="board_types[{{ $boardType->id }}][enabled]"
-                value="1"
-                class="rounded"
-            >
-
-            <label>{{ $boardType->name }}</label>
-
-            <input 
-                type="number"
-                step="0.01"
-                name="board_types[{{ $boardType->id }}][price]"
-                :disabled="!enabled"
-                value="{{ $pivot[$boardType->id]->pivot->price ?? '' }}"
-                class="border rounded px-2 py-1 board-price"
-            >
-        </div>
-
-        @endforeach
-    </div>
-
-    <div class="mb-4">
-    <label>Capacity</label>
-    <input
-    type="number"
-    name="capacity"
-    value="{{ old('capacity', $room->capacity) }}"
-    class="w-full border p-2 rounded"
-    >
-    </div>
-
-    <div class="mb-4">
-    <label>Price per Night (€)</label>
-    <input
-    type="number"
-    step="0.01"
-    name="price_per_night"
-    value="{{ old('price_per_night', $room->price_per_night) }}"
-    class="w-full border p-2 rounded"
-    >
-    </div>
-
-    <div class="mb-6">
-    <label>Total Units</label>
-    <input
-    type="number"
-    name="total_units"
-    value="{{ old('total_units', $room->total_units) }}"
-    class="w-full border p-2 rounded"
-    >
-    </div>
-
-    <x-button class="primary">
-    Update Room
-    </x-button>
-
-    </form>
-
-    </div>
 </x-layouts.dashboard>
