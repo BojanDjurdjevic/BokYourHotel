@@ -15,12 +15,12 @@ class Room extends Model
         'capacity',
         'price_per_night',
         'total_units',
-        'facilities'
     ];
 
+    /*
     protected $casts = [
         'facilities' => 'array'
-    ];
+    ]; */
 
     public function hotel()
     {
@@ -62,5 +62,12 @@ class Room extends Model
     public function inventories()
     {
         return $this->hasMany(RoomInventory::class);
+    }
+
+    // From room & facilities table:
+
+    public function facilities()
+    {
+        return $this->belongsToMany(Facility::class);
     }
 }

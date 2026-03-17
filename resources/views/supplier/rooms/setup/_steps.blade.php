@@ -27,7 +27,7 @@ $steps = [
     'inventory' => [
         'label' => 'Inventory',
         'route' => $room
-            ? route('supplier.inventory.index', $hotel)
+            ? route('supplier.rooms.inventory.index', $hotel)
             : null
     ],
 ];
