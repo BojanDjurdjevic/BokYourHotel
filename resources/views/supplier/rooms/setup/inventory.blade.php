@@ -28,7 +28,7 @@
 
             <div id="calendar">
                 <!-- JS -->
-
+                {{--  
                 <h1 class="text-xl font-bold mb-6">
                     Inventory Calendar
                 </h1>
@@ -110,116 +110,8 @@
                 </div>
 
                 </div>
-            </div>
+            </div>--}}
 
         </div>
     </div>
-
-    <script>
-
-        function inventoryCalendar(roomId,hotelId){
-
-            return{
-
-                roomId: roomId ?? {{ $rooms->first()->id }},
-
-                month:new Date(),
-
-                days:[],
-
-                get monthLabel(){
-
-                return this.month.toLocaleDateString(
-                    'en-US',
-                    {month:'long',year:'numeric'}
-                )
-
-                },
-
-                load() {
-
-                    fetch(`/supplier/hotels/${hotelId}/inventory-calendar/data?room_id=${this.roomId}&month=${this.month.toISOString()}`)
-
-                    .then(r=>r.json())
-
-                    .then(data=>{
-
-                    this.days=data
-
-                    })
-
-                },
-
-                prevMonth() {
-
-                    this.month = new Date(
-                        this.month.getFullYear(),
-                        this.month.getMonth()-1,
-                        1
-                    )
-
-                    this.load()
-
-                },
-
-                nextMonth(){
-
-                    this.month = new Date(
-                        this.month.getFullYear(),
-                        this.month.getMonth()+1,
-                        1
-                    )
-
-                    this.load()
-
-                },
-
-                edit(day) {
-
-                    let available=prompt(
-                        'Available rooms',
-                        day.available
-                    )
-
-                    let price=prompt(
-                        'Price',
-                    day.price
-                    )
-
-                    fetch(
-                        '{{ route("supplier.inventory.update") }}',
-                    {
-
-                    method:'POST',
-
-                    headers:{
-                        'Content-Type':'application/json',
-                        'X-CSRF-TOKEN':document
-                        .querySelector('meta[name=csrf-token]')
-                        .content
-                    },
-
-                    body:JSON.stringify({
-
-                        room_id:this.roomId,
-                        //room_id: roomId,
-                        date:day.date,
-                        available:available,
-                        price:price
-
-                })
-
-            }
-
-            )
-
-            .then(()=>this.load())
-
-            }
-
-            }
-
-        }
-
-    </script>
 </x-layouts.dashboard>

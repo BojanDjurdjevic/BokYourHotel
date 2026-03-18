@@ -22,7 +22,7 @@ class HotelSetupController extends Controller
     {
         $rooms = $hotel->rooms;
 
-        return view('supplier.hotels.setup.rooms', compact('hotel','rooms'));
+        return view('supplier.rooms.index', compact('hotel','rooms'));
     }
 
     public function inventory(Hotel $hotel)

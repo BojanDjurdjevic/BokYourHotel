@@ -61,7 +61,7 @@
 
                 <div class="mt-6 flex justify-between">
 
-                <a href="{{ route('supplier.hotels.rooms.index',$hotel) }}"
+                <a href="{{ route('supplier.hotels.setup.rooms',$hotel) }}"
                     
                 >
                     Cancel

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoomSetupController;
 use App\Http\Controllers\Supplier\HotelController;
 use App\Http\Controllers\Supplier\HotelSetupController;
 use App\Http\Controllers\Supplier\RoomController;
@@ -115,21 +116,26 @@ Route::middleware('auth')->group(function () {
         Route::resource('hotels', HotelController::class);
 
         Route::resource('hotels.rooms', RoomController::class);
+
         // NEW ROOM ROUTES
         Route::get(
-            '/rooms/{room}/images/index',
-            [HotelSetupController::class,'publish']
+            '/rooms/{room}/images/index', [RoomSetupController::class, 'images']
         )->name('rooms.images.index');
 
-        Route::get(
-            '/rooms/{room}/facilities',
-            [HotelSetupController::class,'publish']
-        )->name('rooms.facilities');
+        Route::post('/rooms/{room}/images/store', [RoomSetupController::class, 'storeImages'])
+        ->name('rooms.images.store');
 
         Route::get(
-            '/rooms/{room}/inventory/index',
-            [HotelSetupController::class,'publish']
-        )->name('inventory.index');
+            '/rooms/{room}/facilities', [RoomSetupController::class, 'facilities']
+        )->name('rooms.facilities');
+
+        Route::put(
+            '/rooms/{room}/facilities-update', [RoomSetupController::class, 'facilitiesUpdate']
+        )->name('rooms.facilities.update');
+            
+        Route::get(
+            '/rooms/{room}/inventory/index', [RoomSetupController::class, 'inventory']
+        )->name('rooms.inventory.index');
     });
 
     Route::middleware(SuperMiddleware::class)->group(function () {
