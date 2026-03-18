@@ -79,6 +79,24 @@
             <input type="number" name="capacity" class="w-full border p-2 rounded">
         </div>
 
+        <div class="flex gap-2 flex-wrap mt-2">
+
+            @foreach($room->facilities as $facility)
+
+            <span class="text-xs bg-gray-800 px-2 py-1 rounded flex items-center gap-1">
+
+            <span>
+                {{ config('facility_icons')[$facility->icon] ?? '❔' }}
+            </span>
+
+                {{ $facility->name }}
+
+            </span>
+
+            @endforeach
+
+        </div>
+
         <div class="mb-4">
             <label>Price per Night (€)</label>
             <input type="number" step="0.01" name="price_per_night" class="w-full border p-2 rounded">

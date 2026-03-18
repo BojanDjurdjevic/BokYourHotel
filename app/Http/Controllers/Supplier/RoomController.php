@@ -61,6 +61,8 @@ class RoomController extends Controller
 
         $room->boardTypes()->sync($syncData);
 
+        $room->facilities()->sync($request->facilities ??  []);
+
         if(!$hotel->published)
         return redirect()
             ->route('supplier.hotels.setup.inventory', $hotel)
@@ -96,6 +98,8 @@ class RoomController extends Controller
         $room->boardTypes()->sync(
             $request->board_types ?? []
         );
+
+        $room->facilities()->sync($request->facilities ?? []);
 
         return redirect()
             ->route('supplier.hotels.rooms.index', $room->hotel)
