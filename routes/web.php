@@ -135,7 +135,7 @@ Route::middleware('auth')->group(function () {
             
         Route::get(
             '/rooms/{room}/inventory/index', [RoomSetupController::class, 'inventory']
-        )->name('rooms.inventory.index');
+        )->name('rooms.inventory');
     });
 
     Route::middleware(SuperMiddleware::class)->group(function () {

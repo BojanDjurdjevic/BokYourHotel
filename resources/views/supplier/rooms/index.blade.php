@@ -62,7 +62,7 @@
                Images
             </a>
 
-            <a href="{{ route('supplier.rooms.inventory.index', $hotel) }}"
+            <a href="{{ route('supplier.rooms.inventory', $room) }}"
                class="px-3 py-1 bg-gray-700 rounded-lg text-sm">
                Inventory
             </a>

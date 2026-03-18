@@ -17,9 +17,18 @@ class RoomSetupController extends Controller
         return view('supplier.rooms.setup.images', compact('hotel', 'room'));
     }
 
-    public function storeImages()
+    public function storeImages(Request $request, Room $room)
     {
+        foreach ($request->file('images', []) as $file) {
 
+            $path = $file->store('rooms', 'public');
+
+            $room->images()->create([
+                'path' => $path
+            ]);
+        }
+
+        return back()->with('success','Images uploaded');
     }
 
     public function facilities(Room $room)
@@ -30,9 +39,15 @@ class RoomSetupController extends Controller
         return view('supplier.rooms.setup.facilities', compact('hotel', 'room', 'facilities'));
     }
 
-    public function facilitiesUpdate()
+    public function facilitiesUpdate(Request $request, Room $room)
     {
-        
+         $room->facilities()->sync(
+            $request->facilities ?? []
+        );
+
+        return redirect()
+        ->route('supplier.rooms.facilities', $room)
+        ->with('success', 'Facilities updated');
     }
 
     public function inventory(Room $room)
