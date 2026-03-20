@@ -136,6 +136,10 @@ Route::middleware('auth')->group(function () {
         Route::get(
             '/rooms/{room}/inventory/index', [RoomSetupController::class, 'inventory']
         )->name('rooms.inventory');
+
+        Route::put(
+            '/rooms/{room}/inventory-update', [RoomSetupController::class, 'inventoryUpdate']
+        )->name('rooms.inventory.update');
     });
 
     Route::middleware(SuperMiddleware::class)->group(function () {
