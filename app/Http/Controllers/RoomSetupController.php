@@ -22,7 +22,7 @@ class RoomSetupController extends Controller
     {
         foreach ($request->file('images', []) as $file) {
 
-            $path = $file->store('rooms', 'public');
+            $path = $file->store("rooms/{$room->id}", 'public');
 
             $room->images()->create([
                 'path' => $path

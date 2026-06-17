@@ -4,12 +4,13 @@ namespace App\Traits;
 
 use Illuminate\Container\Attributes\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 
 trait HandleImagesUpload {
-    public function uploadImage($request, $path)
+    public function uploadImage(Request $request, string $path)
     {
         /*
         $avatar = Auth::user()->avatar;
@@ -25,7 +26,7 @@ trait HandleImagesUpload {
         $gd = new Driver(); // kupimo novi GD driver
         $manager = new ImageManager($gd); // uzimamo iz bibl intervention/image Manager
 
-        $image = $manager->read($file)->scaleDown(width: 1920)->toWebp(85); // prepakujemo u Webp
+        $image = $manager->read($file)->scaleDown(width: 1200)->toWebp(85); // prepakujemo u Webp
 
         Storage::disk('public')->put("$path/$name", (string) $image); // images/avatars
 

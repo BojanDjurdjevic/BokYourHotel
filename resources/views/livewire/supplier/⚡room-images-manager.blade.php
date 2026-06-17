@@ -27,13 +27,13 @@ new class extends Component
         $this->images = array_values($this->images);
     }
 
-    public function upload()
+    public function upload($room)
     {
         $this->validate();
 
         foreach ($this->images as $index => $image) {
 
-            $path = $image->store('rooms', 'public');
+            $path = $image->store("rooms/{$this->room->id}", 'public');
 
             RoomImage::create([
                 'room_id' => $this->room->id,

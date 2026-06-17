@@ -4,9 +4,10 @@ namespace App\Services;
 
 use App\Actions\Hotels\SetHotelInventory;
 use App\Actions\Hotels\UploadHotelImage;
+use App\Models\Hotel;
 
 class HotelService {
-    public function uploadImages($hotel, $images)
+    public function uploadImages(Hotel $hotel, array $images)
     {
         $count = $hotel->images()->count();
 
