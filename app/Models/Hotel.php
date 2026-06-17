@@ -97,6 +97,6 @@ class Hotel extends Model
 
     public function canBePublished(): bool
     {
-        return $this->setupProgress() === 100;
+        return $this->setupProgress() >= 80;
     }
 }
