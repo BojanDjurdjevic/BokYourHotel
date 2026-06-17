@@ -25,10 +25,10 @@ trait HandleImagesUpload {
         $gd = new Driver(); // kupimo novi GD driver
         $manager = new ImageManager($gd); // uzimamo iz bibl intervention/image Manager
 
-        $image = $manager->read($file)->toWebp(85); // prepakujemo u Webp
+        $image = $manager->read($file)->scaleDown(width: 1920)->toWebp(85); // prepakujemo u Webp
 
         Storage::disk('public')->put("$path/$name", (string) $image); // images/avatars
 
-        return "$path/$name";  
+        return "$path/$name"; 
     }
 }

@@ -6,6 +6,9 @@
     </h1>
 
     <form method="POST" action="{{ route('supplier.hotels.rooms.store', $hotel) }}">
+        @if ($errors->any())
+            <p class="text-red-500"> {{ $errors->first() }} </p>
+        @endif
         @csrf
 
         <div class="mb-4">
@@ -20,7 +23,7 @@
 
         @foreach($roomTypes as $type)
 
-        <option value="{{ $type->id }}">
+        <option value="{{ $type->id }}" class=" bg-gray-800">
             {{ $type->name }}
         </option>
 
@@ -36,7 +39,7 @@
 
         @foreach($bedTypes as $bed)
 
-        <option value="{{ $bed->id }}">
+        <option value="{{ $bed->id }}" class="bg-gray-800">
             {{ $bed->name }}
         </option>
 
@@ -78,7 +81,7 @@
             <label>Capacity</label>
             <input type="number" name="capacity" class="w-full border p-2 rounded">
         </div>
-
+        {{-- 
         <div class="flex gap-2 flex-wrap mt-2">
 
             @foreach($room->facilities as $facility)
@@ -95,7 +98,7 @@
 
             @endforeach
 
-        </div>
+        </div>--}}
 
         <div class="mb-4">
             <label>Price per Night (€)</label>
@@ -108,13 +111,13 @@
         </div>
 
         <div class="mb-6">
-            @foreach(config('room_facilities') as $facility)
+            @foreach($facilities as $facility) {{-- config('room_facilities') --}} 
 
             <label class="flex items-center gap-2">
                 <input type="checkbox"
                     name="facilities[]"
-                    value="{{ $facility }}">
-                {{ ucfirst($facility) }}
+                    value="{{ $facility->id }}">
+                {{ ucfirst($facility->name) }}
             </label>
 
         @endforeach

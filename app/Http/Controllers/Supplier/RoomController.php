@@ -9,6 +9,7 @@ use App\Models\RoomType;
 use App\Models\BedType;
 use App\Models\BoardType;
 use App\Http\Requests\RoomRequest;
+use App\Models\Facility;
 
 class RoomController extends Controller
 {
@@ -23,12 +24,14 @@ class RoomController extends Controller
     public function create(Hotel $hotel)
     {
         //dd($hotel->supplier_id, auth()->id());
+        $facilities = Facility::all();
         $roomTypes = RoomType::all();
         $bedTypes = BedType::all();
         $boardTypes = BoardType::all();
 
         return view('supplier.rooms.create', compact(
             'hotel',
+            'facilities',
             'roomTypes',
             'bedTypes',
             'boardTypes'

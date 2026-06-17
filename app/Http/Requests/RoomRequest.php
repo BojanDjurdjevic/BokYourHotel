@@ -30,7 +30,7 @@ class RoomRequest extends FormRequest
             'board_types.*' => 'array', 
 
             'facilities' => 'nullable|array',
-            'facilities.*' => 'string',
+            'facilities.*' => 'integer',
         ];
     }
 }

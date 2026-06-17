@@ -3,7 +3,7 @@
     return [
         'wifi' => '📶',
         'tv' => '📺',
-        'air_conditioning' => '❄️',
+        'air_condition' => '❄️',
         'minibar' => '🍷',
         'balcony' => '🌅',
         'parking' => '🅿️',

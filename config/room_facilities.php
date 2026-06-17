@@ -5,7 +5,7 @@
         'balcony',
         'minibar',
         'air_condition',
-        'safe'
+        'safe',
     ];
 
 ?>

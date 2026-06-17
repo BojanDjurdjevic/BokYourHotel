@@ -73,7 +73,7 @@
                     <span class="text-xs bg-gray-800 px-2 py-1 rounded flex items-center gap-1">
 
                     <span>
-                        {{ config('facility_icons')[$facility->icon] ?? '❔' }}
+                        {{ config('facility_icons')[$facility->name] ?? '❔' }}
                     </span>
 
                         {{ $facility->name }}
