@@ -1,11 +1,15 @@
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-
+<div
+    x-data="{
+        facilities: @js($selected)
+    }"
+>
     @foreach($facilities as $facility)
 
         <label
-            class="cursor-pointer border rounded-xl p-4 flex items-center gap-3
-            hover:border-blue-500 transition
-            {{ in_array($facility->id, $selected ?? []) ? 'border-blue-500 bg-blue-500/10' : 'border-gray-700' }}"
+            class="cursor-pointer border rounded-xl p-4 flex items-center gap-3 hover:border-blue-500 transition"
+            :class="facilities.includes('{{ $facility->id }}')
+                ? 'border-blue-500 bg-blue-500/10'
+                : 'border-gray-700'"
         >
 
             <input
@@ -13,19 +17,18 @@
                 name="facilities[]"
                 value="{{ $facility->id }}"
                 class="hidden"
-                @checked(in_array($facility->id, $selected ?? []))
+                x-model="facilities"
             >
 
-            <span class="text-xl">
-                {{ config('facility_icons')[$facility->icon] ?? '❔' }}
+            <span>
+                {{ config('facility_icons')[$facility->name] ?? '❔' }}
             </span>
 
-            <span class="text-sm">
+            <span>
                 {{ $facility->name }}
             </span>
 
         </label>
 
     @endforeach
-
 </div>

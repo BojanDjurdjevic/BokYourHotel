@@ -23,7 +23,7 @@
 
                 <x-facilities-selector
                     :facilities="$facilities"
-                    :selected="$room->facilities->pluck('id')->toArray()"
+                    :selected="$room->facilities->pluck('id')->map(fn ($id) => (string) $id)->toArray()"
                 />
 
                 <div class="mt-6 flex justify-end">

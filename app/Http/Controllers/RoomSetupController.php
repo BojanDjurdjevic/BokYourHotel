@@ -37,6 +37,8 @@ class RoomSetupController extends Controller
         $hotel = $room->hotel;
         $facilities = Facility::all();
 
+        //dd($facilities);
+
         return view('supplier.rooms.setup.facilities', compact('hotel', 'room', 'facilities'));
     }
 
