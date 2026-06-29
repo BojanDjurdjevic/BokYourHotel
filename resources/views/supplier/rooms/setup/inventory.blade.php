@@ -40,14 +40,14 @@
         <tr class="text-gray-400 border-b border-gray-700">
 
             <th class="p-3 text-left">Date</th>
-            
+            {{--
             @foreach($dates as $date)
             <th class="p-2 text-center">
                 {{ $date->format('d') }}
             </th>
             @endforeach
-            
-{{-- 
+            --}}
+ 
             <template x-for="date in dates" :key="date">
 
                 <th class="p-2 text-center">
@@ -58,7 +58,7 @@
 
                 </th>
 
-            </template>--}}
+            </template>
 
         </tr>
         </thead>
@@ -71,51 +71,48 @@
             {{ $room->name }}
         </td>
 
-        @foreach($dates as $date)
+        <template x-for="date in dates" :key="date">
 
-        @php
-            $key = $date->format('Y-m-d');
-            $item = $inventory[$key] ?? null;
-            $available = $item->available ?? $room->total_units;
-        @endphp
+            <td class="p-1">
 
-        <td class="p-1">
+                <div
+                    class="cursor-pointer rounded text-center p-2"
+                    :class="getColor(cells[date])"
+                    @click="edit(date)"
+                >
 
-        <div
-            class="cursor-pointer rounded text-center p-2"
-            :class="getColor(cells['{{ $key }}'])"
-            @click="edit('{{ $key }}')"
-        >
+                    <template x-if="editing !== date">
 
-        <template x-if="editing !== '{{ $key }}'">
-            <span x-text="cells['{{ $key }}']?.available"></span>
-            <div class="text-xs">€<span x-text="cells['{{ $key }}']?.price"></span></div>
+                        <div>
+
+                            <span x-text="cells[date]?.available"></span>
+
+                            <div class="text-xs">
+                                €
+                                <span x-text="cells[date]?.price"></span>
+                            </div>
+
+                        </div>
+
+                    </template>
+
+                    <template x-if="editing === date">
+
+                        <input
+                            type="number"
+                            class="w-16 text-black text-center"
+                            x-model="cells[date].available"
+                            @blur="save(date)"
+                            @keydown.enter="save(date)"
+                        >
+
+                    </template>
+
+                </div>
+
+            </td>
+
         </template>
-
-        <template x-if="editing === '{{ $key }}'">
-            <input
-                type="number"
-                class="w-16 text-black text-center"
-                x-model="cells['{{ $key }}'].available"
-                @blur="save('{{ $key }}')"
-                @keydown.enter="save('{{ $key }}')"
-                autofocus
-            >
-        </template>
-
-        </div>
-
-        </td>
-
-        <script>
-            window.initialCells = window.initialCells || {}
-            window.initialCells['{{ $key }}'] = {
-                available: {{ $available }},
-                price: {{ $item->price ?? $room->price_per_night ?? 0 }}
-            }
-        </script>
-
-        @endforeach
 
         </tr>
 
@@ -136,13 +133,6 @@ function inventoryGrid(config) {
         month: new Date(),
 
         label: '',
-        /*
-        get monthLabel() {
-            return this.month.toLocaleDateString('en-US', {
-                month: 'long',
-                year: 'numeric'
-            })
-        }, */
 
         async load() {
             let res = await fetch(
@@ -164,16 +154,21 @@ function inventoryGrid(config) {
 
             this.cells = {}
 
-            data.dates.forEach(date => {
+            for (const date of data.dates) {
 
-                let row = data.inventory[date]
+                const row = data.inventory[date]
 
                 this.cells[date] = {
-                    available: row?.available ?? 0,
-                    price: row?.price ?? 0
+                    available: row
+                        ? row.available
+                        : data.defaults.available,
+
+                    price: row
+                        ? row.price
+                        : data.defaults.price
                 }
 
-            })
+            }
         },
 
         prevMonth() {
@@ -182,7 +177,7 @@ function inventoryGrid(config) {
                 this.month.getMonth() - 1,
                 1
             )
-            //this.load()
+            this.load()
         },
 
         nextMonth() {
@@ -191,17 +186,15 @@ function inventoryGrid(config) {
                 this.month.getMonth() + 1,
                 1
             )
-            //this.load()
+            this.load()
         },
 
-        cells: window.initialCells || {},
+        cells: {},
+        dates: [],
         editing: null,
         updateUrl: config.updateUrl,
         csrf: config.csrf,
-        /*
-        init() {
-            this.cells = window.initialCells || {}
-        } */
+
 
         edit(date) {
             this.editing = date
