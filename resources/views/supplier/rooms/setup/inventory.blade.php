@@ -23,7 +23,7 @@
         ←
         </x-button>
 
-        <h2 class="text-lg font-semibold" x-text="monthLabel"></h2>
+        <h2 class="text-lg font-semibold" x-text="label"></h2>
 
         <x-button 
             @click="nextMonth"
@@ -40,12 +40,25 @@
         <tr class="text-gray-400 border-b border-gray-700">
 
             <th class="p-3 text-left">Date</th>
-
+            
             @foreach($dates as $date)
             <th class="p-2 text-center">
                 {{ $date->format('d') }}
             </th>
             @endforeach
+            
+{{-- 
+            <template x-for="date in dates" :key="date">
+
+                <th class="p-2 text-center">
+
+                    <span
+                        x-text="new Date(date).getDate()"
+                    ></span>
+
+                </th>
+
+            </template>--}}
 
         </tr>
         </thead>
@@ -114,24 +127,40 @@
 <script>
 function inventoryGrid(config) {
     return {
+        init() {
+            this.load()
+        },
+
         dataUrl: config.dataUrl,
 
         month: new Date(),
 
+        label: '',
+        /*
         get monthLabel() {
             return this.month.toLocaleDateString('en-US', {
                 month: 'long',
                 year: 'numeric'
             })
-        },
+        }, */
 
         async load() {
-
             let res = await fetch(
-                `${this.dataUrl}?month=${this.month.toISOString()}`
+                `${this.dataUrl}?month=${this.month.toISOString()}`,
+                {
+                    headers: {
+                        Accept: 'application/json'
+                    }
+                }
             )
 
+            //console.log(await res.text())
+
             let data = await res.json()
+
+            this.label = data.label
+
+            this.dates = data.dates
 
             this.cells = {}
 

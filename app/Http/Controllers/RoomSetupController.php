@@ -72,7 +72,40 @@ class RoomSetupController extends Controller
         $inventory = $room->inventories()
             ->whereBetween('date', [$start, $end])
             ->get()
-            ->keyBy(fn($i) => $i->date->format('Y-m-d'));
+            ->keyBy(fn($i) => $i->date->format('Y-m-d'))
+        ;
+
+        if ($request->expectsJson()) {
+
+            return response()->json([
+
+                'label' => $month->translatedFormat('F Y'),
+
+                'dates' => $dates->map(fn ($date) => $date->format('Y-m-d')),
+
+                'inventory' => $inventory->mapWithKeys(fn ($item) => [
+
+                    $item->date->format('Y-m-d') => [
+
+                        'available' => $item->available,
+
+                        'price' => $item->price,
+
+                    ]
+
+                ]),
+
+                'defaults' => [
+
+                    'available' => $room->total_units,
+
+                    'price' => $room->price_per_night ?? 0,
+
+                ]
+
+            ]);
+
+        }
 
         return view('supplier.rooms.setup.inventory', compact(
             'hotel',
