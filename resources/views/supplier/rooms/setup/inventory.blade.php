@@ -98,13 +98,26 @@
 
                     <template x-if="editing === date">
 
-                        <input
-                            type="number"
-                            class="w-16 text-black text-center"
-                            x-model="cells[date].available"
-                            @blur="save(date)"
-                            @keydown.enter="save(date)"
+                        <div class="flex flex-col gap-1" 
+                            
                         >
+
+                            <input
+                                type="number"
+                                class="w-16 text-black text-center"
+                                x-model="form.available"
+                            >
+
+                            <input
+                                type="number"
+                                class="w-16 text-black text-center"
+                                x-model="form.price"
+                            >
+
+                            <button @click.stop="save(date)">OK</button>
+                            <button @click.stop="editing = null; form = {}">Cancel</button>
+
+                        </div>
 
                     </template>
 
@@ -192,17 +205,28 @@ function inventoryGrid(config) {
         cells: {},
         dates: [],
         editing: null,
+        form: {},
         updateUrl: config.updateUrl,
         csrf: config.csrf,
 
 
         edit(date) {
             this.editing = date
+
+            this.form = {
+                available: this.cells[date].available,
+                price: this.cells[date].price
+            }
         },
 
         async save(date) {
 
-            let value = this.cells[date] // value
+            //let value = this.cells[date]  value
+
+            this.cells[date] = {
+                available: this.form.available,
+                price: this.form.price
+            }
 
             await fetch(this.updateUrl, {
                 method: "PUT",
@@ -213,12 +237,13 @@ function inventoryGrid(config) {
                 body: JSON.stringify({
                     //room_id: this.roomId,
                     date: date,
-                    available: this.cells[date].available,
-                    price: this.cells[date].price
+                    available: this.form.available,
+                    price: this.form.price
                 })
             })
 
             this.editing = null
+            this.form = {}
         },
 
         getColor(cell) {
