@@ -99,7 +99,7 @@
                     <template x-if="editing === date">
 
                         <div class="flex flex-col gap-1" 
-                            
+                            @click.stop
                         >
 
                             <input
@@ -157,8 +157,6 @@ function inventoryGrid(config) {
                 }
             )
 
-            //console.log(await res.text())
-
             let data = await res.json()
 
             this.label = data.label
@@ -211,6 +209,10 @@ function inventoryGrid(config) {
 
 
         edit(date) {
+            if (this.editing === date) {
+                return;
+            }
+
             this.editing = date
 
             this.form = {
@@ -221,21 +223,18 @@ function inventoryGrid(config) {
 
         async save(date) {
 
-            //let value = this.cells[date]  value
-
             this.cells[date] = {
                 available: this.form.available,
                 price: this.form.price
             }
 
-            await fetch(this.updateUrl, {
+            const response = await fetch(this.updateUrl, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-TOKEN": this.csrf
                 },
                 body: JSON.stringify({
-                    //room_id: this.roomId,
                     date: date,
                     available: this.form.available,
                     price: this.form.price
