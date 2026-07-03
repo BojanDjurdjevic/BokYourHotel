@@ -141,7 +141,7 @@ class RoomSetupController extends Controller
 
     public function bulkUpdate(Request $request, Room $room)
     {
-        $request->validate([
+        $mydata = $request->validate([
             'from' => 'required|date',
             'to' => 'required|date|after_or_equal:from',
             'available' => 'required|integer|min:0',

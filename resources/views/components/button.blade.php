@@ -12,7 +12,7 @@ $classes = match($variant) {
     default => 'bg-indigo-600 hover:bg-indigo-500 text-white',
 };
 
-$base = "$classes rounded-xl px-6 py-3 transition text-sm font-medium inline-flex items-center gap-2";
+$base = "$classes rounded-xl m-6 px-6 py-3 transition text-sm font-medium inline-flex items-center gap-2";
 @endphp
 
 @if ($href)

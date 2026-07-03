@@ -9,11 +9,13 @@
 <div 
     x-data="inventoryGrid({
         updateUrl: '{{ route('supplier.rooms.inventory.update', $room) }}',
+        bulkUrl: '{{ route('supplier.rooms.inventory.bulk', $room) }}',
         dataUrl: '{{ route('supplier.rooms.inventory', $room) }}',
         csrf: '{{ csrf_token() }}'
     })"
     class="overflow-x-auto"
 >
+
     <div class="flex items-center gap-4 mb-4">
 
         <x-button 
@@ -32,6 +34,140 @@
         →
         </x-button>
 
+    </div>
+
+    <div >
+        <x-button
+            variant="primary"
+            @click="openBulk"
+        >
+            Bulk
+        </x-button>
+
+        <div x-show="bulk.open">
+            <div>
+                <x-button
+                    variant="primary"
+                    @click="openBulk"
+                >
+                    Bulk
+                </x-button>
+
+                <div
+                    x-show="bulk.open"
+                    x-transition.opacity
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                >
+
+                    <div
+                        @click.outside="bulk.open = false"
+                        class="w-full max-w-lg rounded-2xl bg-zinc-900 border border-zinc-700 shadow-2xl"
+                    >
+
+                        <!-- Header -->
+                        <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-700">
+
+                            <h2 class="text-xl font-semibold text-white">
+                                Bulk Inventory Update
+                            </h2>
+
+                            <button
+                                @click="bulk.open = false"
+                                class="text-zinc-400 hover:text-white text-xl"
+                            >
+                                ✕
+                            </button>
+
+                        </div>
+
+                        <!-- Body -->
+                        <div class="p-6 space-y-5">
+
+                            <div class="grid grid-cols-2 gap-4">
+
+                                <div>
+                                    <label class="block mb-2 text-sm text-zinc-300">
+                                        From
+                                    </label>
+
+                                    <input
+                                        type="date"
+                                        x-model="bulk.from"
+                                        class="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white focus:border-blue-500 focus:ring-blue-500"
+                                    >
+                                </div>
+
+                                <div>
+                                    <label class="block mb-2 text-sm text-zinc-300">
+                                        To
+                                    </label>
+
+                                    <input
+                                        type="date"
+                                        x-model="bulk.to"
+                                        class="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white focus:border-blue-500 focus:ring-blue-500"
+                                    >
+                                </div>
+
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+
+                                <div>
+                                    <label class="block mb-2 text-sm text-zinc-300">
+                                        Availability
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        x-model="bulk.available"
+                                        class="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white focus:border-blue-500 focus:ring-blue-500"
+                                    >
+                                </div>
+
+                                <div>
+                                    <label class="block mb-2 text-sm text-zinc-300">
+                                        Price (€)
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        x-model="bulk.price"
+                                        class="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white focus:border-blue-500 focus:ring-blue-500"
+                                    >
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="flex justify-end gap-3 px-6 py-4 border-t border-zinc-700">
+
+                            <x-button
+                                variant="secondary"
+                                @click="bulk.open = false"
+                            >
+                                Cancel
+                            </x-button>
+
+                            <x-button
+                                variant="primary"
+                                @click="saveBulk"
+                            >
+                                Confirm
+                            </x-button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
 
     <table class="min-w-full text-sm">
@@ -147,6 +283,8 @@ function inventoryGrid(config) {
 
         label: '',
 
+        data: '',
+
         async load() {
             let res = await fetch(
                 `${this.dataUrl}?month=${this.month.toISOString()}`,
@@ -158,6 +296,8 @@ function inventoryGrid(config) {
             )
 
             let data = await res.json()
+
+            this.data = data
 
             this.label = data.label
 
@@ -205,8 +345,24 @@ function inventoryGrid(config) {
         editing: null,
         form: {},
         updateUrl: config.updateUrl,
+        bulkUrl: config.bulkUrl,
         csrf: config.csrf,
 
+        bulk: {
+            open: false,
+            from: '',
+            to: '',
+            available: '',
+            price: ''
+        },
+
+        openBulk() {
+            this.bulk.open = true
+            this.bulk.from = ''
+            this.bulk.to = ''
+            this.bulk.available = this.data.defaults.available
+            this.bulk.price = this.data.defaults.price
+        },
 
         edit(date) {
             if (this.editing === date) {
@@ -244,6 +400,43 @@ function inventoryGrid(config) {
             this.editing = null
             this.form = {}
         },
+
+        async saveBulk() {
+
+            try {
+
+                const response = await fetch(this.bulkUrl, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": this.csrf
+                    },
+                    body: JSON.stringify({
+                        from: this.bulk.from,
+                        to: this.bulk.to,
+                        available: this.bulk.available,
+                        price: this.bulk.price
+                    })
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                await this.load();
+
+                this.bulk = {
+                    open: false,
+                    from: '',
+                    to: '',
+                    available: '',
+                    price: ''
+                };
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
 
         getColor(cell) {
             if (!cell) return 'bg-gray-700'
