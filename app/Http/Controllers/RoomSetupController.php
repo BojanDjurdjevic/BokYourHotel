@@ -7,6 +7,7 @@ use App\Models\Facility;
 use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\RoomInventory;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class RoomSetupController extends Controller
@@ -136,5 +137,36 @@ class RoomSetupController extends Controller
 
 
         return response()->json(['success' => true]);
+    }
+
+    public function bulkUpdate(Request $request, Room $room)
+    {
+        $request->validate([
+            'from' => 'required|date',
+            'to' => 'required|date|after_or_equal:from',
+            'available' => 'required|integer|min:0',
+            'price' => 'required|numeric|gt:0'
+        ]);
+
+        $start = Carbon::parse($request->from);
+        $end = Carbon::parse($request->to);
+
+        for ($date = $start->copy(); $date <= $end; $date->addDay()) {
+
+            RoomInventory::updateOrCreate(
+                [
+                    'room_id' => $room->id,
+                    'date' => $date->toDateString(),
+                ],
+                [
+                    'available' => $request->available,
+                    'price' => $request->price,
+                ]
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
     }
 }

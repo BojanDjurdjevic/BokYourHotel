@@ -140,6 +140,10 @@ Route::middleware('auth')->group(function () {
         Route::put(
             '/rooms/{room}/inventory-update', [RoomSetupController::class, 'inventoryUpdate']
         )->name('rooms.inventory.update');
+
+        Route::put(
+            '/rooms/{room}/inventory/bulk', [RoomSetupController::class, 'bulkUpdate']
+        )->name('rooms.inventory.bulk');
     });
 
     Route::middleware(SuperMiddleware::class)->group(function () {
