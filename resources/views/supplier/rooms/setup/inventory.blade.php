@@ -436,7 +436,7 @@ function inventoryGrid(config) {
             } catch (e) {
                 console.error(e);
             }
-        }
+        },
 
         getColor(cell) {
             if (!cell) return 'bg-gray-700'
