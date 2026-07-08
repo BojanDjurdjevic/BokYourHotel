@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Room;
+use Carbon\Carbon;
+use Exception;
 
 class BookingService {
 
@@ -11,9 +13,22 @@ class BookingService {
 
     }
 
-    public function validateDates()
+    private function validateDates(array $data): void
     {
+        $start = Carbon::parse($data['check_in']);
+        $end = Carbon::parse($data['check_out']);
 
+        if($start->isPast()) {
+            throw new Exception('Check-in date cannot be in the past.');
+        } 
+
+        if($end <= $start) {
+            throw new Exception('Check-out date must be after check-in.');
+        }
+
+        if($start->diffInDays($end) > 30) {
+            throw new Exception('The maximum stay is 30 days.');
+        }
     }
 
     public function loadInventories()
@@ -40,6 +55,6 @@ class BookingService {
     {
 
     }
-    
+
 
 }
