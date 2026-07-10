@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Room;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class BookingService {
 
@@ -31,9 +32,18 @@ class BookingService {
         }
     }
 
-    public function loadInventories()
+    private function loadInventories(Room $room, Carbon $checkIn, Carbon $checkOut): EloquentCollection
     {
-
+        return $room->inventories()
+            ->whereBetween('date', [
+                $checkIn,
+                $checkOut->copy()->subDay()
+            ])
+            ->orderBy('date')
+            ->get()
+            ->keyBy(function ($inventory) {
+                return $inventory->date->format('Y-m-d');
+            });
     }
 
     public function ensureAvailability()
