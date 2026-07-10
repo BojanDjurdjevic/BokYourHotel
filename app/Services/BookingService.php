@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Exceptions\BookingException;
 use App\Models\Room;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 
 class BookingService {
 
@@ -32,6 +34,20 @@ class BookingService {
         }
     }
 
+    private function buildPeriod(array $data): Collection
+    {
+        $start = Carbon::parse($data['check_in']);
+        $end = Carbon::parse($data['check_out']);
+
+        $period = collect();
+
+        for ($date = $start->copy(); $date < $end; $date->addDay()) {
+            $period->push($date->copy());
+        }
+
+        return $period;
+    }
+
     private function loadInventories(Room $room, Carbon $checkIn, Carbon $checkOut): EloquentCollection
     {
         return $room->inventories()
@@ -46,22 +62,43 @@ class BookingService {
             });
     }
 
-    public function ensureAvailability()
+    private function ensureAvailability(Room $room, Collection $period, EloquentCollection $inventories, int $numRooms): void
+    {
+        foreach ($period as $date) {
+
+            $inventory = $inventories->firstWhere(
+                'date',
+                $date->toDateString()
+            );
+
+            if (!$inventory) {
+
+                $available = $room->total_units;
+
+            } else {
+
+                $available = $inventory->available;
+            }
+
+            if ($available < $numRooms) {
+                throw new BookingException(
+                    'There is no availability for requested period.'
+                );
+            }
+        }
+    }
+
+    private function calculatePrice()
     {
 
     }
 
-    public function calculatePrice()
+    private function createBookingRecord()
     {
 
     }
 
-    public function createBookingRecord()
-    {
-
-    }
-
-    public function decreaseAvailability()
+    private function decreaseAvailability()
     {
 
     }
