@@ -8,12 +8,41 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class BookingService {
 
     public function createBooking(Room $room, array $data) 
     {
+        $this->validateDates($data);
 
+        $inventories = $this->loadInventories(
+            $room,
+            $data['check_in'],
+            $data['check_out']
+        ); /*
+
+        $this->ensureAvailability($inventories);
+
+        $totalPrice = $this->calculatePrice($inventories, $data['rooms']);
+
+        return DB::transaction(function () use (
+            $room,
+            $data,
+            $inventories,
+            $totalPrice
+        ) {
+
+            $booking = $this->createBookingRecord(
+                $room,
+                $data,
+                $totalPrice
+            ); 
+
+            $this->decreaseAvailability($inventories);
+
+            return $booking;
+        });*/
     }
 
     private function validateDates(array $data): void
@@ -88,14 +117,14 @@ class BookingService {
         }
     }
 
-    private function calculatePrice()
+    private function calculatePrice(EloquentCollection $inventories, int $numRooms): float
     {
-
+        return $inventories->sum('price') * $numRooms;
     }
 
-    private function createBookingRecord()
+    private function createBookingRecord(Room $room, array $data)
     {
-
+        
     }
 
     private function decreaseAvailability()
