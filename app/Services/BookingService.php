@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\BookingException;
+use App\Models\BoardType;
 use App\Models\Booking;
 use App\Models\Room;
 use App\Models\RoomInventory;
@@ -57,7 +58,9 @@ class BookingService
             ->pluck('room_id')
             ->unique();
 
-        return Room::whereIn('id', $roomIds)
+        return Room::query()
+            ->whereIn('id', $roomIds)
+            ->with('boardTypes')
             ->get()
             ->keyBy('id');
     }
@@ -80,17 +83,53 @@ class BookingService
 
     private function ensureRoomsBelongToHotel(EloquentCollection $rooms, int $hotelId): void
     {
-
+        if(!$rooms->every(
+            fn($room) => $room->hotel_id === $hotelId 
+        )) {
+            throw new BookingException('Selected rooms do not belong to this hotel!');
+        }
     }
 
-    private function ensureBoardTypes(EloquentCollection $rooms, array $items): void
+    private function findBoardType(Room $room, int $boardTypeId): BoardType
     {
+        $boardType = $room->boardTypes
+            ->firstWhere('id', $boardTypeId);
 
+        if (! $boardType) {
+            throw new BookingException(
+                'Selected board type does not belong to selected room.'
+            );
+        }
+
+        return $boardType;
     }
 
     private function ensureAvailability(EloquentCollection $rooms, Collection $inventories, Collection $period, array $items): void
     {
+        foreach ($items as $item) {
 
+            $room = $rooms[$item['room_id']];
+
+            $roomInventories = $inventories[$room->id] ?? collect();
+
+            foreach ($period as $date) {
+
+                $inventory = $roomInventories
+                    ->get($date->toDateString());
+
+                $available = $inventory
+                    ? $inventory->available
+                    : $room->total_units;
+
+                if ($available < $item['quantity']) {
+
+                    throw new BookingException(
+                        "Room {$room->name} does not have enough availability."
+                    );
+
+                }
+            }
+        }
     }
 
     private function calculateTotals(EloquentCollection $rooms, array $items, Collection $period): array
