@@ -132,9 +132,86 @@ class BookingService
         }
     }
 
-    private function calculateTotals(EloquentCollection $rooms, array $items, Collection $period): array
+    private function calculateTotals(EloquentCollection $rooms, Collection $inventories, array $items, Collection $period): array
     {
+        $bookingItems = [];
+        $grandTotal = 0;
 
+        foreach ($items as $item) {
+
+            $roomInventories = $inventories[$item['room_id']];
+
+            $room = $rooms[$item['room_id']];
+
+            $board = $room->boardTypes
+                ->firstWhere('id', $item['board_type_id']);
+            
+            $roomTotal = 0;
+            $boardTotal = 0;
+            $totalPerUnit = 0;
+            $itemTotal = 0;
+
+            foreach ($period as $date) {
+
+                $inventory = $roomInventories[$date->toDateString()] ?? null;
+
+                $roomTotal += $inventory?->price ?? $room->base_price;
+
+                $boardTotal += $board->pivot->price;
+            }
+
+            $totalPerUnit = $roomTotal + $boardTotal;
+            $itemTotal = $totalPerUnit * $item['quantity'];
+            $grandTotal += $itemTotal;
+            /*
+            $bookingItems[] = [
+                'room_id' => $room->id,
+                'board_type_id' => $board->id,
+                'quantity' => $item['quantity'],
+
+                'subtotal' => $itemTotal,
+                'room_total' => $roomTotal,
+                'board_total' => $boardTotal,
+
+                'nights' => $period->count()
+            ]; */
+
+            $bookingItems[] = [
+
+                'room_id'         => $room->id,
+                'board_type_id'   => $board->id,
+
+                'quantity'        => $item['quantity'],
+                'adults'          => $item['adults'],
+                'children'        => $item['children'],
+
+                'price_per_night' => $totalPerUnit / $period->count(),
+
+                'subtotal'        => $itemTotal,
+
+                'nights'          => $period->count(),
+
+                'check_in'        => $period->first(),
+                'check_out'       => $period->last()->copy()->addDay(),
+
+                'currency'        => 'EUR',
+            ];
+
+        }
+
+        return [
+
+            'items' => $bookingItems,
+
+            'subtotal' => $grandTotal,
+
+            'discount' => 0,
+
+            'tax' => 0,
+
+            'total' => $grandTotal,
+
+        ];
     }
 
     private function createBooking(array $data, array $totals): Booking
