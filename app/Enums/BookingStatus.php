@@ -10,6 +10,24 @@ enum BookingStatus:string
     case Rejected = 'rejected';
     case Expired = 'expired';
 
+    public function canConfirm(): bool
+    {
+        return $this === self::Pending;
+    }
+
+    public function canCancel(): bool
+    {
+        return match ($this) {
+
+            self::Pending,
+
+            self::Confirmed => true,
+
+            default => false,
+
+        };
+    }
+
     public function isActive(): bool
     {
         return match ($this) {
