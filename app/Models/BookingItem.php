@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BookingItem extends Model
 {
@@ -19,11 +20,11 @@ class BookingItem extends Model
     {
         return $this->belongsTo(Booking::class);
     }
-
+    
     public function room(): BelongsTo
     {
         return $this->belongsTo(Room::class);
-    }
+    } 
 
     public function boardType(): BelongsTo 
     {
@@ -47,9 +48,20 @@ class BookingItem extends Model
     }
 
     protected $casts = [
+
         'check_in' => 'date',
+
         'check_out' => 'date',
+
         'price_per_night' => 'decimal:2',
-        'subtotal' => 'decimal:2'
+
+        'subtotal' => 'decimal:2',
+
+        'quantity' => 'integer',
+
+        'adults' => 'integer',
+
+        'children' => 'integer',
+
     ];
 }

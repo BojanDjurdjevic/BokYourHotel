@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\BookingStatus;
 use App\Exceptions\BookingException;
 use App\Models\BoardType;
 use App\Models\Booking;
@@ -17,7 +18,67 @@ class BookingService
 {
     public function create(array $data): Booking
     {
+        $checkIn = Carbon::parse($data['check_in']);
+        $checkOut = Carbon::parse($data['check_out']);
 
+        $this->validatePeriod($checkIn, $checkOut);
+
+        $period = $this->buildPeriod($checkIn, $checkOut);
+
+        $rooms = $this->loadRooms($data['items']);
+
+        $this->ensureRoomsBelongToHotel(
+            $rooms,
+            $data['hotel_id']
+        );
+
+        $inventories = $this->loadInventories(
+            $rooms,
+            $period
+        );
+
+        $this->ensureAvailability(
+            $rooms,
+            $inventories,
+            $period,
+            $data['items']
+        );
+
+        $totals = $this->calculateTotals(
+            $rooms,
+            $inventories,
+            $data['items'],
+            $period
+        );
+
+        return DB::transaction(function () use (
+            $data,
+            $totals,
+            $rooms,
+            $inventories,
+            $period
+        ) {
+
+            $booking = $this->createBooking(
+                $data,
+                $totals
+            );
+
+            $this->createBookingItems(
+                $booking,
+                $rooms,
+                $totals['items']
+            );
+
+            $this->decreaseAvailability(
+                $inventories,
+                $period,
+                $data['items'],
+                $rooms
+            );
+
+            return $booking;
+        });
     }
 
     private function validatePeriod(Carbon $checkIn, Carbon $checkOut): void
@@ -134,7 +195,7 @@ class BookingService
 
     private function calculateTotals(EloquentCollection $rooms, Collection $inventories, array $items, Collection $period): array
     {
-        $bookingItems = [];
+        $preparedItems = [];
         $grandTotal = 0;
 
         foreach ($items as $item) {
@@ -143,8 +204,10 @@ class BookingService
 
             $room = $rooms[$item['room_id']];
 
-            $board = $room->boardTypes
-                ->firstWhere('id', $item['board_type_id']);
+            $board = $this->findBoardType(
+                $room,
+                $item['board_type_id']
+            );
             
             $roomTotal = 0;
             $boardTotal = 0;
@@ -155,7 +218,7 @@ class BookingService
 
                 $inventory = $roomInventories[$date->toDateString()] ?? null;
 
-                $roomTotal += $inventory?->price ?? $room->base_price;
+                $roomTotal += $inventory?->price ?? $room->price_per_night;
 
                 $boardTotal += $board->pivot->price;
             }
@@ -174,9 +237,9 @@ class BookingService
                 'board_total' => $boardTotal,
 
                 'nights' => $period->count()
-            ]; */
+            ]; 
 
-            $bookingItems[] = [
+            $preparedItems[] = [
 
                 'room_id'         => $room->id,
                 'board_type_id'   => $board->id,
@@ -195,13 +258,42 @@ class BookingService
                 'check_out'       => $period->last()->copy()->addDay(),
 
                 'currency'        => 'EUR',
+            ];*/
+
+            $preparedItems[] = [
+
+                'room_id' => $room->id,
+
+                'board_type_id' => $board->id,
+
+                'room_name' => $room->name,
+
+                'board_name' => $board->name,
+
+                'quantity' => $item['quantity'],
+
+                'adults' => $item['adults'],
+
+                'children' => $item['children'],
+
+                'price_per_night' => $totalPerUnit / $period->count(),
+
+                'subtotal' => $itemTotal,
+
+                'nights' => $period->count(),
+
+                'check_in' => $period->first(),
+
+                'check_out' => $period->last()->copy()->addDay(),
+
+                'currency' => 'EUR',
             ];
 
         }
 
         return [
 
-            'items' => $bookingItems,
+            'items' => $preparedItems,
 
             'subtotal' => $grandTotal,
 
@@ -216,21 +308,108 @@ class BookingService
 
     private function createBooking(array $data, array $totals): Booking
     {
+        return Booking::create([
 
+            'hotel_id' => $data['hotel_id'],
+
+            'booking_number' => $this->generateBookingNumber(),
+
+            'guest_name' => $data['guest_name'],
+
+            'guest_email' => $data['guest_email'],
+
+            'guest_phone' => $data['guest_phone'],
+
+            'notes' => $data['notes'],
+
+            'status' => BookingStatus::Pending,
+
+            'subtotal' => $totals['subtotal'],
+
+            'discount' => $totals['discount'],
+
+            'tax' => $totals['tax'],
+
+            'total' => $totals['total'],
+
+            'currency' => 'EUR',
+
+            'check_in' => $data['check_in'],
+
+            'check_out' => $data['check_out'],
+
+        ]);
     }
 
-    private function createBookingItems(Booking $booking, EloquentCollection $rooms, array $items, Collection $period): void
+    private function createBookingItems(Booking $booking, Collection $items): void
     {
-
+        $booking->items()->createMany($items);
     }
 
-    private function decreaseAvailability(Collection $inventories, Collection $period, array $items): void
+    private function decreaseAvailability(Collection $inventories, Collection $period,  array $items, EloquentCollection $rooms): void
     {
+        foreach ($items as $item) {
 
+            $room = $rooms[$item['room_id']];
+
+            $roomInventories = $inventories[$room->id] ?? collect();
+
+            foreach ($period as $date) {
+
+                $inventory = $roomInventories
+                    ->get($date->toDateString());
+
+                if (!$inventory) {
+
+                    $inventory = RoomInventory::create([
+
+                        'room_id' => $room->id,
+
+                        'date' => $date,
+
+                        'available' =>
+                            $room->total_units,
+
+                        'price' =>
+                            $room->price_per_night
+
+                    ]);
+
+                    $roomInventories->put(
+                        $date->toDateString(),
+                        $inventory
+                    );
+                }
+
+                $inventory->decrement(
+                    'available',
+                    $item['quantity']
+                );
+            }
+        }
     }
 
     private function generateBookingNumber(): string
     {
-        
+        do {
+
+            $number =
+                'BYH-'
+                . now()->format('ymd')
+                . '-'
+                . strtoupper(
+                    \Illuminate\Support\Str::random(6)
+                );
+
+        } while (
+
+            Booking::where(
+                'booking_number',
+                $number
+            )->exists()
+
+        );
+
+        return $number;
     }
 }

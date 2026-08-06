@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Booking extends Model
 {
@@ -49,10 +50,15 @@ class Booking extends Model
     {
         return $this->belongsTo(Hotel::class);
     }
-
+    /*
     public function room()
     {
         return $this->belongsTo(Room::class);
+    } */
+
+    public function bookingItem() : HasMany
+    {
+        return $this->hasMany(BookingItem::class);
     }
 
     public function user()
@@ -90,5 +96,16 @@ class Booking extends Model
     public function isCancelled(): bool
     {
         return $this->status === BookingStatus::Cancelled;
+    }
+
+    public function canBeCancelled(): bool
+    {
+        return $this->isPending()
+            || $this->isConfirmed();
+    }
+
+    public function canBeConfirmed(): bool
+    {
+        return $this->isPending();
     }
 }
