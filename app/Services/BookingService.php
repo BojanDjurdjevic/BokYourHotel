@@ -412,4 +412,102 @@ class BookingService
 
         return $number;
     }
+
+    // CONFIRM Booking
+
+    public function confirm(Booking $booking): Booking
+    {
+        if (! $booking->isPending()) {
+            throw new BookingException(
+                'Only pending bookings can be confirmed.'
+            );
+        }
+
+        $booking->update([
+            'status' => BookingStatus::Confirmed,
+        ]);
+
+        return $booking->refresh();
+    }
+
+    // CANCEL
+
+    public function cancel(Booking $booking, ?string $reason = null): Booking
+    {
+        if ($booking->isCancelled()) {
+
+            throw new BookingException(
+                'Booking is already cancelled.'
+            );
+        }
+
+        DB::transaction(function () use (
+            $booking,
+            $reason
+        ) {
+
+            $this->restoreAvailability(
+                $booking
+            );
+
+            $booking->update([
+
+                'status' => BookingStatus::Cancelled,
+
+                'notes' => trim(
+                    $booking->notes .
+                    PHP_EOL .
+                    $reason
+                )
+
+            ]);
+
+        });
+
+        return $booking->refresh();
+    }
+
+    // RESTORE Availability
+
+    private function restoreAvailability(Booking $booking): void
+    {
+        foreach ($booking->items as $item) {
+
+            $period = $this->buildPeriod(
+
+                $item->check_in,
+
+                $item->check_out
+
+            );
+
+            foreach ($period as $date) {
+
+                $inventory = RoomInventory::firstOrCreate(
+
+                    [
+
+                        'room_id' => $item->room_id,
+
+                        'date' => $date
+
+                    ],
+
+                    [
+
+                        'available' => 0,
+
+                        'price' => $item->price_per_night
+
+                    ]
+
+                );
+
+                $inventory->increment(
+                    'available',
+                    $item->quantity
+                );
+            }
+        }
+    }
 }
