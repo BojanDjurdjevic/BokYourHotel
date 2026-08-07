@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Booking\BookingController;
+use App\Http\Controllers\Booking\PublicBookingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoomSetupController;
 use App\Http\Controllers\Supplier\HotelController;
@@ -20,6 +22,16 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+// BOOKING:
+
+Route::get('/hotels/{hotel}/booking', [BookingController::class, 'show'])->name('booking.show');
+
+Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+
+Route::get('/booking/{booking}/success', [BookingController::class, 'success'])->name('booking.success');
+
+// AUTH:
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -151,6 +163,9 @@ Route::middleware('auth')->group(function () {
             return view('layouts.dashboard');
         })->name('admin.dashboard');
     }); 
+
+    
+    
 });
 
 require __DIR__.'/auth.php';

@@ -108,4 +108,10 @@ class Booking extends Model
     {
         return $this->isPending();
     }
+
+    // Booking Number route:
+    public function getRouteKeyName(): string
+    {
+        return 'booking_number';
+    }
 }
