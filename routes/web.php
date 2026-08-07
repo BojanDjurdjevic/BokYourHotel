@@ -168,4 +168,10 @@ Route::middleware('auth')->group(function () {
     
 });
 
+/*
+require __DIR__.'/booking.php';
+require __DIR__.'/supplier.php';
+require __DIR__.'/admin.php';
+*/
+
 require __DIR__.'/auth.php';
