@@ -73,7 +73,7 @@ class AvailabilityService
 
                         $inventory = $roomInventories->get($date->toDateString());
 
-                        return $inventory?->price ?? $room->base_price;
+                        return $inventory?->price ?? $room->price_per_night;
 
                     });
 

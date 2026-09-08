@@ -7,13 +7,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateBookingRequest;
 use App\Models\Booking;
 use App\Models\Hotel;
+use App\Services\AvailabilityService;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
     public function __construct(
-        private BookingService $bookingService
+        private BookingService $bookingService,
+        private AvailabilityService $availabilityService,
     ) {}
 
     public function show(Hotel $hotel)
@@ -70,8 +72,43 @@ class BookingController extends Controller
         );
     }
 
-    public function availability(Hotel $hotel, Request $request)
-    {
-        
+    public function availability(Hotel $hotel, Request $request) {
+        $request->validate([
+            'check_in' => [
+                'required',
+                'date',
+            ],
+
+            'check_out' => [
+                'required',
+                'date',
+                'after:check_in',
+            ],
+        ]);
+
+        try {
+
+            $availability = $this->availabilityService->getAvailability(
+                $hotel,
+                \Carbon\Carbon::parse(
+                    $request->check_in
+                ),
+                \Carbon\Carbon::parse(
+                    $request->check_out
+                )
+            );
+
+            return response()->json($availability);
+
+        } catch (BookingException $e) {
+
+            return response()->json(
+                [
+                    'message' => $e->getMessage(),
+                ],
+                422
+            );
+
+        }
     }
 }
