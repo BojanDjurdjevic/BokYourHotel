@@ -57,36 +57,23 @@ class AvailabilityService
                         $roomInventories
                     ) {
 
-                        $inventory =
-                            $roomInventories
-                                ->get(
-                                    $date->toDateString()
-                                );
+                        $inventory =$roomInventories->get($date->toDateString());
 
-                        return $inventory
-                            ? $inventory->available
-                            : $room->total_units;
+                        return $inventory ? $inventory->available : $room->total_units;
 
-                    })
-                    ->min();
+                    })->min();
 
                 /*
                  * Calculate room price for the period.
                  */
-                $roomTotal = $period
-                    ->sum(function ($date) use (
+                $roomTotal = $period->sum(function ($date) use (
                         $room,
                         $roomInventories
                     ) {
 
-                        $inventory =
-                            $roomInventories
-                                ->get(
-                                    $date->toDateString()
-                                );
+                        $inventory = $roomInventories->get($date->toDateString());
 
-                        return $inventory?->price
-                            ?? $room->base_price;
+                        return $inventory?->price ?? $room->base_price;
 
                     });
 
@@ -125,8 +112,7 @@ class AvailabilityService
                             )
                             : null,
 
-                    'room_type' =>
-                        $room->roomType?->name,
+                    'room_type' => $room->roomType?->name,
 
                     'board_types' =>
                         $room->boardTypes
@@ -151,39 +137,30 @@ class AvailabilityService
 
                                     'name' => $board->name,
 
-                                    'price_per_night' =>
-                                        $boardPricePerNight,
+                                    'price_per_night' => $boardPricePerNight,
 
-                                    'total' =>
-                                        $boardTotal,
+                                    'total' => $boardTotal,
 
                                 ];
 
-                            })
-                            ->values(),
+                            })->values(),
 
                 ];
 
-            })
-            ->filter(
+            })->filter(
                 fn ($room) =>
                     $room['available'] > 0
-            )
-            ->values();
+            )->values();
 
         return [
 
-            'check_in' =>
-                $checkIn->toDateString(),
+            'check_in' => $checkIn->toDateString(),
 
-            'check_out' =>
-                $checkOut->toDateString(),
+            'check_out' => $checkOut->toDateString(),
 
-            'nights' =>
-                $period->count(),
+            'nights' => $period->count(),
 
-            'rooms' =>
-                $availableRooms,
+            'rooms' => $availableRooms,
 
         ];
     }
@@ -201,9 +178,7 @@ class AvailabilityService
 
         }
 
-        if ($checkOut->lessThanOrEqualTo(
-            $checkIn
-        )) {
+        if ($checkOut->lessThanOrEqualTo($checkIn)) {
 
             throw new BookingException(
                 'Check-out date must be after check-in.'
@@ -211,11 +186,7 @@ class AvailabilityService
 
         }
 
-        if (
-            $checkIn
-                ->diffInDays($checkOut)
-            > 30
-        ) {
+        if ($checkIn->diffInDays($checkOut) > 30) {
 
             throw new BookingException(
                 'The maximum stay is 30 days.'
@@ -231,15 +202,9 @@ class AvailabilityService
 
         $period = collect();
 
-        for (
-            $date = $checkIn->copy();
-            $date < $checkOut;
-            $date->addDay()
-        ) {
+        for ($date = $checkIn->copy(); $date < $checkOut; $date->addDay()) {
 
-            $period->push(
-                $date->copy()
-            );
+            $period->push($date->copy());
 
         }
 
@@ -259,11 +224,9 @@ class AvailabilityService
             ->whereBetween(
                 'date',
                 [
-                    $period->first()
-                        ->toDateString(),
+                    $period->first()->toDateString(),
 
-                    $period->last()
-                        ->toDateString(),
+                    $period->last()->toDateString(),
                 ]
             )
             ->get()
@@ -271,9 +234,7 @@ class AvailabilityService
             ->map(function ($items) {
 
                 return $items->keyBy(
-                    fn ($inventory) =>
-                        $inventory->date
-                            ->toDateString()
+                    fn ($inventory) =>$inventory->date->toDateString()
                 );
 
             });
