@@ -13,68 +13,114 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 
 class BookingService
 {
     public function create(array $data): Booking
     {
-        $checkIn = Carbon::parse($data['check_in']);
-        $checkOut = Carbon::parse($data['check_out']);
+        $checkIn = Carbon::parse(
+            $data['check_in']
+        )->startOfDay();
 
-        $this->validatePeriod($checkIn, $checkOut);
+        $checkOut = Carbon::parse(
+            $data['check_out']
+        )->startOfDay();
 
-        $period = $this->buildPeriod($checkIn, $checkOut);
-
-        $rooms = $this->loadRooms($data['items']);
-
-        $this->ensureRoomsBelongToHotel(
-            $rooms,
-            $data['hotel_id']
+        $this->validatePeriod(
+            $checkIn,
+            $checkOut
         );
 
-        $inventories = $this->loadInventories(
-            $rooms,
-            $period
-        );
-
-        $this->ensureAvailability(
-            $rooms,
-            $inventories,
-            $period,
-            $data['items']
-        );
-
-        $totals = $this->calculateTotals(
-            $rooms,
-            $inventories,
-            $data['items'],
-            $period
+        $period = $this->buildPeriod(
+            $checkIn,
+            $checkOut
         );
 
         return DB::transaction(function () use (
             $data,
-            $totals,
-            $rooms,
-            $inventories,
             $period
         ) {
 
+            /*
+            * 1. Load selected rooms.
+            */
+            $rooms = $this->loadRooms(
+                $data['items']
+            );
+
+            /*
+            * 2. Security/domain validation:
+            * selected rooms must belong to the hotel.
+            */
+            $this->ensureRoomsBelongToHotel(
+                $rooms,
+                $data['hotel_id']
+            );
+
+            /*
+            * 3. Materialize missing inventory rows.
+            *
+            * If no custom inventory exists,
+            * total_units becomes the initial availability.
+            */
+            $this->ensureInventoryRowsExist(
+                $rooms,
+                $period
+            );
+
+            /*
+            * 4. Load inventory rows and lock them.
+            */
+            $inventories = $this->loadInventoriesForUpdate(
+                $rooms,
+                $period
+            );
+
+            /*
+            * 5. Availability check happens
+            * AFTER database rows are locked.
+            */
+            $this->ensureAvailability(
+                $rooms,
+                $inventories,
+                $period,
+                $data['items']
+            );
+
+            /*
+            * 6. Calculate final prices.
+            */
+            $totals = $this->calculateTotals(
+                $rooms,
+                $inventories,
+                $data['items'],
+                $period
+            );
+
+            /*
+            * 7. Create booking.
+            */
             $booking = $this->createBooking(
                 $data,
                 $totals
             );
 
+            /*
+            * 8. Create booking items.
+            */
             $this->createBookingItems(
                 $booking,
-                $rooms,
                 $totals['items']
             );
 
+            /*
+            * 9. Reduce availability.
+            */
             $this->decreaseAvailability(
                 $inventories,
                 $period,
-                $data['items'],
-                $rooms
+                $data['items']
             );
 
             return $booking;
@@ -126,6 +172,58 @@ class BookingService
             ->keyBy('id');
     }
 
+    private function ensureInventoryRowsExist(EloquentCollection $rooms, Collection $period): void 
+    {
+        $rows = [];
+
+        $timestamp = now();
+
+        foreach ($rooms as $room) {
+
+            foreach ($period as $date) {
+
+                $rows[] = [
+                    'room_id' => $room->id,
+                    'date' => $date->toDateString(),
+                    'available' => $room->total_units,
+                    'price' => $room->price_per_night,
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
+                ];
+            }
+        }
+
+        RoomInventory::query()->insertOrIgnore($rows);
+    }
+
+    private function loadInventoriesForUpdate(EloquentCollection $rooms, Collection $period): Collection 
+    {
+        return RoomInventory::query()
+            ->whereIn(
+                'room_id',
+                $rooms->pluck('id')
+            )
+            ->whereBetween(
+                'date',
+                [
+                    $period->first()->toDateString(),
+                    $period->last()->toDateString(),
+                ]
+            )
+            ->lockForUpdate()
+            ->get()
+            ->groupBy('room_id')
+            ->map(function ($items) {
+
+                return $items->keyBy(
+                    fn ($inventory) =>
+                        $inventory->date->toDateString()
+                );
+
+            });
+    }
+
+    /*
     private function loadInventories(EloquentCollection $rooms, Collection $period): Collection
     {
         $inventories = RoomInventory::query()
@@ -140,7 +238,7 @@ class BookingService
         });
 
         return $inventories;
-    }
+    } */
 
     private function ensureRoomsBelongToHotel(EloquentCollection $rooms, int $hotelId): void
     {
@@ -200,7 +298,7 @@ class BookingService
 
         foreach ($items as $item) {
 
-            $roomInventories = $inventories[$item['room_id']];
+            $roomInventories = $inventories[$item['room_id']] ?? collect();
 
             $room = $rooms[$item['room_id']];
 
