@@ -30,14 +30,13 @@ Route::controller(BookingController::class)
     ->name('booking.')
     ->group(function () {
 
-        Route::get('/hotels/{hotel}/booking', 'show')
-            ->name('show');
+        Route::get('/hotels/{hotel}/booking', 'show')->name('show');
 
-        Route::post('/booking', 'store')
-            ->name('store');
+        Route::get('/hotels/{hotel}/availability', 'availability')->name('booking.availability');
 
-        Route::get('/booking/{booking}/success', 'success')
-            ->name('success');
+        Route::post('/booking', 'store')->name('store');
+
+        Route::get('/booking/{booking}/success', 'success')->name('success');
 
 });
 
