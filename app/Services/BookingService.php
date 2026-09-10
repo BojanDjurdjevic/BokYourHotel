@@ -120,7 +120,8 @@ class BookingService
             $this->decreaseAvailability(
                 $inventories,
                 $period,
-                $data['items']
+                $data['items'],
+                $rooms
             );
 
             return $booking;
@@ -454,28 +455,11 @@ class BookingService
 
             foreach ($period as $date) {
 
-                $inventory = $roomInventories
-                    ->get($date->toDateString());
+                $inventory = $roomInventories->get($date->toDateString());
 
-                if (!$inventory) {
-
-                    $inventory = RoomInventory::create([
-
-                        'room_id' => $room->id,
-
-                        'date' => $date,
-
-                        'available' =>
-                            $room->total_units,
-
-                        'price' =>
-                            $room->price_per_night
-
-                    ]);
-
-                    $roomInventories->put(
-                        $date->toDateString(),
-                        $inventory
+                if (! $inventory) {
+                    throw new \LogicException(
+                        "Inventory missing for room {$room->id} on {$date->toDateString()}."
                     );
                 }
 
