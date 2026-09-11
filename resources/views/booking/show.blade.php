@@ -2,7 +2,8 @@
 
     <div
         x-data="bookingPage({
-            availabilityUrl: '{{ route('booking.availability', $hotel) }}'
+            availabilityUrl: '{{ route('booking.availability', $hotel) }}',
+            storeUrl: '{{ route('booking.store') }}'
         })"
         class="max-w-6xl mx-auto py-8"
     >
@@ -1281,6 +1282,7 @@
 
             return {
                 availabilityUrl: config.availabilityUrl,
+                storeUrl: config.storeUrl,
 
                 checkIn: '',
                 checkOut: '',
@@ -1308,6 +1310,12 @@
                     email: '',
                     phone: '',
                 },
+
+                submitting: false,
+
+                submitError: null,
+
+                csrfToken: document.querySelector('meta[name="csrf-token"]') ?.getAttribute('content'),
 
                 async searchAvailability() {
 
@@ -1557,6 +1565,84 @@
                         guest: this.guest,
                         total: this.bookingTotal(),
                     })
+                },
+
+                // CONFIRM Booking
+
+                async submitBooking() {
+
+                    this.submitError = null
+
+                    this.submitting = true
+
+                    try {
+
+                        const payload = {
+
+                            hotel_id: this.results.hotel_id ?? null,
+
+                            check_in: this.checkIn,
+
+                            check_out: this.checkOut,
+
+                            guest_name:
+                                `${this.guest.firstName} ${this.guest.lastName}`.trim(),
+
+                            guest_email: this.guest.email,
+
+                            guest_phone: this.guest.phone,
+
+                            items: this.bookingItems.map(item => ({
+                                room_id: item.room_id,
+
+                                board_type_id: item.board_type_id,
+
+                                quantity: item.quantity,
+
+                                adults: item.adults,
+
+                                children: item.children,
+                            })),
+                        }
+
+                        const response = await fetch(
+                            this.storeUrl,
+                            {
+                                method: 'POST',
+
+                                headers: {
+
+                                    'Content-Type': 'application/json',
+
+                                    'Accept': 'application/json',
+
+                                    'X-CSRF-TOKEN': this.csrfToken,
+                                },
+
+                                body: JSON.stringify(payload),
+                            }
+                        )
+
+                        const data = await response.json()
+
+                        if (!response.ok) {
+
+                            throw new Error(
+                                data.message ?? 'Unable to create booking.'
+                            )
+                        }
+
+                        window.location.href = data.redirect
+
+                    } catch (error) {
+
+                        this.submitError = error.message
+
+                    } finally {
+
+                        this.submitting = false
+
+                    }
                 },
 
             }
