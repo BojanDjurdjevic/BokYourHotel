@@ -37,30 +37,27 @@ class BookingController extends Controller
                 $request->validated()
             );
 
-            return redirect()
-                ->route('booking.success', $booking)
-                ->with(
-                    'success',
-                    'Booking successfully created.'
-                );
+            return response()->json([
+                'redirect' => route(
+                    'booking.success',
+                    $booking
+                ),
+            ]);
 
         } catch (BookingException $e) {
 
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'booking' => $e->getMessage()
-                ]);
+        return response()->json([
+            'message' => $e->getMessage(),
+        ], 422);
 
         } catch (\Throwable $e) {
 
             report($e);
 
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'booking' =>'Unexpected error occurred.'
-                ]);
+            return response()->json([
+                'message' =>
+                    'Unexpected error occurred.',
+            ], 500);
         }
     }
 

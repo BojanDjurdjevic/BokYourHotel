@@ -417,9 +417,9 @@ class BookingService
 
             'guest_email' => $data['guest_email'],
 
-            'guest_phone' => $data['guest_phone'],
+            'guest_phone' => $data['guest_phone'] ?? null,
 
-            'notes' => $data['notes'],
+            'notes' => $data['notes'] ?? null,
 
             'status' => BookingStatus::Pending,
 

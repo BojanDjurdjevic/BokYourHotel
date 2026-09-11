@@ -2,6 +2,7 @@
 
     <div
         x-data="bookingPage({
+            hotelId: {{ $hotel->id }},
             availabilityUrl: '{{ route('booking.availability', $hotel) }}',
             storeUrl: '{{ route('booking.store') }}'
         })"
@@ -1258,7 +1259,7 @@
 
                     <button
                         type="button"
-                        @click="confirmBooking()"
+                        @click="submitBooking()"
                         class="
                             px-6
                             py-3
@@ -1303,6 +1304,8 @@
                 bookingItems: [],
 
                 step: 'rooms',
+
+                hotelId: config.hotelId,
 
                 guest: {
                     firstName: '',
@@ -1579,7 +1582,7 @@
 
                         const payload = {
 
-                            hotel_id: this.results.hotel_id ?? null,
+                            hotel_id: this.hotelId,
 
                             check_in: this.checkIn,
 
@@ -1593,15 +1596,22 @@
                             guest_phone: this.guest.phone,
 
                             items: this.bookingItems.map(item => ({
-                                room_id: item.room_id,
 
-                                board_type_id: item.board_type_id,
+                                room_id:
+                                    item.room_id,
 
-                                quantity: item.quantity,
+                                board_type_id:
+                                    item.board_type_id,
 
-                                adults: item.adults,
+                                quantity:
+                                    item.quantity,
 
-                                children: item.children,
+                                adults:
+                                    item.adults,
+
+                                children:
+                                    item.children,
+
                             })),
                         }
 

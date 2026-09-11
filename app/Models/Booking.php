@@ -54,12 +54,12 @@ class Booking extends Model
     public function room()
     {
         return $this->belongsTo(Room::class);
-    } */
+    } 
 
     public function bookingItem() : HasMany
     {
         return $this->hasMany(BookingItem::class);
-    }
+    }*/
 
     public function user()
     {
