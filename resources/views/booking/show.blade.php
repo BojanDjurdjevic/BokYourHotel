@@ -880,6 +880,399 @@
             </div>
         </div>
 
+        {{-- Review Booking --}}
+
+        <div
+            x-show="step === 'review'"
+            x-cloak
+            class="max-w-4xl mx-auto"
+        >
+            <div
+                class="
+                    bg-gray-900
+                    rounded-2xl
+                    p-6
+                    md:p-8
+                    shadow
+                "
+            >
+                {{-- Header --}}
+
+                <div class="mb-8">
+                    <p class="text-sm text-gray-400 mb-2">
+                        Step 3
+                    </p>
+
+                    <h2 class="text-2xl font-bold">
+                        Review your booking
+                    </h2>
+
+                    <p class="text-gray-400 mt-2">
+                        Please review your stay and guest details before continuing.
+                    </p>
+                </div>
+
+
+                {{-- Stay details --}}
+
+                <div
+                    class="
+                        rounded-xl
+                        border
+                        border-gray-800
+                        p-5
+                        mb-6
+                    "
+                >
+                    <h3 class="font-semibold mb-4">
+                        Your stay
+                    </h3>
+
+                    <div
+                        class="
+                            grid
+                            grid-cols-1
+                            md:grid-cols-3
+                            gap-5
+                            text-sm
+                        "
+                    >
+                        <div>
+                            <div class="text-gray-400">
+                                Check-in
+                            </div>
+
+                            <div
+                                class="font-medium mt-1"
+                                x-text="checkIn"
+                            ></div>
+                        </div>
+
+
+                        <div>
+                            <div class="text-gray-400">
+                                Check-out
+                            </div>
+
+                            <div
+                                class="font-medium mt-1"
+                                x-text="checkOut"
+                            ></div>
+                        </div>
+
+
+                        <div>
+                            <div class="text-gray-400">
+                                Duration
+                            </div>
+
+                            <div class="font-medium mt-1">
+                                <span x-text="nights"></span>
+                                night(s)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                {{-- Rooms --}}
+
+                <div
+                    class="
+                        rounded-xl
+                        border
+                        border-gray-800
+                        p-5
+                        mb-6
+                    "
+                >
+                    <h3 class="font-semibold mb-4">
+                        Rooms
+                    </h3>
+
+
+                    <template
+                        x-for="item in bookingItems"
+                        :key="
+                            item.room_id +
+                            '-' +
+                            item.board_type_id
+                        "
+                    >
+                        <div
+                            class="
+                                flex
+                                flex-col
+                                md:flex-row
+                                md:justify-between
+                                md:items-center
+                                gap-4
+                                py-4
+                                border-b
+                                border-gray-800
+                                last:border-b-0
+                            "
+                        >
+                            <div>
+                                <div
+                                    class="font-medium"
+                                    x-text="item.room_name"
+                                ></div>
+
+                                <div
+                                    class="
+                                        text-sm
+                                        text-gray-400
+                                        mt-1
+                                    "
+                                >
+                                    <span
+                                        x-text="item.board_name"
+                                    ></span>
+
+                                    <span class="mx-2">
+                                        ·
+                                    </span>
+
+                                    Quantity:
+
+                                    <span
+                                        x-text="item.quantity"
+                                    ></span>
+                                </div>
+
+                                <div
+                                    class="
+                                        text-xs
+                                        text-gray-500
+                                        mt-2
+                                    "
+                                >
+                                    <span x-text="nights"></span>
+                                    nights
+                                </div>
+                            </div>
+
+
+                            <div class="md:text-right">
+                                <div
+                                    class="
+                                        text-lg
+                                        font-semibold
+                                    "
+                                >
+                                    €
+
+                                    <span
+                                        x-text="
+                                            formatPrice(
+                                                itemTotal(item)
+                                            )
+                                        "
+                                    ></span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+
+                {{-- Guest --}}
+
+                <div
+                    class="
+                        rounded-xl
+                        border
+                        border-gray-800
+                        p-5
+                        mb-6
+                    "
+                >
+                    <div
+                        class="
+                            flex
+                            justify-between
+                            items-center
+                            mb-4
+                        "
+                    >
+                        <h3 class="font-semibold">
+                            Main guest
+                        </h3>
+
+                        <button
+                            type="button"
+                            @click="step = 'guest'"
+                            class="
+                                text-sm
+                                text-blue-400
+                                hover:text-blue-300
+                            "
+                        >
+                            Edit
+                        </button>
+                    </div>
+
+
+                    <div
+                        class="
+                            grid
+                            grid-cols-1
+                            md:grid-cols-2
+                            gap-5
+                            text-sm
+                        "
+                    >
+                        <div>
+                            <div class="text-gray-400">
+                                Name
+                            </div>
+
+                            <div class="font-medium mt-1">
+                                <span
+                                    x-text="guest.firstName"
+                                ></span>
+
+                                <span
+                                    x-text="guest.lastName"
+                                ></span>
+                            </div>
+                        </div>
+
+
+                        <div>
+                            <div class="text-gray-400">
+                                Email
+                            </div>
+
+                            <div
+                                class="font-medium mt-1"
+                                x-text="guest.email"
+                            ></div>
+                        </div>
+
+
+                        <div
+                            x-show="guest.phone"
+                        >
+                            <div class="text-gray-400">
+                                Phone
+                            </div>
+
+                            <div
+                                class="font-medium mt-1"
+                                x-text="guest.phone"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+
+
+                {{-- Total --}}
+
+                <div
+                    class="
+                        rounded-xl
+                        bg-gray-800
+                        p-6
+                    "
+                >
+                    <div
+                        class="
+                            flex
+                            justify-between
+                            items-center
+                        "
+                    >
+                        <div>
+                            <div
+                                class="
+                                    text-sm
+                                    text-gray-400
+                                "
+                            >
+                                Total for your stay
+                            </div>
+
+                            <div
+                                class="
+                                    text-xs
+                                    text-gray-500
+                                    mt-1
+                                "
+                            >
+                                <span x-text="nights"></span>
+                                nights
+                            </div>
+                        </div>
+
+
+                        <div
+                            class="
+                                text-3xl
+                                font-bold
+                            "
+                        >
+                            €
+
+                            <span
+                                x-text="
+                                    formatPrice(
+                                        bookingTotal()
+                                    )
+                                "
+                            ></span>
+                        </div>
+                    </div>
+                </div>
+
+
+                {{-- Buttons --}}
+
+                <div
+                    class="
+                        mt-8
+                        flex
+                        flex-col
+                        sm:flex-row
+                        gap-4
+                        justify-between
+                    "
+                >
+                    <button
+                        type="button"
+                        @click="step = 'guest'"
+                        class="
+                            px-6
+                            py-3
+                            rounded-xl
+                            bg-gray-800
+                            hover:bg-gray-700
+                            font-medium
+                        "
+                    >
+                        Back to guest details
+                    </button>
+
+
+                    <button
+                        type="button"
+                        @click="confirmBooking()"
+                        class="
+                            px-6
+                            py-3
+                            rounded-xl
+                            bg-green-600
+                            hover:bg-green-500
+                            font-semibold
+                        "
+                    >
+                        Confirm booking
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 
@@ -1153,6 +1546,16 @@
                     window.scrollTo({
                         top: 0,
                         behavior: 'smooth'
+                    })
+                },
+
+                confirmBooking() {
+                    console.log({
+                        checkIn: this.checkIn,
+                        checkOut: this.checkOut,
+                        bookingItems: this.bookingItems,
+                        guest: this.guest,
+                        total: this.bookingTotal(),
                     })
                 },
 
