@@ -105,7 +105,7 @@
 
 
         {{-- Results --}}
-        <div x-show="searched">
+        <div x-show="searched && step === 'rooms'">
 
             <div class="flex items-center justify-between mb-6">
 
@@ -516,11 +516,7 @@
                             ></div>
 
                             <div
-                                class="
-                                    text-sm
-                                    text-gray-400
-                                    mt-1
-                                "
+                                class="text-sm text-gray-400 mt-1"
                             >
                                 <span x-text="item.board_name"></span>
 
@@ -530,39 +526,121 @@
                                 <span x-text="item.quantity"></span>
                             </div>
 
+                            <div class="text-sm text-gray-500 mt-2">
+
+                                € <span
+                                    x-text="
+                                        formatPrice(
+                                            Number(item.room_total) +
+                                            Number(item.board_total)
+                                        )
+                                    "
+                                ></span>
+
+                                per room for
+
+                                <span x-text="nights"></span>
+
+                                nights
+
+                            </div>
                         </div>
 
 
-                        <button
-                            type="button"
-                            @click="
-                                bookingItems =
-                                    bookingItems.filter(
-                                        bookingItem =>
-                                            !(
-                                                bookingItem.room_id === item.room_id &&
-                                                bookingItem.board_type_id === item.board_type_id
-                                            )
-                                    )
-                            "
-                            class="
-                                text-sm
-                                text-red-400
-                                hover:text-red-300
-                            "
-                        >
-                            Remove
-                        </button>
+                        <div class="text-right">
+
+                            <div class="text-lg font-semibold">
+
+                                €
+
+                                <span
+                                    x-text="
+                                        formatPrice(
+                                            itemTotal(item)
+                                        )
+                                    "
+                                ></span>
+
+                            </div>
+
+                            <button
+                                type="button"
+                                @click="
+                                    bookingItems =
+                                        bookingItems.filter(
+                                            bookingItem =>
+                                                !(
+                                                    bookingItem.room_id === item.room_id &&
+                                                    bookingItem.board_type_id === item.board_type_id
+                                                )
+                                        )
+                                "
+                                class="
+                                    mt-2
+                                    text-sm
+                                    text-red-400
+                                    hover:text-red-300
+                                "
+                            >
+                                Remove
+                            </button>
+
+                        </div>
 
                     </div>
 
                 </template>
 
+                <div
+                    class="
+                        mt-6
+                        pt-6
+                        border-t
+                        border-gray-700
+                        flex
+                        justify-between
+                        items-center
+                    "
+                >
+
+                    <div>
+
+                        <div class="text-sm text-gray-400">
+                            Total for your stay
+                        </div>
+
+                        <div class="text-xs text-gray-500 mt-1">
+
+                            <span x-text="nights"></span>
+
+                            nights
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="text-2xl font-bold">
+
+                        €
+
+                        <span
+                            x-text="
+                                formatPrice(
+                                    bookingTotal()
+                                )
+                            "
+                        ></span>
+
+                    </div>
+
+                </div>
 
                 <div class="mt-6">
 
                     <button
                         type="button"
+                        @click="goToGuestDetails()"
                         class="
                             w-full
                             py-3
@@ -580,6 +658,226 @@
 
             </div>
 
+        </div>
+
+        {{-- Guest Details Form --}}
+
+        <div
+            x-show="step === 'guest'"
+            x-cloak
+            class="max-w-3xl mx-auto"
+        >
+            <div
+                class="
+                    bg-gray-900
+                    rounded-2xl
+                    p-6
+                    md:p-8
+                    shadow
+                "
+            >
+
+                <div class="mb-8">
+
+                    <p class="text-sm text-gray-400 mb-2">
+
+                        Step 2
+
+                    </p>
+
+                    <h2 class="text-2xl font-bold">
+
+                        Guest details
+
+                    </h2>
+
+                    <p class="text-gray-400 mt-2">
+
+                        Please enter the details of the main guest.
+
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-2
+                        gap-5
+                    "
+                >
+
+                    {{-- First name --}}
+
+                    <div>
+
+                        <label
+                            class="block text-sm font-medium mb-2"
+                        >
+
+                            First name
+
+                        </label>
+
+                        <input
+                            type="text"
+                            x-model="guest.firstName"
+                            class="
+                                w-full
+                                rounded-xl
+                                border
+                                border-gray-700
+                                bg-gray-800
+                                px-4
+                                py-3
+                            "
+                        >
+
+                    </div>
+
+
+                    {{-- Last name --}}
+
+                    <div>
+
+                        <label
+                            class="block text-sm font-medium mb-2"
+                        >
+
+                            Last name
+
+                        </label>
+
+                        <input
+                            type="text"
+                            x-model="guest.lastName"
+                            class="
+                                w-full
+                                rounded-xl
+                                border
+                                border-gray-700
+                                bg-gray-800
+                                px-4
+                                py-3
+                            "
+                        >
+
+                    </div>
+
+
+                    {{-- Email --}}
+
+                    <div>
+
+                        <label
+                            class="block text-sm font-medium mb-2"
+                        >
+
+                            Email
+
+                        </label>
+
+                        <input
+                            type="email"
+                            x-model="guest.email"
+                            class="
+                                w-full
+                                rounded-xl
+                                border
+                                border-gray-700
+                                bg-gray-800
+                                px-4
+                                py-3
+                            "
+                        >
+
+                    </div>
+
+
+                    {{-- Phone --}}
+
+                    <div>
+
+                        <label
+                            class="block text-sm font-medium mb-2"
+                        >
+
+                            Phone
+
+                        </label>
+
+                        <input
+                            type="tel"
+                            x-model="guest.phone"
+                            class="
+                                w-full
+                                rounded-xl
+                                border
+                                border-gray-700
+                                bg-gray-800
+                                px-4
+                                py-3
+                            "
+                        >
+
+                    </div>
+
+                </div>
+
+
+                {{-- Buttons --}}
+
+                <div
+                    class="
+                        mt-8
+                        flex
+                        flex-col
+                        sm:flex-row
+                        gap-4
+                        justify-between
+                    "
+                >
+
+                    <button
+                        type="button"
+                        @click="step = 'rooms'"
+                        class="
+                            px-6
+                            py-3
+                            rounded-xl
+                            bg-gray-800
+                            hover:bg-gray-700
+                            font-medium
+                        "
+                    >
+
+                        Back to rooms
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        @click="continueToReview()"
+                        class="
+                            px-6
+                            py-3
+                            rounded-xl
+                            bg-blue-600
+                            hover:bg-blue-500
+                            font-semibold
+                        "
+                    >
+
+                        Review booking
+
+                    </button>
+
+                </div>
+
+            </div>
         </div>
 
     </div>
@@ -608,6 +906,15 @@
                 selectedQuantities: {},
 
                 bookingItems: [],
+
+                step: 'rooms',
+
+                guest: {
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    phone: '',
+                },
 
                 async searchAvailability() {
 
@@ -780,12 +1087,74 @@
 
                 },
 
+                itemTotal(item) {
+
+                    return (
+                        Number(item.room_total ?? 0) +
+                        Number(item.board_total ?? 0)
+                    ) * Number(item.quantity ?? 1)
+
+                },
+
+                bookingTotal() {
+
+                    return this.bookingItems.reduce(
+                        (total, item) => {
+                            return total + this.itemTotal(item)
+                        }, 0
+                    )
+
+                },
 
                 formatPrice(value) {
 
                     return Number(value ?? 0).toFixed(2)
 
-                }
+                },
+
+                // GUEST DETAILS:
+
+                goToGuestDetails() {
+
+                    if (this.bookingItems.length === 0) {
+
+                        alert(
+                            'Please add at least one room to your booking.'
+                        )
+
+                        return
+                    }
+
+                    this.step = 'guest'
+
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    })
+                },
+
+                continueToReview() {
+
+                    if (
+                        !this.guest.firstName ||
+                        !this.guest.lastName ||
+                        !this.guest.email
+                    ) {
+
+                        alert(
+                            'Please complete all required guest details.'
+                        )
+
+                        return
+                    }
+
+                    this.step = 'review'
+
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    })
+                },
 
             }
         }
