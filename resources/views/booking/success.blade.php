@@ -15,6 +15,7 @@
                 Your booking has been saved. Keep your booking number for reference.
             </p>
 
+            @include('booking._deadline')
             <dl class="rounded-xl bg-gray-800 p-5 space-y-5">
                 <div><dt class="text-sm text-gray-400">Payment (simulation)</dt><dd>{{ ucfirst($booking->payment?->status->value ?? 'not started') }}</dd></div>
                 <div>

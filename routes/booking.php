@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/hotels/{hotel}/booking', [BookingController::class, 'show'])->name('booking.show');
 
-Route::get('/hotels/{hotel}/availability', [BookingController::class, 'availability'])->name('booking.availability');
+Route::get('/hotels/{hotel}/availability', [BookingController::class, 'availability'])->middleware('throttle:availability')->name('booking.availability');
 
-Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+Route::post('/booking', [BookingController::class, 'store'])->middleware('throttle:booking-create')->name('booking.store');
 
 Route::get('/booking/{booking}/success', [BookingController::class, 'success'])->middleware('signed')->name('booking.success');
 
@@ -18,22 +18,22 @@ Route::get('/booking/{booking}/success', [BookingController::class, 'success'])-
 
 Route::middleware('signed')->group(function () {
     Route::get('/guest/bookings/{booking}/checkout', [PaymentController::class, 'show'])->name('guest.payments.show');
-    Route::post('/guest/bookings/{booking}/payment', [PaymentController::class, 'submit'])->name('guest.payments.submit');
-    Route::post('/guest/bookings/{booking}/payment/retry', [PaymentController::class, 'retry'])->name('guest.payments.retry');
+    Route::post('/guest/bookings/{booking}/payment', [PaymentController::class, 'submit'])->middleware('throttle:booking-action')->name('guest.payments.submit');
+    Route::post('/guest/bookings/{booking}/payment/retry', [PaymentController::class, 'retry'])->middleware('throttle:booking-action')->name('guest.payments.retry');
     Route::get('/guest/bookings/{booking}/manage', [GuestBookingController::class, 'show'])->name('guest.bookings.show');
-    Route::post('/guest/bookings/{booking}/cancel', [GuestBookingController::class, 'cancel'])->name('guest.bookings.cancel');
+    Route::post('/guest/bookings/{booking}/cancel', [GuestBookingController::class, 'cancel'])->middleware('throttle:booking-action')->name('guest.bookings.cancel');
 });
 
 Route::middleware('auth')->controller(PaymentController::class)->group(function () {
     Route::get('/bookings/{booking}/checkout', 'show')->name('payments.show');
-    Route::post('/bookings/{booking}/payment', 'submit')->name('payments.submit');
-    Route::post('/bookings/{booking}/payment/retry', 'retry')->name('payments.retry');
+    Route::post('/bookings/{booking}/payment', 'submit')->middleware('throttle:booking-action')->name('payments.submit');
+    Route::post('/bookings/{booking}/payment/retry', 'retry')->middleware('throttle:booking-action')->name('payments.retry');
 });
 
 Route::middleware('auth')->controller(BookingManagementController::class)->group(function () {
     Route::get('/bookings', 'index')->name('bookings.index');
     Route::get('/bookings/{booking}', 'show')->name('bookings.show');
-    Route::post('/bookings/{booking}/cancel', 'cancel')->name('bookings.cancel');
-    Route::post('/bookings/{booking}/confirm', 'confirm')->name('bookings.confirm');
-    Route::post('/bookings/{booking}/complete', 'complete')->name('bookings.complete');
+    Route::post('/bookings/{booking}/cancel', 'cancel')->middleware('throttle:booking-action')->name('bookings.cancel');
+    Route::post('/bookings/{booking}/confirm', 'confirm')->middleware('throttle:booking-action')->name('bookings.confirm');
+    Route::post('/bookings/{booking}/complete', 'complete')->middleware('throttle:booking-action')->name('bookings.complete');
 });

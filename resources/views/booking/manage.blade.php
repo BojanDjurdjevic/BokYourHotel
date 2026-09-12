@@ -2,6 +2,7 @@
     <div class="max-w-3xl mx-auto">
         <h1 class="text-3xl font-bold mb-2">Manage booking</h1>
         <p class="text-gray-400 mb-6">{{ $booking->booking_number }}</p>
+        @include('booking._deadline')
 
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6">
             <div class="flex flex-wrap justify-between gap-3">
@@ -56,7 +57,7 @@
                 </form>
             @endif
 
-            @if($staff && $booking->canBeConfirmed())
+            @if($staff && $booking->canBeConfirmed() && (! $booking->holdDeadlinePassed() || $booking->payment?->status === \App\Enums\PaymentStatus::Paid))
                 <form method="POST" action="{{ route('bookings.confirm', $booking) }}">
                     @csrf
                     <button class="px-6 py-3 rounded-xl bg-green-600 hover:bg-green-500 font-semibold">Confirm booking</button>

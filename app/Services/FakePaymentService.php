@@ -52,6 +52,10 @@ class FakePaymentService
                 'failed_at' => now(),
             ]);
 
+            if ($payment->status === PaymentStatus::Paid) {
+                $booking->update(['locked_until' => null]);
+            }
+
             return $payment;
         }, 3);
     }
@@ -107,6 +111,9 @@ class FakePaymentService
 
     private function ensurePayable(Booking $booking): void
     {
+        if ($booking->holdDeadlinePassed() && ! $booking->payment()->where('status', PaymentStatus::Paid)->exists()) {
+            throw new BookingException('The payment deadline has passed. Please create a new booking.');
+        }
         if (! $booking->canBeCancelled() || now()->greaterThanOrEqualTo($booking->check_out)) {
             throw new BookingException('This booking can no longer be paid.');
         }

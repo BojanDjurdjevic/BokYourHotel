@@ -48,6 +48,11 @@ class Booking extends Model
         return $this->isConfirmed() && now()->greaterThanOrEqualTo($this->check_out);
     }
 
+    public function holdDeadlinePassed(): bool
+    {
+        return $this->isPending() && $this->locked_until !== null && now()->greaterThanOrEqualTo($this->locked_until);
+    }
+
     protected $table = "bookings";
 
     protected $fillable = [

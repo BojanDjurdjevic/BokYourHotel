@@ -9,6 +9,7 @@ use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:supplier'])->prefix('supplier')->name('supplier.')->group(function () {
+    Route::get('/rooms/{room}/inventory-preview', [RoomSetupController::class, 'inventoryPreview'])->name('rooms.inventory.preview');
     Route::controller(SupplierController::class)->group(function () {
         Route::get('/dashboard', 'index')
             ->name('dashboard');
@@ -92,7 +93,7 @@ Route::middleware(['auth', 'role:supplier'])->prefix('supplier')->name('supplier
     )->name('rooms.images.index');
 
     Route::post('/rooms/{room}/images/store', [RoomSetupController::class, 'storeImages'])
-        ->name('rooms.images.store');
+        ->middleware('throttle:image-upload')->name('rooms.images.store');
 
     Route::get(
         '/rooms/{room}/facilities', [RoomSetupController::class, 'facilities']

@@ -17,11 +17,12 @@ class HotelController extends Controller
         $hotels = auth()->user()
             ->hotels()
             ->withCount('rooms')
-            ->with(['rooms', 'images'])
+            ->with('featuredImage')
+            ->withExists(['rooms', 'images', 'rooms as inventory_exists' => fn ($query) => $query->whereHas('inventories')])
             ->latest()
-            ->get();
+            ->paginate(12);
         
-        $incompleteHotels = $hotels->filter(
+        $incompleteHotels = $hotels->getCollection()->filter(
         fn($hotel) => $hotel->setupProgress() < 100
         );
 

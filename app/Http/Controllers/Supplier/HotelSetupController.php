@@ -23,7 +23,7 @@ class HotelSetupController extends Controller
     public function rooms(Hotel $hotel)
     {
         Gate::authorize('update', $hotel);
-        $rooms = $hotel->rooms;
+        $rooms = $hotel->rooms()->with('featuredImage')->paginate(12);
 
         return view('supplier.rooms.index', compact('hotel','rooms'));
     }
@@ -95,7 +95,7 @@ class HotelSetupController extends Controller
             ['available','price','updated_at']
         ); */
 
-        $service->createInventory($inventory, $request->room_id);
+        app(\App\Services\InventoryService::class)->initialize($hotel->rooms()->findOrFail($request->room_id), $request->user(), $inventory);
 
         return redirect()
             ->route('supplier.hotels.setup.images',$hotel)

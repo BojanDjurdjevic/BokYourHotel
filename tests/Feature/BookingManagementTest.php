@@ -130,6 +130,8 @@ class BookingManagementTest extends TestCase
 
     public function test_staff_can_confirm_and_cancel_even_after_owner_deadline(): void
     {
+        // A legacy reservation without an unpaid hold isolates the staff cancellation cutoff.
+        $this->booking->update(['locked_until' => null]);
         foreach ([$this->supplier, User::factory()->create(['role' => 'admin']), User::factory()->create(['role' => 'superadmin'])] as $actor) {
             $this->booking->update(['status' => BookingStatus::Pending]);
             RoomInventory::query()->update(['available' => 0]);

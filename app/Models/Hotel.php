@@ -72,13 +72,13 @@ class Hotel extends Model
 
             'info' => !empty($this->name),
 
-            'rooms' => $this->rooms()->exists(),
+            'rooms' => (bool) ($this->rooms_exists ?? $this->rooms()->exists()),
 
-            'inventory' => $this->rooms()
+            'inventory' => (bool) ($this->inventory_exists ?? $this->rooms()
                 ->whereHas('inventories')
-                ->exists(),
+                ->exists()),
 
-            'images' => $this->images()->exists(),
+            'images' => (bool) ($this->images_exists ?? $this->images()->exists()),
 
             'published' => $this->published
         ];

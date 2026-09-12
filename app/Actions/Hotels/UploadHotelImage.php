@@ -16,11 +16,16 @@ class UploadHotelImage {
         $path = $this->uploadImage($image, "hotels/$id");
 
 
-        return HotelImage::create([
+        try {
+            return HotelImage::create([
                     'hotel_id' => $id,
                     'path' => $path,
                     'position' => $position,
                     'is_featured' => $isFeatured,
                 ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($path);
+            throw $e;
+        }
     }
 }

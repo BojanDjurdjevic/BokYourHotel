@@ -1,2 +1,5 @@
 allowBuilds:
   esbuild: true
+overrides:
+  # concurrently pins a vulnerable patch; retain its API-compatible release line.
+  'concurrently>shell-quote': ^1.8.5

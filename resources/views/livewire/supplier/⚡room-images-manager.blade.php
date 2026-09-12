@@ -19,7 +19,8 @@ new class extends Component
     public array $images = [];
 
     protected $rules = [
-        'images.*' => 'image|max:2048',
+        'images' => 'required|array|max:10',
+        'images.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
     ];
 
     public function removeTempImage($index)
@@ -29,20 +30,17 @@ new class extends Component
         $this->images = array_values($this->images);
     }
 
-    public function upload($room)
+    public function upload()
     {
         Gate::authorize('update', $this->room->hotel);
         $this->validate();
+        $key = 'room-images:'.auth()->id();
+        abort_if(\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, 10), 429);
+        \Illuminate\Support\Facades\RateLimiter::hit($key, 60);
 
         foreach ($this->images as $index => $image) {
 
-            $path = $image->store("rooms/{$this->room->id}", 'public');
-
-            RoomImage::create([
-                'room_id' => $this->room->id,
-                'path' => $path,
-                'is_featured' => $this->room->images()->count() === 0 && $index === 0
-            ]);
+            app(\App\Actions\Rooms\UploadRoomImage::class)->execute($this->room, $image);
         }
 
         $this->reset('images');
@@ -63,7 +61,11 @@ new class extends Component
         Gate::authorize('update', $this->room->hotel);
         $image = $this->room->images()->findOrFail($imageId);
 
-        Storage::disk('public')->delete($image->path);
+        abort_unless(str_starts_with($image->path, "rooms/{$this->room->id}/") && ! str_contains($image->path, '..'), 403);
+
+        if (Storage::disk('public')->exists($image->path) && ! Storage::disk('public')->delete($image->path)) {
+            throw new \RuntimeException('Could not delete image file.');
+        }
 
         $image->delete();
     }

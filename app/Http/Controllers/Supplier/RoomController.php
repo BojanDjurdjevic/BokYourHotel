@@ -31,7 +31,7 @@ class RoomController extends Controller
     public function index(Hotel $hotel)
     {
         Gate::authorize('update', $hotel);
-        $rooms = $hotel->rooms;
+        $rooms = $hotel->rooms()->with('featuredImage')->paginate(12);
 
         return view('supplier.rooms.index', compact('hotel','rooms'));
     }

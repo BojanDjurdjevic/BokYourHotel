@@ -1,6 +1,7 @@
 <x-app-layout>
     <div class="max-w-2xl mx-auto bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6">
         <h1 class="text-3xl font-bold">Fake checkout</h1>
+        @include('booking._deadline')
         <p class="text-amber-300">Development simulation only. No money is charged. Never enter card details.</p>
         <dl class="space-y-3">
             <div><dt class="text-gray-400">Booking number</dt><dd>{{ $booking->booking_number }}</dd></div>
@@ -18,7 +19,7 @@
         @elseif($booking->payment?->status === \App\Enums\PaymentStatus::Refunded)
             <p class="text-gray-300">Payment was refunded in this simulation.</p>
         @endif
-        @if(config('payments.fake_enabled') && $booking->canBeCancelled() && now()->lessThan($booking->check_out))
+        @if(config('payments.fake_enabled') && $booking->canBeCancelled() && ! $booking->holdDeadlinePassed() && now()->lessThan($booking->check_out))
             @if(! $booking->payment || $booking->payment->status === \App\Enums\PaymentStatus::Pending)
                 <form method="POST" action="{{ $submitUrl }}" class="flex flex-wrap gap-3" x-data="{ submitting: false, outcome: '' }"
                       @submit="if (submitting) { $event.preventDefault() } else { submitting = true }">

@@ -1,0 +1,68 @@
+<?php
+
+namespace Tests\Feature;
+
+use Database\Seeders\DemoSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
+
+class DemoSeederIntegrityTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_full_demo_is_consistent_bulk_generated_and_safe_to_repeat(): void
+    {
+        $existing = \App\Models\User::factory()->create();
+        $this->travelTo(\Carbon\Carbon::parse('2026-10-01 12:00:00'));
+        $inserts = 0;
+        DB::listen(function ($query) use (&$inserts) {
+            if (str_starts_with(strtolower($query->sql), 'insert into "room_inventories"')) $inserts++;
+        });
+        $summary = app(DemoSeeder::class)->seed('2026-10-01');
+        $this->assertSame(100, $summary['hotels']);
+        $this->assertSame(450, $summary['rooms']);
+        $this->assertSame(191250, $summary['inventory']);
+        $this->assertSame(400, $summary['bookings']);
+        $this->assertSame(300, $summary['payments']);
+        $this->assertSame(450, $inserts);
+        $this->assertDatabaseCount('users', 34);
+        $this->assertSame(50, DB::table('hotels')->distinct()->count('city'));
+        $this->assertSame(164250, DB::table('room_inventories')->whereBetween('date', ['2026-10-01', '2027-09-30'])->count());
+        $this->assertFalse(DB::table('room_inventories as i')->join('rooms as r', 'r.id', '=', 'i.room_id')->whereColumn('i.available', '>', 'r.total_units')->orWhere('i.available', '<', 0)->exists());
+        $this->assertFalse(DB::table('payments as p')->join('bookings as b', 'b.id', '=', 'p.booking_id')->where(function ($query) {
+            $query->whereColumn('p.amount', '!=', 'b.total')->orWhereColumn('p.currency', '!=', 'b.currency')
+                ->orWhere(fn ($q) => $q->whereIn('b.status', ['cancelled', 'expired', 'rejected'])->where('p.status', 'paid'))
+                ->orWhere(fn ($q) => $q->where('p.status', 'refunded')->where('b.status', '!=', 'cancelled'));
+        })->exists());
+        $this->assertSame(200, DB::table('bookings')->whereNull('user_id')->count());
+        $this->assertDatabaseCount('booking_items', 400);
+        $this->assertDatabaseCount('hotel_images', 0);
+        $this->assertDatabaseCount('room_images', 0);
+        $this->assertSame($summary, app(DemoSeeder::class)->seed('2027-01-01'));
+        $this->assertDatabaseCount('bookings', 400);
+        $this->assertDatabaseHas('users', ['id' => $existing->id, 'email' => $existing->email]);
+        $this->artisan('demo:images')->assertSuccessful();
+    }
+
+    public function test_demo_namespace_collision_does_not_overwrite_accounts(): void
+    {
+        \App\Models\User::factory()->create(['email' => 'user@demo.bookyourhotel.test']);
+        try {
+            app(DemoSeeder::class)->seed('2026-10-01');
+            $this->fail('Expected namespace collision.');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('refusing to overwrite', $e->getMessage());
+        }
+        $this->assertDatabaseCount('demo_seed_runs', 0);
+        $this->assertDatabaseCount('hotels', 0);
+    }
+
+    public function test_demo_commands_refuse_production(): void
+    {
+        $this->app->instance('env', 'production');
+        $this->artisan('demo:seed')->assertFailed();
+        $this->artisan('demo:images')->assertFailed();
+        $this->assertDatabaseCount('users', 0);
+    }
+}

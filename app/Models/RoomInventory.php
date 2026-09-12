@@ -12,12 +12,14 @@ class RoomInventory extends Model
         'room_id',
         'date',
         'available',
-        'price'
+        'price',
+        'version',
     ];
 
     protected $casts = [
         'date' => 'date',
-        'price' => 'decimal:2'
+        'price' => 'decimal:2',
+        'version' => 'integer',
     ];
 
     public function room()

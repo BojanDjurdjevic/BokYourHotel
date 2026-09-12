@@ -102,6 +102,8 @@ rooms
 
             days:[],
             error: null,
+            loadId: 0,
+            busy: false,
 
             get monthLabel(){
 
@@ -113,6 +115,7 @@ rooms
             },
 
             load() {
+                const loadId = ++this.loadId
                 this.error = null
                 this.days = []
 
@@ -122,9 +125,9 @@ rooms
 
                 .then(data=>{
 
-                this.days=data
+                if (loadId === this.loadId) this.days=data
 
-                }).catch(e => { this.error = e.message })
+                }).catch(e => { if (loadId === this.loadId) this.error = e.message })
 
             },
 
@@ -153,6 +156,7 @@ rooms
             },
 
             edit(day) {
+                if (this.busy) return
 
                 let available=prompt(
                     'Available rooms',
@@ -167,6 +171,7 @@ rooms
                 )
 
                 if (price === null) return
+                this.busy = true
 
                 fetch(
                     '{{ route("supplier.inventory.update") }}',
@@ -187,6 +192,7 @@ rooms
                     room_id:this.roomId,
                     //room_id: roomId,
                     date:day.date,
+                    version:day.version,
                     available:available,
                     price:price
 
@@ -196,7 +202,7 @@ rooms
 
         )
 
-        .then(async response => { if (!response.ok) throw new Error((await response.json()).message || 'Could not save inventory.'); this.load() }).catch(e => { this.error = e.message })
+        .then(async response => { if (!response.ok) throw new Error((await response.json()).message || 'Could not save inventory.'); this.load() }).catch(e => { this.error = e.message }).finally(() => { this.busy = false })
 
         }
 

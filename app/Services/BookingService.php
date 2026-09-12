@@ -135,7 +135,7 @@ class BookingService
             );
 
             return $booking;
-        });
+        }, 3);
     }
 
     private function validatePeriod(Carbon $checkIn, Carbon $checkOut): void
@@ -221,7 +221,7 @@ class BookingService
                     $period->last()->toDateString(),
                 ]
             )
-            ->lockForUpdate()
+            ->orderBy('room_id')->orderBy('date')->lockForUpdate()
             ->get()
             ->groupBy('room_id')
             ->map(function ($items) {
@@ -455,6 +455,7 @@ class BookingService
             'notes' => $data['notes'] ?? null,
 
             'status' => BookingStatus::Pending,
+            'locked_until' => now()->addMinutes(30),
 
             'subtotal' => $totals['subtotal'],
 
@@ -498,7 +499,8 @@ class BookingService
 
                 $inventory->decrement(
                     'available',
-                    $item['quantity']
+                    $item['quantity'],
+                    ['version' => $inventory->version + 1]
                 );
             }
         }
@@ -536,11 +538,15 @@ class BookingService
             $booking = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
             Gate::forUser($actor)->authorize('confirm', $booking);
 
+            if ($booking->holdDeadlinePassed() && ! $booking->payment()->where('status', \App\Enums\PaymentStatus::Paid)->exists()) {
+                throw new BookingException('The unpaid reservation hold has expired.');
+            }
+
             if (! $booking->canBeConfirmed()) {
                 throw new BookingException('Only pending bookings can be confirmed.');
             }
 
-            $booking->update(['status' => BookingStatus::Confirmed]);
+            $booking->update(['status' => BookingStatus::Confirmed, 'locked_until' => null]);
 
             return $booking;
         }, 3);
@@ -612,6 +618,23 @@ class BookingService
         }, 3);
     }
 
+    public function expire(Booking $booking): bool
+    {
+        return DB::transaction(function () use ($booking) {
+            $booking = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            if (! $booking->holdDeadlinePassed()) return false;
+            $payment = $booking->payment()->lockForUpdate()->first();
+            if ($payment?->status === \App\Enums\PaymentStatus::Paid) {
+                $booking->update(['locked_until' => null]);
+                return false;
+            }
+
+            $this->restoreAvailability($booking);
+            $booking->update(['status' => BookingStatus::Expired]);
+            return true;
+        }, 3);
+    }
+
     // RESTORE Availability
 
     private function restoreAvailability(Booking $booking): void
@@ -654,7 +677,7 @@ class BookingService
         }
 
         foreach ($lockedInventories as [$inventory, $quantity]) {
-            $inventory->increment('available', $quantity);
+            $inventory->increment('available', $quantity, ['version' => $inventory->version + 1]);
         }
     }
 }

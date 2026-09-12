@@ -60,6 +60,7 @@ class CreateBookingRequest extends FormRequest
                 'required',
                 'array',
                 'min:1',
+                'max:20',
             ],
 
             'items.*.room_id' => [

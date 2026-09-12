@@ -11,6 +11,7 @@
 <h1 class="text-xl font-bold mb-6">
     Inventory Manager
 </h1>
+<p class="mb-4 text-sm text-amber-300">Setup creates inventory only for dates that do not exist yet. To change existing dates, open the inventory calendar or the room inventory editor and review current availability before saving.</p>
 
 <form
     method="POST"

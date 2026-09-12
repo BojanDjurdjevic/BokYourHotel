@@ -49,6 +49,9 @@ new class extends Component
     {
         Gate::authorize('update', $this->hotel);
         $this->validate();
+        $key = 'hotel-image-upload:'.auth()->id();
+        abort_if(\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, 10), 429);
+        \Illuminate\Support\Facades\RateLimiter::hit($key, 60);
 
         /*
         foreach ($this->images as $index => $image)
@@ -96,7 +99,11 @@ new class extends Component
         Gate::authorize('update', $this->hotel);
         $image = $this->hotel->images()->findOrFail($imageId);
 
-        Storage::disk('public')->delete($image->path);
+        abort_unless(str_starts_with($image->path, "hotels/{$this->hotel->id}/") && ! str_contains($image->path, '..'), 403);
+
+        if (Storage::disk('public')->exists($image->path) && ! Storage::disk('public')->delete($image->path)) {
+            throw new \RuntimeException('Could not delete image file.');
+        }
 
         $image->delete();
     }

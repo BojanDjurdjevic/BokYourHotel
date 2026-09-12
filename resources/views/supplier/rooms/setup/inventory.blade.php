@@ -11,7 +11,8 @@
         updateUrl: '{{ route('supplier.rooms.inventory.update', $room) }}',
         bulkUrl: '{{ route('supplier.rooms.inventory.bulk', $room) }}',
         dataUrl: '{{ route('supplier.rooms.inventory', $room) }}',
-        csrf: '{{ csrf_token() }}'
+        csrf: '{{ csrf_token() }}',
+        previewUrl: '{{ route('supplier.rooms.inventory.preview', $room) }}'
     })"
     class="overflow-x-auto"
 >
@@ -145,6 +146,9 @@
 
                         </div>
 
+                        <p class="px-6 text-red-400" x-show="error" x-text="error" role="alert"></p>
+                        <p class="px-6 text-amber-300" x-show="bulkRows.length" x-text="`${bulkRows.length} dates previewed. Current availability: ${Math.min(...bulkRows.map(row => row.available))}–${Math.max(...bulkRows.map(row => row.available))}. Save will set availability to ${bulk.available} and price to ${bulk.price}.`"></p>
+                        <button type="button" @click="previewBulk" :disabled="busy" class="mx-6 px-4 py-2 bg-blue-600 rounded-lg">Preview current inventory</button>
                         <!-- Footer -->
                         <div class="flex justify-end gap-3 px-6 py-4 border-t border-zinc-700">
 
@@ -158,6 +162,7 @@
                             <x-button
                                 variant="primary"
                                 @click="saveBulk"
+                                x-bind:disabled="!bulkRows.length || busy"
                             >
                                 Confirm
                             </x-button>
@@ -251,7 +256,7 @@
                                 x-model="form.price"
                             >
 
-                            <button @click.stop="save(date)">OK</button>
+                            <button @click.stop="save(date)" :disabled="busy" :class="busy && 'opacity-50 cursor-wait'">OK</button>
                             <button @click.stop="editing = null; form = {}">Cancel</button>
 
                         </div>
@@ -286,8 +291,14 @@ function inventoryGrid(config) {
 
         data: '',
         error: null,
+        loadId: 0,
+        busy: false,
+        bulkRows: [],
+        bulkKey: null,
+        previewUrl: config.previewUrl,
 
         async load() {
+            const loadId = ++this.loadId
             this.error = null
             this.dates = []
             try {
@@ -301,6 +312,7 @@ function inventoryGrid(config) {
                 )
 
                 let data = await res.json()
+                if (loadId !== this.loadId) return
                 if (!res.ok) throw new Error(data.message || 'Could not load inventory.')
 
                 this.data = data
@@ -316,6 +328,7 @@ function inventoryGrid(config) {
                     const row = data.inventory[date]
 
                     this.cells[date] = {
+                        version: row?.version ?? 0,
                         available: row
                             ? row.available
                             : data.defaults.available,
@@ -326,7 +339,7 @@ function inventoryGrid(config) {
                     }
 
                 }
-            } catch (e) { this.error = e.message }
+            } catch (e) { if (loadId === this.loadId) this.error = e.message }
         },
 
         prevMonth() {
@@ -364,6 +377,8 @@ function inventoryGrid(config) {
         },
 
         openBulk() {
+            this.bulkRows = []
+            this.bulkKey = null
             this.bulk.open = true
             this.bulk.from = ''
             this.bulk.to = ''
@@ -379,18 +394,21 @@ function inventoryGrid(config) {
             this.editing = date
 
             this.form = {
+                version: this.cells[date].version,
                 available: this.cells[date].available,
                 price: this.cells[date].price
             }
         },
 
         async save(date) {
+            if (this.busy) return
+            this.busy = true
             this.error = null
             try {
                 const response = await fetch(this.updateUrl, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': this.csrf },
-                    body: JSON.stringify({ date, available: this.form.available, price: this.form.price })
+                    body: JSON.stringify({ date, version: this.form.version, available: this.form.available, price: this.form.price })
                 })
                 const data = await response.json()
                 if (!response.ok) throw new Error(data.message || 'Could not save inventory.')
@@ -398,45 +416,52 @@ function inventoryGrid(config) {
                 this.form = {}
                 await this.load()
             } catch (e) { this.error = e.message }
+            finally { this.busy = false }
         },
-        async saveBulk() {
+        bulkFingerprint() {
+            return JSON.stringify([this.bulk.from, this.bulk.to, this.bulk.available, this.bulk.price])
+        },
 
+        async previewBulk() {
+            if (this.busy) return
+            this.busy = true
+            this.error = null
+            this.bulkRows = []
+            const key = this.bulkFingerprint()
             try {
-
-                const response = await fetch(this.bulkUrl, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": this.csrf
-                    },
-                    body: JSON.stringify({
-                        from: this.bulk.from,
-                        to: this.bulk.to,
-                        available: this.bulk.available,
-                        price: this.bulk.price
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error((await response.json()).message || 'Could not save inventory.');
-                }
-
-                await this.load();
-
-                this.bulk = {
-                    open: false,
-                    from: '',
-                    to: '',
-                    available: '',
-                    price: ''
-                };
-
-            } catch (e) {
-                this.error = e.message;
-            }
+                const response = await fetch(`${this.previewUrl}?${new URLSearchParams({ from: this.bulk.from, to: this.bulk.to })}`, { headers: { Accept: 'application/json' } })
+                const rows = await response.json()
+                if (!response.ok) throw new Error(rows.message || 'Could not preview inventory.')
+                if (key !== this.bulkFingerprint()) throw new Error('Selection changed. Preview again.')
+                this.bulkRows = rows
+                this.bulkKey = key
+            } catch (e) { this.error = e.message }
+            finally { this.busy = false }
         },
 
+        async saveBulk() {
+            if (this.busy) return
+            if (!this.bulkRows.length || this.bulkKey !== this.bulkFingerprint()) {
+                this.error = 'Preview the selected period and values before saving.'
+                return
+            }
+            this.busy = true
+            try {
+                const response = await fetch(this.bulkUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': this.csrf },
+                    body: JSON.stringify({ rows: this.bulkRows.map(row => ({ date: row.date, version: row.version, available: this.bulk.available, price: this.bulk.price })) })
+                })
+                const data = await response.json()
+                if (!response.ok) throw new Error(data.message || 'Could not save inventory.')
+                this.bulk.open = false
+                this.bulkRows = []
+                await this.load()
+            } catch (e) {
+                this.error = e.message
+                this.bulkRows = []
+            } finally { this.busy = false }
+        },
         getColor(cell) {
             if (!cell) return 'bg-gray-700'
 

@@ -5,6 +5,9 @@ namespace App\Providers;
 use App\Models\Hotel;
 use App\Policies\HotelPolicy;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +25,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        RateLimiter::for('availability', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
+        RateLimiter::for('booking-create', fn (Request $request) => [
+            Limit::perMinute(10)->by('minute:'.$request->ip()),
+            Limit::perHour(60)->by('hour:'.$request->ip()),
+        ]);
+        RateLimiter::for('booking-action', fn (Request $request) => [
+            Limit::perMinute(30)->by('actor:'.($request->user()?->id ?? $request->ip())),
+            Limit::perMinute(15)->by('booking:'.($request->route('booking') instanceof \App\Models\Booking ? $request->route('booking')->getRouteKey() : $request->route('booking')).':'.$request->ip()),
+        ]);
+        RateLimiter::for('image-upload', fn (Request $request) => Limit::perMinute(10)->by((string) $request->user()?->id));
     }
 }

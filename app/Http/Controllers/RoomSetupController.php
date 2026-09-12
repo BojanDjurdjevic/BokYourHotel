@@ -30,12 +30,7 @@ class RoomSetupController extends Controller
         ]);
         foreach ($request->file('images', []) as $file) {
 
-            $path = $file->store("rooms/{$room->id}", 'public');
-
-            $room->images()->create([
-                'path' => $path,
-                'is_featured' => ! $room->images()->where('is_featured', true)->exists(),
-            ]);
+            app(\App\Actions\Rooms\UploadRoomImage::class)->execute($room, $file);
         }
 
         return back()->with('success','Images uploaded');
@@ -102,6 +97,7 @@ class RoomSetupController extends Controller
                     $item->date->format('Y-m-d') => [
 
                         'available' => $item->available,
+                        'version' => $item->version,
 
                         'price' => $item->price,
 
@@ -129,59 +125,23 @@ class RoomSetupController extends Controller
         ));
     }
 
-    public function inventoryUpdate(Request $request, Room $room)
+    public function inventoryPreview(Request $request, Room $room, \App\Services\InventoryService $inventory)
     {
-        Gate::authorize('update', $room->hotel);
-        $request->validate([
-            'date' => 'required|date',
-            'available' => 'required|integer|min:0',
-            'price' => 'required|numeric|min:0'
-        ]);
+        $data = $request->validate(['from' => ['required', 'date_format:Y-m-d'], 'to' => ['required', 'date_format:Y-m-d', 'after_or_equal:from']]);
+        return response()->json($inventory->snapshot($room, $request->user(), $data['from'], $data['to']));
+    }
 
-        RoomInventory::updateOrCreate(
-            [
-                'room_id' => $room->id,
-                'date' => $request->date
-            ],
-            [
-                'available' => $request->available,
-                'price' => $request->price
-            ]
-        );
-
-
+    public function inventoryUpdate(Request $request, Room $room, \App\Services\InventoryService $inventory)
+    {
+        $inventory->update($room, $request->user(), [$request->only('date', 'version', 'available', 'price')]);
         return response()->json(['success' => true]);
     }
 
-    public function bulkUpdate(Request $request, Room $room)
+    public function bulkUpdate(Request $request, Room $room, \App\Services\InventoryService $inventory)
     {
         Gate::authorize('update', $room->hotel);
-        $mydata = $request->validate([
-            'from' => 'required|date',
-            'to' => 'required|date|after_or_equal:from',
-            'available' => 'required|integer|min:0',
-            'price' => 'required|numeric|gt:0'
-        ]);
-
-        $start = Carbon::parse($request->from);
-        $end = Carbon::parse($request->to);
-
-        for ($date = $start->copy(); $date <= $end; $date->addDay()) {
-
-            RoomInventory::updateOrCreate(
-                [
-                    'room_id' => $room->id,
-                    'date' => $date->toDateString(),
-                ],
-                [
-                    'available' => $request->available,
-                    'price' => $request->price,
-                ]
-            );
-        }
-
-        return response()->json([
-            'success' => true,
-        ]);
+        $data = $request->validate(['rows' => ['required', 'array', 'max:366']]);
+        $inventory->update($room, $request->user(), $data['rows']);
+        return response()->json(['success' => true]);
     }
 }

@@ -64,6 +64,7 @@ class RoomInventoryController extends Controller
         $days[] = [
 
             'date' => $date,
+            'version' => (int) ($row?->version ?? 0),
             'available' => $row?->available ?? $room->total_units,
             'price' => $row?->price ?? $room->price_per_night
 
@@ -78,36 +79,10 @@ class RoomInventoryController extends Controller
     }
 
 
-    public function updateDay(Request $request)
+    public function updateDay(Request $request, \App\Services\InventoryService $inventory)
     {
-
-        $request->validate([
-
-            'room_id'=>'required|exists:rooms,id',
-            'date'=>'required|date',
-            'available'=>'required|integer|min:0',
-            'price'=>'required|numeric|min:0'
-
-        ]);
-
-        Gate::authorize('update', Room::findOrFail($request->room_id)->hotel);
-
-        RoomInventory::updateOrCreate(
-
-        [
-            'room_id'=>$request->room_id,
-            'date'=>$request->date
-        ],
-
-        [
-            'available'=>$request->available,
-            'price'=>$request->price
-        ]
-
-        );
-
-        return response()->json(['success'=>true]);
-
+        $request->validate(['room_id' => ['required', 'integer', 'exists:rooms,id']]);
+        $inventory->update(Room::findOrFail($request->room_id), $request->user(), [$request->only('date', 'version', 'available', 'price')]);
+        return response()->json(['success' => true]);
     }
-
 }

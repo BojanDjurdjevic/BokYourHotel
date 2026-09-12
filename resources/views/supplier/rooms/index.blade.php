@@ -83,6 +83,8 @@
 
 @endforelse
 
+{{ $rooms->links() }}
+
 </div>
 
 </x-layouts.dashboard>

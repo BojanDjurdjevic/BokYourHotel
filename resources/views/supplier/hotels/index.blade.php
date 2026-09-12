@@ -16,6 +16,7 @@
 </div>
 
 <div class="space-y-4">
+    {{ $hotels->links() }}
 
     @forelse($hotels as $hotel)
 

@@ -85,6 +85,7 @@ class BookingManagementConcurrencyTest extends TestCase
         $threads = [];
         DB::beginTransaction();
         Booking::whereKey($this->booking->id)->lockForUpdate()->firstOrFail();
+        RoomInventory::orderBy('room_id')->orderBy('date')->lockForUpdate()->get();
 
         try {
             foreach ($actions as $action) {
@@ -92,7 +93,7 @@ class BookingManagementConcurrencyTest extends TestCase
                     PHP_BINARY, base_path('tests/Support/booking-management-worker.php'),
                     $this->testDatabase, $action, (string) $this->booking->id, (string) $this->supplier->id,
                 ], base_path(), ['APP_ENV' => 'testing', 'SESSION_DRIVER' => 'array', 'CACHE_STORE' => 'array']);
-                $process->setTimeout(20);
+                $process->setTimeout(60);
                 $processes[] = $process;
                 $process->start();
                 $process->waitUntil(fn () => str_contains($process->getOutput(), 'READY:'));
@@ -110,12 +111,13 @@ class BookingManagementConcurrencyTest extends TestCase
                 if ($waiting === 2) break;
                 usleep(100000);
             } while (microtime(true) < $deadline);
-            $this->assertSame(2, $waiting, 'Both workers must contend on the booking lock.');
+            $this->assertSame(2, $waiting, 'Both workers must contend on the held database locks.');
             DB::commit();
 
             $results = [];
             foreach ($processes as $process) {
                 $this->assertSame(0, $process->wait(), $process->getErrorOutput());
+                $this->assertMatchesRegularExpression('/RESULT:(\w+)/', $process->getOutput(), $process->getOutput().$process->getErrorOutput());
                 preg_match('/RESULT:(\w+)/', $process->getOutput(), $match);
                 $results[] = $match[1];
             }
@@ -184,5 +186,51 @@ class BookingManagementConcurrencyTest extends TestCase
         $this->assertSame(\App\Enums\PaymentStatus::Refunded, $payment->status);
         $this->assertNotNull($payment->refund_reference);
         $this->assertSame([3, 3], RoomInventory::orderBy('date')->pluck('available')->all());
+    }
+
+    public function test_parallel_expirations_restore_once(): void
+    {
+        $this->assertEqualsCanonicalizing(['success', 'rejected'], $this->runConcurrentActions(['expire', 'expire']));
+        $this->assertSame(BookingStatus::Expired, $this->booking->refresh()->status);
+        $this->assertSame([3, 3], RoomInventory::orderBy('date')->pluck('available')->all());
+        $this->assertDatabaseCount('booking_items', 1);
+    }
+
+    public function test_payment_and_expiry_have_only_consistent_outcomes(): void
+    {
+        $results = $this->runConcurrentActions(['pay_before_expiry', 'expire']);
+        if ($results[0] === 'success') {
+            $this->assertSame(BookingStatus::Pending, $this->booking->refresh()->status);
+            $this->assertSame(\App\Enums\PaymentStatus::Paid, $this->booking->payment->status);
+            $this->assertSame([0, 0], RoomInventory::orderBy('date')->pluck('available')->all());
+        } else {
+            $this->assertSame(BookingStatus::Expired, $this->booking->refresh()->status);
+            $this->assertDatabaseCount('payments', 0);
+            $this->assertSame([3, 3], RoomInventory::orderBy('date')->pluck('available')->all());
+        }
+    }
+
+    public function test_supplier_snapshot_cannot_restore_units_sold_concurrently(): void
+    {
+        app(BookingService::class)->cancel($this->booking, $this->supplier);
+        $results = $this->runConcurrentActions(['create', 'inventory']);
+        $this->assertSame('success', $results[0]);
+        $this->assertContains($results[1], ['success', 'rejected']);
+        $this->assertSame([1, 1], RoomInventory::orderBy('date')->pluck('available')->all());
+    }
+
+    public function test_supplier_snapshot_cannot_erase_a_concurrent_cancellation_restore(): void
+    {
+        $results = $this->runConcurrentActions(['cancel', 'inventory']);
+        $this->assertSame('success', $results[0]);
+        $this->assertSame([3, 3], RoomInventory::orderBy('date')->pluck('available')->all());
+    }
+
+    public function test_parallel_creations_cannot_sell_four_units_from_three(): void
+    {
+        app(BookingService::class)->cancel($this->booking, $this->supplier);
+        $this->assertEqualsCanonicalizing(['success', 'rejected'], $this->runConcurrentActions(['create', 'create']));
+        $this->assertSame([1, 1], RoomInventory::orderBy('date')->pluck('available')->all());
+        $this->assertSame(1, Booking::where('status', BookingStatus::Pending)->count());
     }
 }
