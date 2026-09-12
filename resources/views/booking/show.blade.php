@@ -28,6 +28,15 @@
         </div>
 
 
+        <div
+            x-show="submitError"
+            x-cloak
+            role="alert"
+            class="mb-6 rounded-xl border border-red-800 bg-red-950 p-4 text-red-300"
+            x-text="submitError"
+            x-effect="if (submitError) $nextTick(() => $el.scrollIntoView({ behavior: 'smooth', block: 'center' }))"
+        ></div>
+
         {{-- Search --}}
         <div class="bg-gray-900 rounded-2xl p-6 shadow mb-8">
 
@@ -43,6 +52,8 @@
                     <input
                         type="date"
                         x-model="checkIn"
+                        @input="resetAvailability()"
+                        :disabled="submitting"
                         class="w-full rounded-lg border border-gray-700 bg-gray-800 p-3"
                     >
 
@@ -59,6 +70,8 @@
                     <input
                         type="date"
                         x-model="checkOut"
+                        @input="resetAvailability()"
+                        :disabled="submitting"
                         class="w-full rounded-lg border border-gray-700 bg-gray-800 p-3"
                     >
 
@@ -71,7 +84,7 @@
                     <button
                         type="button"
                         @click="searchAvailability"
-                        :disabled="loading"
+                        :disabled="loading || submitting"
                         class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg px-4 py-3 font-medium"
                     >
 
@@ -1260,16 +1273,19 @@
                     <button
                         type="button"
                         @click="submitBooking()"
+                        :disabled="submitting"
                         class="
                             px-6
                             py-3
                             rounded-xl
                             bg-green-600
                             hover:bg-green-500
+                            disabled:opacity-50
+                            disabled:cursor-not-allowed
                             font-semibold
                         "
                     >
-                        Confirm booking
+                        <span x-text="submitting ? 'Submitting...' : 'Confirm booking'"></span>
                     </button>
                 </div>
             </div>
@@ -1297,6 +1313,8 @@
                 error: null,
                 results: null,
 
+                availabilityRequest: 0,
+
                 selectedBoards: {},
 
                 selectedQuantities: {},
@@ -1320,9 +1338,40 @@
 
                 csrfToken: document.querySelector('meta[name="csrf-token"]') ?.getAttribute('content'),
 
+                resetAvailability() {
+
+                    this.availabilityRequest++
+                    this.rooms = []
+                    this.nights = 0
+                    this.results = null
+                    this.selectedBoards = {}
+                    this.selectedQuantities = {}
+                    this.bookingItems = []
+                    this.searched = false
+                    this.loading = false
+                    this.error = null
+                    this.submitError = null
+                    this.step = 'rooms'
+
+                },
+
+                hasCurrentAvailability() {
+
+                    return this.results !== null &&
+                        this.results.check_in === this.checkIn &&
+                        this.results.check_out === this.checkOut
+
+                },
+
                 async searchAvailability() {
 
-                    this.error = null
+                    if (this.submitting) return
+
+                    this.resetAvailability()
+
+                    const requestId = this.availabilityRequest
+                    const checkIn = this.checkIn
+                    const checkOut = this.checkOut
 
 
                     if (!this.checkIn || !this.checkOut) {
@@ -1342,8 +1391,8 @@
 
                         const params =
                             new URLSearchParams({
-                                check_in: this.checkIn,
-                                check_out: this.checkOut
+                                check_in: checkIn,
+                                check_out: checkOut
                             })
 
 
@@ -1359,6 +1408,12 @@
 
 
                         const data = await response.json()
+
+                        if (
+                            requestId !== this.availabilityRequest ||
+                            checkIn !== this.checkIn ||
+                            checkOut !== this.checkOut
+                        ) return
 
                         if (!response.ok) {
 
@@ -1391,6 +1446,8 @@
 
                     } catch (error) {
 
+                        if (requestId !== this.availabilityRequest) return
+
                         this.error = error.message
 
                         this.rooms = []
@@ -1398,13 +1455,17 @@
 
                     } finally {
 
-                        this.loading = false
+                        if (requestId === this.availabilityRequest) {
+                            this.loading = false
+                        }
 
                     }
 
                 },
 
                 addRoom(room) {
+
+                    if (!this.hasCurrentAvailability()) return
 
                     const boardTypeId =
                         this.selectedBoards[room.id]
@@ -1520,7 +1581,7 @@
 
                 goToGuestDetails() {
 
-                    if (this.bookingItems.length === 0) {
+                    if (!this.hasCurrentAvailability() || this.bookingItems.length === 0) {
 
                         alert(
                             'Please add at least one room to your booking.'
@@ -1574,7 +1635,15 @@
 
                 async submitBooking() {
 
+                    if (this.submitting) return
+
                     this.submitError = null
+
+                    if (!this.hasCurrentAvailability() || this.bookingItems.length === 0) {
+                        this.submitError = 'Please search availability and select your rooms again.'
+                        this.step = 'rooms'
+                        return
+                    }
 
                     this.submitting = true
 

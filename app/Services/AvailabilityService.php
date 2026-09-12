@@ -14,6 +14,9 @@ class AvailabilityService
         Carbon $checkIn,
         Carbon $checkOut
     ): array {
+        $checkIn = $checkIn->copy()->startOfDay();
+        $checkOut = $checkOut->copy()->startOfDay();
+
         $this->validatePeriod(
             $checkIn,
             $checkOut
@@ -170,7 +173,7 @@ class AvailabilityService
         Carbon $checkOut
     ): void {
 
-        if ($checkIn->isPast()) {
+        if ($checkIn->lessThan(Carbon::today())) {
 
             throw new BookingException(
                 'Check-in date cannot be in the past.'

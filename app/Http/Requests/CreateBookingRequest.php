@@ -22,13 +22,13 @@ class CreateBookingRequest extends FormRequest
 
             'check_in' => [
                 'required',
-                'date',
+                'date_format:Y-m-d',
                 'after_or_equal:today',
             ],
 
             'check_out' => [
                 'required',
-                'date',
+                'date_format:Y-m-d',
                 'after:check_in',
             ],
 
@@ -83,12 +83,14 @@ class CreateBookingRequest extends FormRequest
                 'required',
                 'integer',
                 'min:1',
+                'max:255',
             ],
 
             'items.*.children' => [
                 'nullable',
                 'integer',
                 'min:0',
+                'max:255',
             ],
         ];
     }
@@ -101,11 +103,11 @@ class CreateBookingRequest extends FormRequest
             'hotel_id.exists' => 'Selected hotel does not exist.',
 
             'check_in.required' => 'Please select a check-in date.',
-            'check_in.date' => 'Check-in must be a valid date.',
+            'check_in.date_format' => 'Check-in must be a valid date in YYYY-MM-DD format.',
             'check_in.after_or_equal' => 'Check-in cannot be in the past.',
 
             'check_out.required' => 'Please select a check-out date.',
-            'check_out.date' => 'Check-out must be a valid date.',
+            'check_out.date_format' => 'Check-out must be a valid date in YYYY-MM-DD format.',
             'check_out.after' => 'Check-out must be after check-in.',
 
             'guest_name.required' => 'Guest name is required.',
@@ -136,9 +138,11 @@ class CreateBookingRequest extends FormRequest
             'items.*.adults.required' => 'Please enter the number of adults.',
             'items.*.adults.integer' => 'Adults must be a whole number.',
             'items.*.adults.min' => 'At least one adult is required.',
+            'items.*.adults.max' => 'You cannot enter more than 255 adults per booking item.',
 
             'items.*.children.integer' => 'Children must be a whole number.',
             'items.*.children.min' => 'Children cannot be negative.',
+            'items.*.children.max' => 'You cannot enter more than 255 children per booking item.',
         ];
     }
 

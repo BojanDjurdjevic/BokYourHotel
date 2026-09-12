@@ -32,6 +32,9 @@ class BookingService
             $checkOut
         );
 
+        $data['check_in'] = $checkIn->toDateString();
+        $data['check_out'] = $checkOut->toDateString();
+
         $period = $this->buildPeriod(
             $checkIn,
             $checkOut
@@ -56,6 +59,11 @@ class BookingService
             $this->ensureRoomsBelongToHotel(
                 $rooms,
                 $data['hotel_id']
+            );
+
+            $this->ensureGuestCapacity(
+                $rooms,
+                $data['items']
             );
 
             /*
@@ -130,7 +138,7 @@ class BookingService
 
     private function validatePeriod(Carbon $checkIn, Carbon $checkOut): void
     {
-        if ($checkIn->isPast()) {
+        if ($checkIn->lessThan(Carbon::today())) {
             throw new BookingException(
                 'Check-in date cannot be in the past.'
             );
@@ -264,11 +272,32 @@ class BookingService
         return $boardType;
     }
 
-    private function ensureAvailability(EloquentCollection $rooms, Collection $inventories, Collection $period, array $items): void
+    private function ensureGuestCapacity(EloquentCollection $rooms, array $items): void
     {
         foreach ($items as $item) {
 
             $room = $rooms[$item['room_id']];
+
+            // Guest counts are totals for this booking item, across its rooms.
+            $guests = $item['adults'] + ($item['children'] ?? 0);
+
+            if ($guests > $room->capacity * $item['quantity']) {
+                throw new BookingException(
+                    "The number of guests exceeds the capacity of room {$room->name}."
+                );
+            }
+        }
+    }
+
+    private function ensureAvailability(EloquentCollection $rooms, Collection $inventories, Collection $period, array $items): void
+    {
+        $quantities = collect($items)
+            ->groupBy('room_id')
+            ->map(fn ($roomItems) => $roomItems->sum('quantity'));
+
+        foreach ($quantities as $roomId => $quantity) {
+
+            $room = $rooms[$roomId];
 
             $roomInventories = $inventories[$room->id] ?? collect();
 
@@ -281,7 +310,7 @@ class BookingService
                     ? $inventory->available
                     : $room->total_units;
 
-                if ($available < $item['quantity']) {
+                if ($available < $quantity) {
 
                     throw new BookingException(
                         "Room {$room->name} does not have enough availability."
@@ -373,7 +402,7 @@ class BookingService
 
                 'adults' => $item['adults'],
 
-                'children' => $item['children'],
+                'children' => $item['children'] ?? 0,
 
                 'price_per_night' => $totalPerUnit / $period->count(),
 

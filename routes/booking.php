@@ -36,7 +36,7 @@ Route::controller(BookingController::class)
 
         Route::post('/booking', 'store')->name('store');
 
-        Route::get('/booking/{booking}/success', 'success')->name('success');
+        Route::get('/booking/{booking}/success', 'success')->middleware('signed')->name('success');
 
 });
 

@@ -31,7 +31,7 @@ Route::get('/hotels/{hotel}/availability', [BookingController::class, 'availabil
 
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
 
-Route::get('/booking/{booking}/success', [BookingController::class, 'success'])->name('booking.success');
+Route::get('/booking/{booking}/success', [BookingController::class, 'success'])->middleware('signed')->name('booking.success');
 
 // AUTH:
 

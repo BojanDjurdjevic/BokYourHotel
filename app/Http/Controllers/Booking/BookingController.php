@@ -10,6 +10,7 @@ use App\Models\Hotel;
 use App\Services\AvailabilityService;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class BookingController extends Controller
 {
@@ -38,7 +39,7 @@ class BookingController extends Controller
             );
 
             return response()->json([
-                'redirect' => route(
+                'redirect' => URL::signedRoute(
                     'booking.success',
                     $booking
                 ),
@@ -73,12 +74,12 @@ class BookingController extends Controller
         $request->validate([
             'check_in' => [
                 'required',
-                'date',
+                'date_format:Y-m-d',
             ],
 
             'check_out' => [
                 'required',
-                'date',
+                'date_format:Y-m-d',
                 'after:check_in',
             ],
         ]);
