@@ -2,6 +2,7 @@
     <div class="max-w-2xl mx-auto bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6">
         <h1 class="text-3xl font-bold">Fake checkout</h1>
         @include('booking._deadline')
+        <a class="text-blue-400" href="{{ request()->routeIs('guest.payments.*') ? \Illuminate\Support\Facades\URL::temporarySignedRoute('guest.bookings.voucher', $booking->check_out->copy()->endOfDay(), $booking) : route('bookings.voucher', $booking) }}">Download / print voucher</a>
         <p class="text-amber-300">Development simulation only. No money is charged. Never enter card details.</p>
         <dl class="space-y-3">
             <div><dt class="text-gray-400">Booking number</dt><dd>{{ $booking->booking_number }}</dd></div>

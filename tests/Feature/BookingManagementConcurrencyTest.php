@@ -96,7 +96,11 @@ class BookingManagementConcurrencyTest extends TestCase
                 $process->setTimeout(60);
                 $processes[] = $process;
                 $process->start();
-                $process->waitUntil(fn () => str_contains($process->getOutput(), 'READY:'));
+                // Check buffered output too: on Windows READY may be read before waitUntil installs its callback.
+                while (! str_contains($process->getOutput(), 'READY:') && $process->isRunning()) {
+                    $process->checkTimeout();
+                    usleep(10000);
+                }
                 $this->assertMatchesRegularExpression('/READY:(\d+)/', $process->getOutput(), $process->getErrorOutput());
                 preg_match('/READY:(\d+)/', $process->getOutput(), $match);
                 $threads[] = (int) $match[1];

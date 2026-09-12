@@ -4,7 +4,8 @@
         x-data="bookingPage({
             hotelId: {{ $hotel->id }},
             availabilityUrl: '{{ route('booking.availability', $hotel) }}',
-            storeUrl: '{{ route('booking.store') }}'
+            storeUrl: '{{ route('booking.store') }}',
+            prefill: @js($prefill)
         })"
         class="max-w-6xl mx-auto py-8"
     >
@@ -1310,8 +1311,8 @@
                 availabilityUrl: config.availabilityUrl,
                 storeUrl: config.storeUrl,
 
-                checkIn: '',
-                checkOut: '',
+                checkIn: config.prefill?.check_in || '',
+                checkOut: config.prefill?.check_out || '',
 
                 rooms: [],
                 nights: 0,
@@ -1523,9 +1524,9 @@
 
                         quantity: quantity,
 
-                        adults: 1,
+                        adults: Number(config.prefill?.adults || 1),
 
-                        children: 0,
+                        children: Number(config.prefill?.children || 0),
 
                         // Frontend display data:
 

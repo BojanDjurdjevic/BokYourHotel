@@ -54,6 +54,7 @@ class FakePaymentService
 
             if ($payment->status === PaymentStatus::Paid) {
                 $booking->update(['locked_until' => null]);
+                \App\Events\BookingActivity::record($booking, \App\Enums\BookingNoticeType::PaymentSucceeded);
             }
 
             return $payment;
@@ -82,7 +83,7 @@ class FakePaymentService
     }
 
     // Internal cancellation operation: caller holds the booking lock in this transaction.
-    public function refundForCancellation(Booking $booking): void
+    public function refundForCancellation(Booking $booking): bool
     {
         if (DB::transactionLevel() === 0) {
             throw new \LogicException('Refund requires the booking cancellation transaction.');
@@ -96,7 +97,9 @@ class FakePaymentService
                 'refunded_at' => now(),
                 'refund_reference' => (string) Str::uuid(),
             ]);
+            return true;
         }
+        return false;
     }
 
     private function authorize(Booking $booking, ?User $actor): void

@@ -15,8 +15,11 @@ $customer = App\Models\User::where('email', 'user@demo.bookyourhotel.test')->fir
 $admin = App\Models\User::where('email', 'admin@demo.bookyourhotel.test')->first();
 $customerBooking = $customer ? App\Models\Booking::where('user_id', $customer->id)->first() : null;
 $supplierBooking = $ownedHotel ? App\Models\Booking::where('hotel_id', $ownedHotel->id)->first() : null;
+$searchRequest = App\Http\Requests\HotelSearchRequest::createFrom($request);
+$searchRequest->setContainer(app())->setRedirector(app('redirect'));
+$searchRequest->validateResolved();
 $cases = [
- 'public_listing'=>fn()=>app(App\Http\Controllers\PublicHotelController::class)->index($request),
+ 'public_listing'=>fn()=>app(App\Http\Controllers\PublicHotelController::class)->index($searchRequest, app(App\Services\HotelSearchService::class)),
  'supplier_hotels'=>fn()=>app(App\Http\Controllers\Supplier\HotelController::class)->index(),
  'supplier_dashboard'=>fn()=>app(App\Http\Controllers\SupplierController::class)->index(),
  'bookings_index'=>fn()=>app(App\Http\Controllers\Booking\BookingManagementController::class)->index($request),

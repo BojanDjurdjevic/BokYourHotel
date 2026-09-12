@@ -11,6 +11,7 @@ class AddHotelRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:64',
+            'star_rating' => 'nullable|integer|between:1,5',
             'country' => 'required|string|min:3|max:64',
             'city' => 'required|string|min:3|max:64',
             'address' => 'required|string|max:128',

@@ -172,7 +172,8 @@ class ReadinessHardeningTest extends TestCase
         DB::enableQueryLog();
         DB::flushQueryLog();
         $response = $this->get(route('supplier.hotels.rooms.index', $this->hotel))->assertOk();
-        $this->assertLessThanOrEqual(7, collect(DB::getQueryLog())->filter(fn ($q) => str_starts_with(strtolower($q['query']), 'select'))->count());
+        // One additional bounded query supplies the authenticated navigation unread count.
+        $this->assertLessThanOrEqual(8, collect(DB::getQueryLog())->filter(fn ($q) => str_starts_with(strtolower($q['query']), 'select'))->count());
         $this->assertCount(12, $response->viewData('rooms'));
         $this->assertSame(16, $response->viewData('rooms')->total());
         DB::disableQueryLog();

@@ -7,14 +7,12 @@ use Illuminate\Http\Request;
 
 class PublicHotelController extends Controller
 {
-    public function index(Request $request)
+    public function index(\App\Http\Requests\HotelSearchRequest $request, \App\Services\HotelSearchService $search)
     {
-        $data = $request->validate(['city' => ['nullable', 'string', 'max:64']]);
-        $hotels = Hotel::where('published', true)
-            ->when($data['city'] ?? null, fn ($query, $city) => $query->where('city', 'like', '%'.$city.'%'))
-            ->with('featuredImage')->withCount('rooms')->orderBy('name')->paginate(12)->withQueryString();
+        $data = $request->validated();
+        $hotels = $search->query($data)->paginate(12)->withQueryString();
 
-        return view('hotels.index', compact('hotels'));
+        return view('hotels.index', compact('hotels') + $search->options());
     }
 
     public function show(Hotel $hotel)

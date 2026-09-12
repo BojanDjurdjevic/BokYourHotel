@@ -25,6 +25,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Event::listen(\App\Events\BookingActivity::class, [\App\Notifications\SendBookingNotice::class, 'handle']);
+        \Illuminate\Support\Facades\View::composer('layouts.partials.navigation-links', function ($view) {
+            $request = request();
+            if (auth()->check() && !$request->attributes->has('notificationUnread')) {
+                $request->attributes->set('notificationUnread', auth()->user()->unreadNotifications()->count());
+            }
+            $view->with('notificationUnread', $request->attributes->get('notificationUnread', 0));
+        });
         RateLimiter::for('availability', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
         RateLimiter::for('booking-create', fn (Request $request) => [
             Limit::perMinute(10)->by('minute:'.$request->ip()),

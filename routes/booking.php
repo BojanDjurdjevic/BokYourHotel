@@ -17,6 +17,7 @@ Route::get('/booking/{booking}/success', [BookingController::class, 'success'])-
 // Guest booking management:
 
 Route::middleware('signed')->group(function () {
+    Route::get('/guest/bookings/{booking}/voucher', \App\Http\Controllers\Booking\VoucherController::class)->name('guest.bookings.voucher');
     Route::get('/guest/bookings/{booking}/checkout', [PaymentController::class, 'show'])->name('guest.payments.show');
     Route::post('/guest/bookings/{booking}/payment', [PaymentController::class, 'submit'])->middleware('throttle:booking-action')->name('guest.payments.submit');
     Route::post('/guest/bookings/{booking}/payment/retry', [PaymentController::class, 'retry'])->middleware('throttle:booking-action')->name('guest.payments.retry');
@@ -31,6 +32,7 @@ Route::middleware('auth')->controller(PaymentController::class)->group(function 
 });
 
 Route::middleware('auth')->controller(BookingManagementController::class)->group(function () {
+    Route::get('/bookings/{booking}/voucher', \App\Http\Controllers\Booking\VoucherController::class)->name('bookings.voucher');
     Route::get('/bookings', 'index')->name('bookings.index');
     Route::get('/bookings/{booking}', 'show')->name('bookings.show');
     Route::post('/bookings/{booking}/cancel', 'cancel')->middleware('throttle:booking-action')->name('bookings.cancel');

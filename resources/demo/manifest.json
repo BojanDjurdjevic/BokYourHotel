@@ -1,5 +1,316 @@
 {
-    "version": 1,
-    "categories": ["exterior", "lobby", "standard-room", "deluxe-room", "suite", "bathroom", "pool", "restaurant", "spa", "city-view"],
-    "assets": []
+    "version": 2,
+    "categories": [
+        "exterior-city",
+        "exterior-resort",
+        "lobby-modern",
+        "lobby-classic",
+        "reception",
+        "restaurant",
+        "breakfast",
+        "pool",
+        "rooftop",
+        "spa",
+        "gym",
+        "standard",
+        "deluxe",
+        "twin",
+        "king",
+        "suite",
+        "family",
+        "bathroom",
+        "balcony",
+        "city-view",
+        "sea-view"
+    ],
+    "assets": [
+        {
+            "filename": "exterior-city/exterior-city-01.webp",
+            "category": "exterior-city",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "exterior-city/exterior-city-02.webp",
+            "category": "exterior-city",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "exterior-resort/exterior-resort-01.webp",
+            "category": "exterior-resort",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "exterior-resort/exterior-resort-02.webp",
+            "category": "exterior-resort",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "lobby-modern/lobby-modern-01.webp",
+            "category": "lobby-modern",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "lobby-modern/lobby-modern-02.webp",
+            "category": "lobby-modern",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "lobby-classic/lobby-classic-01.webp",
+            "category": "lobby-classic",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "lobby-classic/lobby-classic-02.webp",
+            "category": "lobby-classic",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "reception/reception-01.webp",
+            "category": "reception",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "reception/reception-02.webp",
+            "category": "reception",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "restaurant/restaurant-01.webp",
+            "category": "restaurant",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "restaurant/restaurant-02.webp",
+            "category": "restaurant",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "breakfast/breakfast-01.webp",
+            "category": "breakfast",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "breakfast/breakfast-02.webp",
+            "category": "breakfast",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "pool/pool-01.webp",
+            "category": "pool",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "pool/pool-02.webp",
+            "category": "pool",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "rooftop/rooftop-01.webp",
+            "category": "rooftop",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "rooftop/rooftop-02.webp",
+            "category": "rooftop",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "spa/spa-01.webp",
+            "category": "spa",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "spa/spa-02.webp",
+            "category": "spa",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "gym/gym-01.webp",
+            "category": "gym",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "gym/gym-02.webp",
+            "category": "gym",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "standard/standard-01.webp",
+            "category": "standard",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "standard/standard-02.webp",
+            "category": "standard",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "deluxe/deluxe-01.webp",
+            "category": "deluxe",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "deluxe/deluxe-02.webp",
+            "category": "deluxe",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "twin/twin-01.webp",
+            "category": "twin",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "twin/twin-02.webp",
+            "category": "twin",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "king/king-01.webp",
+            "category": "king",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "king/king-02.webp",
+            "category": "king",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "suite/suite-01.webp",
+            "category": "suite",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "family/family-01.webp",
+            "category": "family",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "bathroom/bathroom-01.webp",
+            "category": "bathroom",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "balcony/balcony-01.webp",
+            "category": "balcony",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "city-view/city-view-01.webp",
+            "category": "city-view",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        },
+        {
+            "filename": "sea-view/sea-view-01.webp",
+            "category": "sea-view",
+            "source_type": "generated-demo-asset",
+            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
+            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
+            "approved": false
+        }
+    ]
 }

@@ -1,5 +1,6 @@
 <a href="{{ route('hotels.index') }}" class="text-gray-300 hover:text-white">Hotels</a>
 @auth
+    <a href="{{ route('notifications.index') }}" class="text-gray-300 hover:text-white">Notifications ({{ $notificationUnread }})</a>
     <a href="{{ route('dashboard') }}" class="text-gray-300 hover:text-white">Dashboard</a>
     <a href="{{ route('bookings.index') }}" class="text-gray-300 hover:text-white">Bookings</a>
     @if(auth()->user()->isSupplier())

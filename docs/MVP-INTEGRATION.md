@@ -1,3 +1,5 @@
+> Latest phase (2026-09-13): [Search, notifications, vouchers and fictional media](SEARCH-NOTIFICATIONS-VOUCHERS.md). Historical missing-email/search/voucher findings below are superseded by that report; the documented FK/account-deletion P1 remains open.
+
 # BookYourHotel — MVP integration audit
 
 Audit i implementacija: 12.09.2026. Ovo je portfolio MVP sa simuliranim plaćanjima, ne production release.

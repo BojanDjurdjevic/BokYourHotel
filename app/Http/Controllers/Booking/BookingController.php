@@ -19,7 +19,7 @@ class BookingController extends Controller
         private AvailabilityService $availabilityService,
     ) {}
 
-    public function show(Hotel $hotel)
+    public function show(Hotel $hotel, \App\Http\Requests\HotelSearchRequest $request)
     {
         abort_unless($hotel->published, 404);
         $hotel->load([
@@ -28,7 +28,8 @@ class BookingController extends Controller
             'rooms.roomType',
         ]);
 
-        return view('booking.show', compact('hotel'));
+        $prefill = $request->safe()->only('check_in', 'check_out', 'adults', 'children');
+        return view('booking.show', compact('hotel', 'prefill'));
     }
 
     public function store(CreateBookingRequest $request)

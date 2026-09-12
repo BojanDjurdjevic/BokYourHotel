@@ -64,7 +64,7 @@ class DemoSeeder extends Seeder
                         'description' => 'Fictional upscale portfolio hotel with spacious rooms, a quiet lounge and thoughtfully designed guest spaces. Not a real property.',
                         'facilities' => ['Wi-Fi', 'Restaurant', 'Pool'],
                     ]);
-                    $hotel->forceFill(['published' => true])->save();
+                    $hotel->forceFill(['published' => true, 'star_rating' => $variant ? 4 : 5])->save();
                     $counts['hotel_ids'][] = $hotel->id;
                     $counts['hotels']++;
                     $rooms = [];

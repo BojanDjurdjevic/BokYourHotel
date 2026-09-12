@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Enums\BookingStatus;
+use App\Enums\BookingNoticeType;
+use App\Events\BookingActivity;
 use App\Exceptions\BookingException;
 use App\Models\BoardType;
 use App\Models\Booking;
@@ -134,6 +136,7 @@ class BookingService
                 $rooms
             );
 
+            BookingActivity::record($booking, BookingNoticeType::BookingCreated);
             return $booking;
         }, 3);
     }
@@ -547,6 +550,7 @@ class BookingService
             }
 
             $booking->update(['status' => BookingStatus::Confirmed, 'locked_until' => null]);
+            BookingActivity::record($booking, BookingNoticeType::BookingConfirmed);
 
             return $booking;
         }, 3);
@@ -596,7 +600,7 @@ class BookingService
                 throw new BookingException('Cancellation is allowed only until the start of the day before check-in.');
             }
 
-            app(FakePaymentService::class)->refundForCancellation($booking);
+            $refunded = app(FakePaymentService::class)->refundForCancellation($booking);
 
             $this->restoreAvailability(
                 $booking
@@ -614,6 +618,8 @@ class BookingService
 
             ]);
 
+            BookingActivity::record($booking, BookingNoticeType::BookingCancelled, $reason);
+            if ($refunded) BookingActivity::record($booking, BookingNoticeType::PaymentRefunded, $reason);
             return $booking;
         }, 3);
     }
@@ -631,6 +637,7 @@ class BookingService
 
             $this->restoreAvailability($booking);
             $booking->update(['status' => BookingStatus::Expired]);
+            BookingActivity::record($booking, BookingNoticeType::BookingExpired);
             return true;
         }, 3);
     }

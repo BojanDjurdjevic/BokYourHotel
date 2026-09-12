@@ -9,6 +9,9 @@
     <form method="POST" action="{{ route('supplier.hotels.update', $hotel) }}">
         @csrf
         @method('PUT')
+        <label class="block mb-4">Property star rating (not guest reviews)
+            <select name="star_rating" class="block rounded-lg bg-gray-900"><option value="">Not rated</option>@foreach(range(1,5) as $star)<option value="{{ $star }}" @selected(old('star_rating',$hotel->star_rating) == $star)>{{ $star }} stars</option>@endforeach</select>
+        </label>
         {{-- NAME --}}
         <div class="mb-4">
             <label class="block mb-1">Hotel Name</label>

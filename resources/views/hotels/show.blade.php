@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="space-y-8">
-        <a href="{{ route('hotels.index') }}" class="text-blue-400">Back to hotels</a>
+        <a href="{{ route('hotels.index', request()->query()) }}" class="text-blue-400">Back to hotels</a>
         <div><h1 class="text-3xl font-bold">{{ $hotel->name }}</h1><p class="mt-2 text-gray-400">{{ $hotel->address }}, {{ $hotel->city }}, {{ $hotel->country }}</p></div>
         @if($hotel->images->isNotEmpty())
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -10,7 +10,7 @@
             </div>
         @endif
         <p class="text-gray-300 whitespace-pre-line">{{ $hotel->description }}</p>
-        <a href="{{ route('booking.show', $hotel) }}" class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl">Check availability and book</a>
+        <a href="{{ route('booking.show', ['hotel' => $hotel] + request()->only('check_in','check_out','adults','children')) }}" class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl">Check availability and book</a>
         <h2 class="text-2xl font-semibold">Rooms</h2>
         <p class="text-gray-400">Choose dates to see current availability and the final price for your stay.</p>
         <div class="grid md:grid-cols-2 gap-6">

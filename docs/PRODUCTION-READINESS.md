@@ -1,3 +1,5 @@
+> Latest phase (2026-09-13): [Search, notifications, vouchers and fictional media](SEARCH-NOTIFICATIONS-VOUCHERS.md). Historical missing-email/search/voucher findings below are superseded by that report; the documented FK/account-deletion P1 remains open.
+
 # Production readiness — baseline i plan
 
 Datum audita: 2026-09-12. Aplikacija nije proglašena production-ready.

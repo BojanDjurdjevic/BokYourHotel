@@ -3,6 +3,7 @@
         <h1 class="text-3xl font-bold mb-2">Manage booking</h1>
         <p class="text-gray-400 mb-6">{{ $booking->booking_number }}</p>
         @include('booking._deadline')
+        <a class="inline-block text-blue-400 mb-4" href="{{ $guestManagement ? \Illuminate\Support\Facades\URL::temporarySignedRoute('guest.bookings.voucher', $booking->check_out->copy()->endOfDay(), $booking) : route('bookings.voucher', $booking) }}">Download / print voucher</a>
 
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6">
             <div class="flex flex-wrap justify-between gap-3">

@@ -11,6 +11,7 @@ class Hotel extends Model
     protected $fillable = [
         'supplier_id',
         'name', 
+        'star_rating',
         'city', 
         'country',
         'address', 
