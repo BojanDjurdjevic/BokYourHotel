@@ -8,122 +8,115 @@ use App\Http\Controllers\Supplier\RoomInventoryController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth','role:supplier'])
-    ->prefix('supplier')
-    ->name('supplier.')
-    ->group(function () {
-
-        Route::controller(SupplierController::class)->group(function() {
-            Route::get('/dashboard', 'index')
+Route::middleware(['auth', 'role:supplier'])->prefix('supplier')->name('supplier.')->group(function () {
+    Route::controller(SupplierController::class)->group(function () {
+        Route::get('/dashboard', 'index')
             ->name('dashboard');
-            
-            
-        });
-        Route::get('/myhotels', function() {
-             return view('supplier.hotels.index');
-        })->name('myhotels');
-        Route::get('/bookings', function() {
-             return view('supplier.bookings.confirmed');
-        })->name('bookings');
-        Route::get('/pending', function() {
-             return view('supplier.bookings.pending');
-        })->name('pending');
-        Route::get('/revenue', function() {
-             return view('supplier.revenue');
-        })->name('revenue');
+    });
 
-        //Setup wizard routes:
+    Route::get('/myhotels', function () {
+        return view('supplier.hotels.index');
+    })->name('myhotels');
 
-        Route::get(
-            '/hotels/{hotel}/setup',
-            [HotelSetupController::class,'info']
-        )->name('hotels.setup.info');
+    Route::get('/bookings', function () {
+        return view('supplier.bookings.confirmed');
+    })->name('bookings');
 
-        Route::get(
-            '/hotels/{hotel}/setup/rooms',
-            [HotelSetupController::class,'rooms']
-        )->name('hotels.setup.rooms');
+    Route::get('/pending', function () {
+        return view('supplier.bookings.pending');
+    })->name('pending');
 
-        Route::get(
-            '/hotels/{hotel}/setup/inventory',
-            [HotelSetupController::class,'inventory']
-        )->name('hotels.setup.inventory');
+    Route::get('/revenue', function () {
+        return view('supplier.revenue');
+    })->name('revenue');
 
-        // Calendar
+    // Hotel setup:
 
-        Route::get(
+    Route::get(
+        '/hotels/{hotel}/setup',
+        [HotelSetupController::class,'info']
+    )->name('hotels.setup.info');
+
+    Route::get(
+        '/hotels/{hotel}/setup/rooms',
+        [HotelSetupController::class,'rooms']
+    )->name('hotels.setup.rooms');
+
+    Route::get(
+        '/hotels/{hotel}/setup/inventory',
+        [HotelSetupController::class,'inventory']
+    )->name('hotels.setup.inventory');
+
+    // Inventory calendar:
+
+    Route::get(
         '/hotels/{hotel}/inventory-calendar',
         [RoomInventoryController::class,'index']
-        )->name('inventory.calendar');
+    )->name('inventory.calendar');
 
-        Route::get(
+    Route::get(
         '/hotels/{hotel}/inventory-calendar/data',
         [RoomInventoryController::class,'monthData']
-        )->name('inventory.calendar.data');
+    )->name('inventory.calendar.data');
 
-        Route::post(
-            '/hotels/{hotel}/inventory',
-            [HotelSetupController::class,'storeInventory']
-        )->name('hotels.inventory.store');
+    Route::post(
+        '/hotels/{hotel}/inventory',
+        [HotelSetupController::class,'storeInventory']
+    )->name('hotels.inventory.store');
 
-        Route::post(
+    Route::post(
         '/inventory/update-day',
         [RoomInventoryController::class,'updateDay']
-        )->name('inventory.update');
+    )->name('inventory.update');
 
-        // Images
+    // Hotel images and publishing:
 
-        //Route::livewire('hotels/{hotel}/setup/images', 'hotel-images-manager');
+    Route::get(
+        '/hotels/{hotel}/setup/images',
+        [HotelSetupController::class,'images']
+    )->name('hotels.setup.images');
 
-        Route::get(
-            '/hotels/{hotel}/setup/images',
-            [HotelSetupController::class,'images']
-        )->name('hotels.setup.images'); 
-        
+    Route::get(
+        '/hotels/{hotel}/setup/publish',
+        [HotelSetupController::class,'publish']
+    )->name('hotels.setup.publish');
 
-        Route::get(
-            '/hotels/{hotel}/setup/publish',
-            [HotelSetupController::class,'publish']
-        )->name('hotels.setup.publish');
+    Route::put(
+        '/hotels/{hotel}/setup/publish-my-hotel',
+        [HotelSetupController::class, 'publishHotel']
+    )->name('hotels.setup.publishHotel');
 
-        Route::put(
-            '/hotels/{hotel}/setup/publish-my-hotel',
-            [HotelSetupController::class, 'publishHotel']
-        )->name('hotels.setup.publishHotel');
+    // Hotel and room resources:
 
-        
+    Route::resource('hotels', HotelController::class);
 
-        //Resource:
+    Route::resource('hotels.rooms', RoomController::class);
 
-        Route::resource('hotels', HotelController::class);
+    // Room setup:
+    Route::get(
+        '/rooms/{room}/images/index', [RoomSetupController::class, 'images']
+    )->name('rooms.images.index');
 
-        Route::resource('hotels.rooms', RoomController::class);
-
-        // NEW ROOM ROUTES
-        Route::get(
-            '/rooms/{room}/images/index', [RoomSetupController::class, 'images']
-        )->name('rooms.images.index');
-
-        Route::post('/rooms/{room}/images/store', [RoomSetupController::class, 'storeImages'])
+    Route::post('/rooms/{room}/images/store', [RoomSetupController::class, 'storeImages'])
         ->name('rooms.images.store');
 
-        Route::get(
-            '/rooms/{room}/facilities', [RoomSetupController::class, 'facilities']
-        )->name('rooms.facilities');
+    Route::get(
+        '/rooms/{room}/facilities', [RoomSetupController::class, 'facilities']
+    )->name('rooms.facilities');
 
-        Route::put(
-            '/rooms/{room}/facilities-update', [RoomSetupController::class, 'facilitiesUpdate']
-        )->name('rooms.facilities.update');
-            
-        Route::get(
-            '/rooms/{room}/inventory/index', [RoomSetupController::class, 'inventory']
-        )->name('rooms.inventory');
+    Route::put(
+        '/rooms/{room}/facilities-update', [RoomSetupController::class, 'facilitiesUpdate']
+    )->name('rooms.facilities.update');
 
-        Route::put(
-            '/rooms/{room}/inventory-update', [RoomSetupController::class, 'inventoryUpdate']
-        )->name('rooms.inventory.update');
+    Route::get(
+        '/rooms/{room}/inventory/index', [RoomSetupController::class, 'inventory']
+    )->name('rooms.inventory');
 
-        Route::put(
-            '/rooms/{room}/inventory/bulk', [RoomSetupController::class, 'bulkUpdate']
-        )->name('rooms.inventory.bulk');
+    Route::put(
+        '/rooms/{room}/inventory-update', [RoomSetupController::class, 'inventoryUpdate']
+    )->name('rooms.inventory.update');
+
+    Route::put(
+        '/rooms/{room}/inventory/bulk', [RoomSetupController::class, 'bulkUpdate']
+    )->name('rooms.inventory.bulk');
 });
