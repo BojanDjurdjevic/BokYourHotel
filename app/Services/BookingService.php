@@ -442,7 +442,7 @@ class BookingService
         ]);
     }
 
-    private function createBookingItems(Booking $booking, Collection $items): void
+    private function createBookingItems(Booking $booking, array $items): void
     {
         $booking->items()->createMany($items);
     }

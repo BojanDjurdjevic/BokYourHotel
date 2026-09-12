@@ -1,4 +1,4 @@
-<x-layouts.dashboard>
+<x-app-layout>
 
     <div
         x-data="bookingPage({
@@ -1659,4 +1659,4 @@
         }
     </script>
 
-</x-layouts.dashboard>
+</x-app-layout>
