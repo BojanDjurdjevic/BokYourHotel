@@ -411,6 +411,8 @@ class BookingService
 
             'hotel_id' => $data['hotel_id'],
 
+            'user_id' => auth()->id(),
+
             'booking_number' => $this->generateBookingNumber(),
 
             'guest_name' => $data['guest_name'],

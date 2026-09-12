@@ -27,3 +27,7 @@ plan.txt
 composer.lock
 
 myNotes.txt
+
+boost.json
+config.toml
+.codex/
