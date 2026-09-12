@@ -7,6 +7,11 @@ use App\Models\User;
 
 class BookingPolicy
 {
+    public function pay(User $user, Booking $booking): bool
+    {
+        return $booking->user_id === $user->id;
+    }
+
     public function viewAny(User $user): bool
     {
         return true;

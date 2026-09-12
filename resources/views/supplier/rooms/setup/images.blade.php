@@ -20,6 +20,7 @@
             >
 
                 @csrf
+                <x-input-error :messages="$errors->all()" />
 
                 <input type="file" name="images[]" multiple
                 class="mb-4">

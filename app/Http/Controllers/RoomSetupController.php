@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 use App\Models\Facility;
 use App\Models\Hotel;
 use App\Models\Room;
@@ -14,6 +15,7 @@ class RoomSetupController extends Controller
 {
     public function images(Room $room)
     {
+        Gate::authorize('update', $room->hotel);
         $hotel = $room->hotel;
 
         return view('supplier.rooms.setup.images', compact('hotel', 'room'));
@@ -21,12 +23,18 @@ class RoomSetupController extends Controller
 
     public function storeImages(Request $request, Room $room)
     {
+        Gate::authorize('update', $room->hotel);
+        $request->validate([
+            'images' => ['required', 'array', 'max:10'],
+            'images.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+        ]);
         foreach ($request->file('images', []) as $file) {
 
             $path = $file->store("rooms/{$room->id}", 'public');
 
             $room->images()->create([
-                'path' => $path
+                'path' => $path,
+                'is_featured' => ! $room->images()->where('is_featured', true)->exists(),
             ]);
         }
 
@@ -35,6 +43,7 @@ class RoomSetupController extends Controller
 
     public function facilities(Room $room)
     {
+        Gate::authorize('update', $room->hotel);
         $hotel = $room->hotel;
         $facilities = Facility::all();
 
@@ -45,6 +54,8 @@ class RoomSetupController extends Controller
 
     public function facilitiesUpdate(Request $request, Room $room)
     {
+        Gate::authorize('update', $room->hotel);
+        $request->validate(['facilities' => ['nullable', 'array'], 'facilities.*' => ['integer', 'exists:facilities,id']]);
          $room->facilities()->sync(
             $request->facilities ?? []
         );
@@ -56,6 +67,8 @@ class RoomSetupController extends Controller
 
     public function inventory(Room $room, Request $request)
     {
+        Gate::authorize('update', $room->hotel);
+        $request->validate(['month' => ['nullable', 'date_format:Y-m']]);
         $hotel = $room->hotel;
 
         $month = $request->month
@@ -118,6 +131,7 @@ class RoomSetupController extends Controller
 
     public function inventoryUpdate(Request $request, Room $room)
     {
+        Gate::authorize('update', $room->hotel);
         $request->validate([
             'date' => 'required|date',
             'available' => 'required|integer|min:0',
@@ -141,6 +155,7 @@ class RoomSetupController extends Controller
 
     public function bulkUpdate(Request $request, Room $room)
     {
+        Gate::authorize('update', $room->hotel);
         $mydata = $request->validate([
             'from' => 'required|date',
             'to' => 'required|date|after_or_equal:from',

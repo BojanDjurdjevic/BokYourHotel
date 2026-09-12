@@ -32,6 +32,14 @@
             <main class="flex-1">
                 @include('components.session-message')
                 <div class="max-w-7xl mx-auto px-6 py-10">
+                    @if($errors->any())
+                        <div role="alert" class="mb-6 rounded-xl border border-red-800 bg-red-950 p-4">
+                            <p class="font-semibold mb-2">Please check the following:</p>
+                            <ul class="list-disc pl-5">
+                                @foreach($errors->all() as $message)<li>{{ $message }}</li>@endforeach
+                            </ul>
+                        </div>
+                    @endif
                     {{ $slot }}
                 </div>
             </main>

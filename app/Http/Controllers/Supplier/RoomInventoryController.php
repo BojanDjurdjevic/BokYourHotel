@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supplier;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use App\Models\Hotel;
 use App\Models\Room;
@@ -14,8 +15,13 @@ class RoomInventoryController extends Controller
 
     public function index(Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
 
         $rooms = $hotel->rooms()->select('id','name')->get();
+
+        if ($rooms->isEmpty()) {
+            return redirect()->route('supplier.hotels.rooms.index', $hotel)->with('error', 'Add a room before opening inventory.');
+        }
 
         return view(
             'supplier.inventory.calendar',
@@ -27,6 +33,9 @@ class RoomInventoryController extends Controller
 
     public function monthData(Request $request, Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
+        $request->validate(['room_id' => ['required', 'integer'], 'month' => ['required', 'date_format:Y-m']]);
+        $room = $hotel->rooms()->findOrFail($request->room_id);
 
         $roomId = $request->room_id;
 
@@ -55,8 +64,8 @@ class RoomInventoryController extends Controller
         $days[] = [
 
             'date' => $date,
-            'available' => $row?->available ?? 0,
-            'price' => $row?->price ?? 0
+            'available' => $row?->available ?? $room->total_units,
+            'price' => $row?->price ?? $room->price_per_night
 
         ];
 
@@ -80,6 +89,8 @@ class RoomInventoryController extends Controller
             'price'=>'required|numeric|min:0'
 
         ]);
+
+        Gate::authorize('update', Room::findOrFail($request->room_id)->hotel);
 
         RoomInventory::updateOrCreate(
 

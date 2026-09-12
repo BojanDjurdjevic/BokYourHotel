@@ -16,6 +16,7 @@
             </p>
 
             <dl class="rounded-xl bg-gray-800 p-5 space-y-5">
+                <div><dt class="text-sm text-gray-400">Payment (simulation)</dt><dd>{{ ucfirst($booking->payment?->status->value ?? 'not started') }}</dd></div>
                 <div>
                     <dt class="text-sm text-gray-400">Booking number</dt>
                     <dd class="text-xl font-semibold mt-1 break-all">
@@ -39,6 +40,7 @@
 
             <div class="mt-8">
                 @if($booking->user_id === null && now()->lessThanOrEqualTo($booking->check_out->copy()->endOfDay()))
+                    <p class="text-sm text-gray-400 mb-4">Save the private management link below to return without an account. Anyone with this link can manage this booking. The link expires at the end of your check-out day.</p>
                     <a href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('guest.bookings.show', $booking->check_out->copy()->endOfDay(), $booking) }}"
                        class="inline-block px-6 py-3 mb-3 rounded-xl bg-green-600 hover:bg-green-500 font-semibold">
                         Manage booking

@@ -2,7 +2,7 @@
     $steps = $hotel->setupChecklist();
 @endphp
 
-<div class="flex gap-6 border-b pb-4 mb-6 text-sm">
+<div class="flex flex-wrap gap-6 border-b pb-4 mb-6 text-sm">
 
     <a href="{{ route('supplier.hotels.setup.info',$hotel) }}">
         Hotel Info
@@ -28,6 +28,9 @@
             Publish
             {!! $steps['published'] ? '✓' : '' !!}
         </a>
+    @endif
+    @if($hotel->published)
+        <a href="{{ route('hotels.show', $hotel) }}" class="text-blue-400">Public hotel page</a>
     @endif
     
 

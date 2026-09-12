@@ -16,7 +16,8 @@
     class="overflow-x-auto"
 >
 
-    <div class="flex items-center gap-4 mb-4">
+    <p x-show="error" x-text="error" class="text-red-400 mb-4" role="alert"></p>
+<div class="flex items-center gap-4 mb-4">
 
         <x-button 
             @click="prevMonth"
@@ -284,42 +285,48 @@ function inventoryGrid(config) {
         label: '',
 
         data: '',
+        error: null,
 
         async load() {
-            let res = await fetch(
-                `${this.dataUrl}?month=${this.month.toISOString()}`,
-                {
-                    headers: {
-                        Accept: 'application/json'
+            this.error = null
+            this.dates = []
+            try {
+                let res = await fetch(
+                    `${this.dataUrl}?month=${`${this.month.getFullYear()}-${String(this.month.getMonth() + 1).padStart(2, "0")}`}`,
+                    {
+                        headers: {
+                            Accept: 'application/json'
+                        }
                     }
+                )
+
+                let data = await res.json()
+                if (!res.ok) throw new Error(data.message || 'Could not load inventory.')
+
+                this.data = data
+
+                this.label = data.label
+
+                this.dates = data.dates
+
+                this.cells = {}
+
+                for (const date of data.dates) {
+
+                    const row = data.inventory[date]
+
+                    this.cells[date] = {
+                        available: row
+                            ? row.available
+                            : data.defaults.available,
+
+                        price: row
+                            ? row.price
+                            : data.defaults.price
+                    }
+
                 }
-            )
-
-            let data = await res.json()
-
-            this.data = data
-
-            this.label = data.label
-
-            this.dates = data.dates
-
-            this.cells = {}
-
-            for (const date of data.dates) {
-
-                const row = data.inventory[date]
-
-                this.cells[date] = {
-                    available: row
-                        ? row.available
-                        : data.defaults.available,
-
-                    price: row
-                        ? row.price
-                        : data.defaults.price
-                }
-
-            }
+            } catch (e) { this.error = e.message }
         },
 
         prevMonth() {
@@ -360,8 +367,8 @@ function inventoryGrid(config) {
             this.bulk.open = true
             this.bulk.from = ''
             this.bulk.to = ''
-            this.bulk.available = this.data.defaults.available
-            this.bulk.price = this.data.defaults.price
+            this.bulk.available = this.data.defaults?.available ?? 0
+            this.bulk.price = this.data.defaults?.price ?? 0
         },
 
         edit(date) {
@@ -378,29 +385,20 @@ function inventoryGrid(config) {
         },
 
         async save(date) {
-
-            this.cells[date] = {
-                available: this.form.available,
-                price: this.form.price
-            }
-
-            const response = await fetch(this.updateUrl, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": this.csrf
-                },
-                body: JSON.stringify({
-                    date: date,
-                    available: this.form.available,
-                    price: this.form.price
+            this.error = null
+            try {
+                const response = await fetch(this.updateUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': this.csrf },
+                    body: JSON.stringify({ date, available: this.form.available, price: this.form.price })
                 })
-            })
-
-            this.editing = null
-            this.form = {}
+                const data = await response.json()
+                if (!response.ok) throw new Error(data.message || 'Could not save inventory.')
+                this.editing = null
+                this.form = {}
+                await this.load()
+            } catch (e) { this.error = e.message }
         },
-
         async saveBulk() {
 
             try {
@@ -409,6 +407,7 @@ function inventoryGrid(config) {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
+                        "Accept": "application/json",
                         "X-CSRF-TOKEN": this.csrf
                     },
                     body: JSON.stringify({
@@ -420,7 +419,7 @@ function inventoryGrid(config) {
                 });
 
                 if (!response.ok) {
-                    return;
+                    throw new Error((await response.json()).message || 'Could not save inventory.');
                 }
 
                 await this.load();
@@ -434,7 +433,7 @@ function inventoryGrid(config) {
                 };
 
             } catch (e) {
-                console.error(e);
+                this.error = e.message;
             }
         },
 

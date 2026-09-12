@@ -18,6 +18,7 @@
     class="space-y-6"
 >
 
+<p x-show="error" x-text="error" class="text-red-400" role="alert"></p>
 <select x-model="roomId" @change="load()" class="border rounded p-2 bg-gray-800">
 
 @foreach($rooms as $room)
@@ -100,6 +101,7 @@ rooms
             month:new Date(),
 
             days:[],
+            error: null,
 
             get monthLabel(){
 
@@ -111,16 +113,18 @@ rooms
             },
 
             load() {
+                this.error = null
+                this.days = []
 
-                fetch(`/supplier/hotels/${hotelId}/inventory-calendar/data?room_id=${this.roomId}&month=${this.month.toISOString()}`)
+                fetch(`/supplier/hotels/${hotelId}/inventory-calendar/data?room_id=${this.roomId}&month=${`${this.month.getFullYear()}-${String(this.month.getMonth() + 1).padStart(2, "0")}`}`)
 
-                .then(r=>r.json())
+                .then(async r => { if (!r.ok) throw new Error('Could not load inventory.'); return r.json() })
 
                 .then(data=>{
 
                 this.days=data
 
-                })
+                }).catch(e => { this.error = e.message })
 
             },
 
@@ -155,10 +159,14 @@ rooms
                     day.available
                 )
 
+                if (available === null) return
+
                 let price=prompt(
                     'Price',
                 day.price
                 )
+
+                if (price === null) return
 
                 fetch(
                     '{{ route("supplier.inventory.update") }}',
@@ -168,6 +176,7 @@ rooms
 
                 headers:{
                     'Content-Type':'application/json',
+                    'Accept':'application/json',
                     'X-CSRF-TOKEN':document
                     .querySelector('meta[name=csrf-token]')
                     .content
@@ -187,7 +196,7 @@ rooms
 
         )
 
-        .then(()=>this.load())
+        .then(async response => { if (!response.ok) throw new Error((await response.json()).message || 'Could not save inventory.'); this.load() }).catch(e => { this.error = e.message })
 
         }
 

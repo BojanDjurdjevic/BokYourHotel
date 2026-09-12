@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supplier;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\StoreInventoryRequest;
 use App\Models\Hotel;
 use App\Models\RoomInventory;
@@ -15,11 +16,13 @@ class HotelSetupController extends Controller
 {
     public function info(Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
         return view('supplier.hotels.setup.info', compact('hotel'));
     }
 
     public function rooms(Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
         $rooms = $hotel->rooms;
 
         return view('supplier.rooms.index', compact('hotel','rooms'));
@@ -27,6 +30,7 @@ class HotelSetupController extends Controller
 
     public function inventory(Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
         $rooms = $hotel->rooms()->get();
 
         return view('supplier.hotels.setup.inventory', [
@@ -37,6 +41,7 @@ class HotelSetupController extends Controller
 
     public function storeInventory(Request $request, Hotel $hotel, HotelService $service)
     {
+        Gate::authorize('update', $hotel);
         //dd($request->all());
 
         $request->validate([
@@ -48,6 +53,14 @@ class HotelSetupController extends Controller
         ]); 
 
         $inventory = json_decode($request->inventory_json, true);
+
+        $hotel->rooms()->findOrFail($request->room_id);
+        \Illuminate\Support\Facades\Validator::make(['inventory' => $inventory], [
+            'inventory' => ['required', 'array', 'min:1', 'max:366'],
+            'inventory.*.date' => ['required', 'date_format:Y-m-d', 'distinct'],
+            'inventory.*.available' => ['required', 'integer', 'min:0', 'max:4294967295'],
+            'inventory.*.price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+        ])->validate();
 
         if(!$inventory){
             return back()->withErrors([
@@ -93,6 +106,7 @@ class HotelSetupController extends Controller
 
     public function images(Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
         $images = $hotel->images;
 
         return view('supplier.hotels.setup.images', compact('hotel','images'));
@@ -100,11 +114,16 @@ class HotelSetupController extends Controller
 
     public function publish(Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
         return view('supplier.hotels.setup.publish', compact('hotel'));
     }
 
     public function publishHotel(Hotel $hotel) 
     {
+        Gate::authorize('update', $hotel);
+        if (! $hotel->canBePublished()) {
+            return back()->with('error', 'Complete hotel setup and add board options to every room before publishing.');
+        }
         $hotel->published = 1;
         $hotel->save(); 
 

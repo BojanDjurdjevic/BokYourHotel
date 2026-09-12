@@ -2,6 +2,10 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PublicHotelController;
+
+Route::get('/hotels', [PublicHotelController::class, 'index'])->name('hotels.index');
+Route::get('/hotels/{hotel}', [PublicHotelController::class, 'show'])->name('hotels.show');
 
 Route::get('/', function () {
     return view('welcome');

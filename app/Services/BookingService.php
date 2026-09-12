@@ -590,6 +590,8 @@ class BookingService
                 throw new BookingException('Cancellation is allowed only until the start of the day before check-in.');
             }
 
+            app(FakePaymentService::class)->refundForCancellation($booking);
+
             $this->restoreAvailability(
                 $booking
             );

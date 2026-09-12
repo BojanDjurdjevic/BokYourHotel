@@ -17,6 +17,12 @@
             </dl>
 
             <div class="space-y-3">
+                <p>Payment: {{ ucfirst($booking->payment?->status->value ?? 'not started') }} (simulation)</p>
+                @if($guestManagement || auth()->user()?->can('pay', $booking))
+                    <a class="inline-block text-blue-400 hover:text-blue-300"
+                       href="{{ $guestManagement ? \Illuminate\Support\Facades\URL::temporarySignedRoute('guest.payments.show', $booking->check_out->copy()->endOfDay(), $booking) : route('payments.show', $booking) }}">View payment / checkout</a>
+                @endif
+                <p class="text-sm text-gray-400">An allowed cancellation refunds a paid booking automatically in this simulation.</p>
                 @foreach($booking->items as $item)
                     <div class="rounded-xl bg-gray-800 p-4">
                         <p class="font-semibold">{{ $item->room_name }} · {{ $item->board_name }}</p>

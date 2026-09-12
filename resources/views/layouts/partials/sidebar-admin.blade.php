@@ -1,23 +1,5 @@
-<nav class="space-y-3 text-sm {{ $bgColor }}">
-
-    <a href="#" class="block text-gray-400 hover:text-white transition">
-        Dashboard
-    </a>
-
-    <a href="#" class="block text-gray-400 hover:text-white transition">
-        All Hotels
-    </a>
-
-    <a href="#" class="block text-gray-400 hover:text-white transition">
-        All Bookings
-    </a>
-
-    <a href="#" class="block text-gray-400 hover:text-white transition">
-        Users
-    </a>
-
-    <a href="#" class="block text-indigo-400 hover:text-indigo-300 transition font-medium">
-        System Logs
-    </a>
-
+<nav class="space-y-4">
+    <a href="{{ route('bookings.index') }}" class="block hover:text-blue-300">Booking management</a>
+    <a href="{{ route('hotels.index') }}" class="block hover:text-blue-300">Public hotels</a>
+    <a href="{{ route('profile.edit') }}" class="block hover:text-blue-300">Profile</a>
 </nav>

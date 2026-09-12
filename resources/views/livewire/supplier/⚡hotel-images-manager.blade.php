@@ -3,28 +3,26 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Illuminate\Support\Facades\Gate;
 use Livewire\WithFileUploads;
 use App\Models\Hotel;
 use App\Models\HotelImage;
 use Illuminate\Support\Facades\Storage;
-use App\Traits\HandleImagesUpload;
 use App\Services\HotelService;
 
 // HotelImagesManager
 new class extends Component
 {
     
-    use WithFileUploads, HandleImagesUpload;
+    use WithFileUploads;
 
     public Hotel $hotel;
     protected HotelService $service;
 
     public array $images = [];
 
-    public string $num = '';
-    public string $name = 'Bojan';
-
     protected $rules = [
+        'images' => 'required|array|max:10',
         'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:4096'
     ];
 
@@ -35,18 +33,21 @@ new class extends Component
 
     public function mount(Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
         $this->hotel = $hotel;
         
     }
 
     public function removeTempImage($index)
     {
+        Gate::authorize('update', $this->hotel);
         unset($this->images[$index]);
         $this->images = array_values($this->images);
     }
 
     public function uploadImages()
     {
+        Gate::authorize('update', $this->hotel);
         $this->validate();
 
         /*
@@ -72,29 +73,28 @@ new class extends Component
         $this->reset('images');
     }
 
-    public function showNum()
-    {
-        $this->num = $this->num == '' ? 'Ćaos' : '';
-    }
-
     public function reorderImages($order)
     {
+        Gate::authorize('update', $this->hotel);
         foreach ($order as $index => $id) {
-            HotelImage::where('id', $id)
+            $this->hotel->images()->where('id', $id)
                 ->update(['position' => $index]);
         }
     }
     
     public function setFeatured($imageId)
     {
+        Gate::authorize('update', $this->hotel);
+        $this->hotel->images()->findOrFail($imageId);
         $this->hotel->images()->update(['is_featured' => false]);
         
-        HotelImage::where('id', $imageId)->update(['is_featured' => true]);
+        $this->hotel->images()->where('id', $imageId)->update(['is_featured' => true]);
     }
 
     public function deleteImage($imageId)
     {
-        $image = HotelImage::findOrFail($imageId);
+        Gate::authorize('update', $this->hotel);
+        $image = $this->hotel->images()->findOrFail($imageId);
 
         Storage::disk('public')->delete($image->path);
 
@@ -103,6 +103,7 @@ new class extends Component
 
     public function render()
     {
+        Gate::authorize('update', $this->hotel);
         //$hotelImages = $this->hotel->images()->latest()->get();
     
         $hotelImages = $this->hotel
@@ -112,7 +113,6 @@ new class extends Component
         return $this->view([
             'hotelImages' => $hotelImages,
             'hotel' => $this->hotel,
-            'ime' => $this->name
         ]); 
 
         //return view('hotel-images-manager', compact('hotelImages'));
@@ -122,7 +122,7 @@ new class extends Component
 
 <div class="space-y-6">
     
-    <h1 class="text-red-500">Pozdrav iz livewire</h1>
+    <h2 class="text-xl font-semibold">Hotel images</h2>
 
     {{-- File input --}}
     <div>
@@ -218,19 +218,6 @@ new class extends Component
             @endforeach
         </div>
     </div>
-
-    <p class="text-white">{{ $ime }}</p>
-    <p class="text-white">{{ $num }}</p>
-    <x-button
-        variant="danger"
-        wire:click="showNum"
-    >
-        Kaži ćao
-    </x-button>
-
-    <button wire:click="$set('name', 'Matteo')">
-        Change name
-    </button>
 
 </div>
 

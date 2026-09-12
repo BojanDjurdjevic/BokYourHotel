@@ -17,7 +17,7 @@
 
 <div class="space-y-4">
 
-    @foreach($hotels as $hotel)
+    @forelse($hotels as $hotel)
 
     <a
         href="{{ route('supplier.hotels.setup.info',$hotel) }}"
@@ -66,7 +66,9 @@
 
 </a>
 
-@endforeach
+@empty
+    <p class="text-gray-400">No hotels yet. Add your first hotel to start setup.</p>
+@endforelse
 
 <h2 class="text-lg font-semibold mb-4">
 Setup Required

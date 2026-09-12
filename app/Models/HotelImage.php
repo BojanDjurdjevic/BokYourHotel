@@ -9,6 +9,7 @@ class HotelImage extends Model
     protected $table = "hotel_images";
 
     protected $fillable = [
+        'position',
         'hotel_id',
         'path',
         'is_featured',

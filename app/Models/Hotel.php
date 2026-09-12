@@ -97,6 +97,10 @@ class Hotel extends Model
 
     public function canBePublished(): bool
     {
-        return $this->setupProgress() >= 80;
+        $steps = $this->setupChecklist();
+        unset($steps['published']);
+
+        return ! in_array(false, $steps, true)
+            && ! $this->rooms()->whereDoesntHave('boardTypes')->exists();
     }
 }

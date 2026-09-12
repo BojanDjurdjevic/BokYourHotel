@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Booking;
+use App\Enums\BookingStatus;
 
 class SupplierController extends Controller
 {
@@ -12,7 +14,30 @@ class SupplierController extends Controller
      */
     public function index()
     {
-        return view('supplier.dashboard');
+        $hotelCount = auth()->user()->hotels()->count();
+        $bookings = Booking::whereHas('hotel', fn ($query) => $query->where('supplier_id', auth()->id()));
+        $pendingCount = (clone $bookings)->where('status', BookingStatus::Pending)->count();
+        $confirmedCount = (clone $bookings)->where('status', BookingStatus::Confirmed)->count();
+
+        return view('supplier.dashboard', compact('hotelCount', 'pendingCount', 'confirmedCount'));
+    }
+
+    public function pending()
+    {
+        return $this->bookings(BookingStatus::Pending);
+    }
+
+    public function confirmed()
+    {
+        return $this->bookings(BookingStatus::Confirmed);
+    }
+
+    private function bookings(BookingStatus $status)
+    {
+        $bookings = Booking::whereHas('hotel', fn ($query) => $query->where('supplier_id', auth()->id()))
+            ->where('status', $status)->with(['hotel', 'payment'])->latest()->paginate(15);
+
+        return view('booking.index', ['bookings' => $bookings, 'title' => ucfirst($status->value).' hotel bookings']);
     }
 
     /**

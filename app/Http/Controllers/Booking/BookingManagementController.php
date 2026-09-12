@@ -18,7 +18,7 @@ class BookingManagementController extends Controller
         Gate::authorize('viewAny', Booking::class);
 
         $bookings = Booking::visibleTo($request->user())
-            ->with('hotel')->latest()->paginate(15);
+            ->with(['hotel', 'payment'])->latest()->paginate(15);
 
         return view('booking.index', compact('bookings'));
     }
@@ -26,7 +26,7 @@ class BookingManagementController extends Controller
     public function show(Booking $booking)
     {
         Gate::authorize('view', $booking);
-        $booking->load(['hotel', 'items']);
+        $booking->load(['hotel', 'items', 'payment']);
 
         return view('booking.manage', [
             'booking' => $booking,

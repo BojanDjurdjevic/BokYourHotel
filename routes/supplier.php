@@ -14,17 +14,11 @@ Route::middleware(['auth', 'role:supplier'])->prefix('supplier')->name('supplier
             ->name('dashboard');
     });
 
-    Route::get('/myhotels', function () {
-        return view('supplier.hotels.index');
-    })->name('myhotels');
+    Route::get('/myhotels', [HotelController::class, 'index'])->name('myhotels');
 
-    Route::get('/bookings', function () {
-        return view('supplier.bookings.confirmed');
-    })->name('bookings');
+    Route::get('/bookings', [SupplierController::class, 'confirmed'])->name('bookings');
 
-    Route::get('/pending', function () {
-        return view('supplier.bookings.pending');
-    })->name('pending');
+    Route::get('/pending', [SupplierController::class, 'pending'])->name('pending');
 
     Route::get('/revenue', function () {
         return view('supplier.revenue');

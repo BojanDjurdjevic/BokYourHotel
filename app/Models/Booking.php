@@ -111,6 +111,11 @@ class Booking extends Model
         return $this->hasMany(BookingItem::class);
     }
 
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
+
     public function getNumberOfRoomsAttribute()
     {
         return $this->items->sum('quantity');

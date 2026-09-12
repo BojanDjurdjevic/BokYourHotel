@@ -541,6 +541,15 @@
                                 <span x-text="item.quantity"></span>
                             </div>
 
+                            <div class="flex flex-wrap gap-3 mt-3">
+                                <label class="text-sm text-gray-400">Adults (all selected rooms)
+                                    <input type="number" min="1" max="255" x-model.number="item.adults" class="block w-24 bg-gray-800 border-gray-700 rounded-lg">
+                                </label>
+                                <label class="text-sm text-gray-400">Children
+                                    <input type="number" min="0" max="255" x-model.number="item.children" class="block w-24 bg-gray-800 border-gray-700 rounded-lg">
+                                </label>
+                            </div>
+
                             <div class="text-sm text-gray-500 mt-2">
 
                                 € <span

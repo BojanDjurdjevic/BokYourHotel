@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Illuminate\Support\Facades\Gate;
 use Livewire\WithFileUploads;
 use App\Models\Room;
 use App\Models\RoomImage;
@@ -23,12 +24,14 @@ new class extends Component
 
     public function removeTempImage($index)
     {
+        Gate::authorize('update', $this->room->hotel);
         unset($this->images[$index]);
         $this->images = array_values($this->images);
     }
 
     public function upload($room)
     {
+        Gate::authorize('update', $this->room->hotel);
         $this->validate();
 
         foreach ($this->images as $index => $image) {
@@ -47,15 +50,18 @@ new class extends Component
 
     public function setFeatured($imageId)
     {
+        Gate::authorize('update', $this->room->hotel);
+        $this->room->images()->findOrFail($imageId);
         $this->room->images()->update(['is_featured' => false]);
 
-        RoomImage::where('id', $imageId)
+        $this->room->images()->where('id', $imageId)
             ->update(['is_featured' => true]);
     }
 
     public function deleteImage($imageId)
     {
-        $image = RoomImage::findOrFail($imageId);
+        Gate::authorize('update', $this->room->hotel);
+        $image = $this->room->images()->findOrFail($imageId);
 
         Storage::disk('public')->delete($image->path);
 
@@ -64,6 +70,7 @@ new class extends Component
 
     public function render()
     {
+        Gate::authorize('update', $this->room->hotel);
         //$roomImages = $this->room->images()->latest()->get();
 
         return $this->view([

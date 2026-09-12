@@ -17,7 +17,7 @@ class CreateBookingRequest extends FormRequest
 
             'hotel_id' => [
                 'required',
-                'exists:hotels,id',
+                \Illuminate\Validation\Rule::exists('hotels', 'id')->where('published', true),
             ],
 
             'check_in' => [

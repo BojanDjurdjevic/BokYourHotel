@@ -10,6 +10,7 @@ if (! preg_match('/^booking_management_test_[a-f0-9]{16}$/', $database)) {
     throw new RuntimeException('Invalid test database.');
 }
 config([
+    'payments.fake_enabled' => true,
     'database.default' => 'mysql',
     'database.connections.mysql.database' => $database,
     'database.connections.mysql.url' => null,
@@ -28,6 +29,7 @@ try {
     match ($action) {
         'cancel' => $service->cancel($booking, $actor),
         'confirm' => $service->confirm($booking, $actor),
+        'pay' => app(App\Services\FakePaymentService::class)->submit($booking, null, 1, 'success'),
         default => throw new RuntimeException('Unknown test action.'),
     };
     echo "RESULT:success\n";

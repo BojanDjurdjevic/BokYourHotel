@@ -37,6 +37,8 @@ class BookingFlowTest extends TestCase
             'address' => 'Test Street 1',
         ]);
 
+        $this->hotel->forceFill(['published' => true])->save();
+
         $roomType = DB::table('room_types')->insertGetId(['name' => 'Double']);
         $bedType = DB::table('bed_types')->insertGetId(['name' => 'Double']);
 

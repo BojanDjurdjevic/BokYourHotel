@@ -95,6 +95,19 @@
                 </div>
 
                 <!-- UNITS -->
+                <fieldset class="mb-6 space-y-3">
+                    <legend class="font-semibold mb-3">Board options</legend>
+                    @foreach($boardTypes as $board)
+                        <div class="flex flex-wrap items-center gap-3">
+                            <label><input type="checkbox" name="board_types[{{ $board->id }}][enabled]" value="1"
+                                @checked(old('board_types.'.$board->id.'.enabled', $room->boardTypes->contains($board->id)))> {{ $board->name }}</label>
+                            <input aria-label="{{ $board->name }} supplement per night" type="number" step="0.01" min="0"
+                                name="board_types[{{ $board->id }}][price]" value="{{ old('board_types.'.$board->id.'.price', $room->boardTypes->find($board->id)?->pivot->price ?? 0) }}"
+                                class="bg-gray-800 rounded border-gray-700">
+                        </div>
+                    @endforeach
+                </fieldset>
+                <x-input-error :messages="$errors->all()" />
                 <div class="mb-6">
                     <label>Total units</label>
                     <input type="number"

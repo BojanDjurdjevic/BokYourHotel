@@ -21,6 +21,7 @@ class BookingController extends Controller
 
     public function show(Hotel $hotel)
     {
+        abort_unless($hotel->published, 404);
         $hotel->load([
             'rooms.featuredImage',
             'rooms.boardTypes',
@@ -39,10 +40,9 @@ class BookingController extends Controller
             );
 
             return response()->json([
-                'redirect' => URL::signedRoute(
-                    'booking.success',
-                    $booking
-                ),
+                'redirect' => $booking->user_id === null
+                    ? URL::temporarySignedRoute('guest.payments.show', $booking->check_out->copy()->endOfDay(), $booking)
+                    : route('payments.show', $booking),
             ]);
 
         } catch (BookingException $e) {
@@ -64,13 +64,14 @@ class BookingController extends Controller
 
     public function success(Booking $booking)
     {
-        return view(
+        return response()->view(
             'booking.success',
             compact('booking')
-        );
+        )->header('Referrer-Policy', 'no-referrer')->header('Cache-Control', 'private, no-store');
     }
 
     public function availability(Hotel $hotel, Request $request) {
+        abort_unless($hotel->published, 404);
         $request->validate([
             'check_in' => [
                 'required',

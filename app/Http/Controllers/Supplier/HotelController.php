@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supplier;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\AddHotelRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,6 +50,7 @@ class HotelController extends Controller
 
     public function publish(Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
         //$this->authorize('update', $hotel);
 
         if (!$hotel->canBePublished()) {
@@ -69,13 +71,15 @@ class HotelController extends Controller
             ->with('success','Hotel published');
     }
 
-    public function show(string $id)
+    public function show(Hotel $hotel)
     {
-        //
+        Gate::authorize('view', $hotel);
+        return redirect()->route('supplier.hotels.setup.info', $hotel);
     }
 
     public function edit(Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
         //$this->authorize('update', $hotel);
 
         return view('supplier.hotels.edit', compact('hotel'));
@@ -83,14 +87,16 @@ class HotelController extends Controller
 
     public function update(AddHotelRequest $request, Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
         $hotel->update($request->validated());
 
         if($hotel->published) return redirect()->route('supplier.hotels.index')->with('success', "Hotel successfuly updated");
         else return redirect()->route('supplier.hotels.setup.rooms', $hotel)->with('success', "Hotel successfuly updated");
     }
 
-    public function destroy(string $id)
+    public function destroy(Hotel $hotel)
     {
-        //
+        Gate::authorize('update', $hotel);
+        abort(405, 'Hotel deletion is not available.');
     }
 }

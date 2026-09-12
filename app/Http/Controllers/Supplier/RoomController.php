@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supplier;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\RoomType;
@@ -13,9 +14,23 @@ use App\Models\Facility;
 
 class RoomController extends Controller
 {
+    public function show(Hotel $hotel, Room $room)
+    {
+        Gate::authorize('update', $hotel);
+        abort_unless($room->hotel_id === $hotel->id, 404);
+        return redirect()->route('supplier.hotels.rooms.edit', [$hotel, $room]);
+    }
+
+    public function destroy(Hotel $hotel, Room $room)
+    {
+        Gate::authorize('update', $hotel);
+        abort_unless($room->hotel_id === $hotel->id, 404);
+        abort(405, 'Room deletion is not available.');
+    }
 
     public function index(Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
         $rooms = $hotel->rooms;
 
         return view('supplier.rooms.index', compact('hotel','rooms'));
@@ -23,6 +38,7 @@ class RoomController extends Controller
 
     public function create(Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
         //dd($hotel->supplier_id, auth()->id());
         $facilities = Facility::all();
         $roomTypes = RoomType::all();
@@ -40,6 +56,7 @@ class RoomController extends Controller
 
     public function store(RoomRequest $request, Hotel $hotel)
     {
+        Gate::authorize('update', $hotel);
         //dd($request->validated());
         $room = $hotel->rooms()->create(
             $request->validated()
@@ -53,7 +70,7 @@ class RoomController extends Controller
 
         foreach ($request->board_types ?? [] as $boardTypeId => $data) {
 
-            if (!isset($data['enabled'])) {
+            if (empty($data['enabled'])) {
                 continue;
             }
 
@@ -78,6 +95,8 @@ class RoomController extends Controller
 
     public function edit(Hotel $hotel, Room $room)
     {
+        Gate::authorize('update', $hotel);
+        abort_unless($room->hotel_id === $hotel->id, 404);
         $roomTypes = RoomType::all();
         $bedTypes = BedType::all();
         $boardTypes = BoardType::all();
@@ -93,16 +112,22 @@ class RoomController extends Controller
 
     public function update(RoomRequest $request, Hotel $hotel, Room $room)
     {
+        Gate::authorize('update', $hotel);
+        abort_unless($room->hotel_id === $hotel->id, 404);
         //dd($request->validated());
         $room->update(
             $request->validated()
         );
 
-        $room->boardTypes()->sync(
-            $request->board_types ?? []
-        );
+        $syncData = [];
+        foreach ($request->validated('board_types', []) as $boardTypeId => $data) {
+            if (! empty($data['enabled'])) {
+                $syncData[$boardTypeId] = ['price' => $data['price'] ?? 0];
+            }
+        }
+        $room->boardTypes()->sync($syncData);
 
-        $room->facilities()->sync($request->facilities ?? []);
+        // Facilities are managed on the separate facilities step.
 
         return redirect()
             ->route('supplier.hotels.rooms.index', $room->hotel)

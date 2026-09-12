@@ -25,10 +25,12 @@
 
     <!-- Image -->
     <div class="w-44 h-28 bg-gray-700 rounded-xl overflow-hidden">
-        <img
+        @if($room->featuredImage)
+        <img alt="{{ $room->name }}"
             src="/storage/{{ $room->featuredImage->path ?? '' }}"
             class="w-full h-full object-cover"
         >
+        @endif
     </div>
 
     <!-- Info -->

@@ -4,13 +4,13 @@ namespace App\Traits;
 
 use Illuminate\Container\Attributes\Auth;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 
 trait HandleImagesUpload {
-    public function uploadImage(Request $request, string $path)
+    public function uploadImage(UploadedFile $request, string $path)
     {
         /*
         $avatar = Auth::user()->avatar;

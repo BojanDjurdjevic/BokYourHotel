@@ -145,4 +145,44 @@ class BookingManagementConcurrencyTest extends TestCase
         $this->assertSame(BookingStatus::Cancelled, $this->booking->refresh()->status);
         $this->assertSame([3, 3], RoomInventory::orderBy('date')->pluck('available')->all());
     }
+
+    public function test_parallel_successful_payments_create_one_paid_payment(): void
+    {
+        $results = $this->runConcurrentActions(['pay', 'pay']);
+        $this->assertSame(['success', 'success'], $results);
+        $this->assertDatabaseCount('payments', 1);
+        $payment = \App\Models\Payment::sole();
+        $this->assertSame(\App\Enums\PaymentStatus::Paid, $payment->status);
+        $this->assertSame(1, $payment->attempt);
+        $this->assertSame(BookingStatus::Pending, $this->booking->refresh()->status);
+        $this->assertSame([0, 0], RoomInventory::orderBy('date')->pluck('available')->all());
+    }
+
+    public function test_parallel_payment_cancellation_never_leaves_cancelled_paid_booking(): void
+    {
+        $results = $this->runConcurrentActions(['pay', 'cancel']);
+        $this->assertSame('success', $results[1]);
+        $this->assertSame(BookingStatus::Cancelled, $this->booking->refresh()->status);
+        $payment = \App\Models\Payment::first();
+        if ($results[0] === 'success') {
+            $this->assertSame(\App\Enums\PaymentStatus::Refunded, $payment->status);
+            $this->assertNotNull($payment->refund_reference);
+        } else {
+            $this->assertNull($payment);
+        }
+        $this->assertSame([3, 3], RoomInventory::orderBy('date')->pluck('available')->all());
+    }
+
+    public function test_parallel_paid_cancellations_refund_and_restore_once(): void
+    {
+        config(['payments.fake_enabled' => true]);
+        app(\App\Services\FakePaymentService::class)->submit($this->booking, null, 1, 'success');
+        $results = $this->runConcurrentActions(['cancel', 'cancel']);
+        $this->assertEqualsCanonicalizing(['success', 'rejected'], $results);
+        $this->assertDatabaseCount('payments', 1);
+        $payment = \App\Models\Payment::sole();
+        $this->assertSame(\App\Enums\PaymentStatus::Refunded, $payment->status);
+        $this->assertNotNull($payment->refund_reference);
+        $this->assertSame([3, 3], RoomInventory::orderBy('date')->pluck('available')->all());
+    }
 }

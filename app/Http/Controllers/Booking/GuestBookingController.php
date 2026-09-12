@@ -16,7 +16,7 @@ class GuestBookingController extends Controller
     public function show(Booking $booking)
     {
         abort_unless($booking->user_id === null, 403);
-        $booking->load(['hotel', 'items']);
+        $booking->load(['hotel', 'items', 'payment']);
 
         return response()->view('booking.manage', [
             'booking' => $booking,
