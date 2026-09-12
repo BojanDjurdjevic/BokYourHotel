@@ -25,12 +25,10 @@
                     </a>
 
                     @auth
-                        @if(auth()->user()->role === 'user')
-                            <a href="#"
+                            <a href="{{ route('bookings.index') }}"
                                class="text-gray-300 hover:text-white transition">
-                                My Bookings
+                                Bookings
                             </a>
-                        @endif
 
                         @if(auth()->user()->role === 'supplier')
                             <a href="#"
@@ -98,9 +96,7 @@
             <a href="#" class="block text-gray-300 hover:text-white">Search</a>
 
             @auth
-                @if(auth()->user()->role === 'user')
-                    <a href="#" class="block text-gray-300 hover:text-white">My Bookings</a>
-                @endif
+                <a href="{{ route('bookings.index') }}" class="block text-gray-300 hover:text-white">Bookings</a>
 
                 @if(auth()->user()->role === 'supplier')
                     <a href="#" class="block text-gray-300 hover:text-white">My Hotels</a>

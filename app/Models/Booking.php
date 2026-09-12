@@ -3,11 +3,51 @@
 namespace App\Models;
 
 use App\Enums\BookingStatus;
+use App\Exceptions\BookingException;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Booking extends Model
 {
+    protected static function booted(): void
+    {
+        static::deleting(function () {
+            throw new BookingException('Bookings must be cancelled, not deleted.');
+        });
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        return $query->where(function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+
+            if ($user->isSupplier()) {
+                $query->orWhereHas('hotel', fn ($hotels) => $hotels->where('supplier_id', $user->id));
+            }
+        });
+    }
+
+    public function cancellationDeadline(): Carbon
+    {
+        return $this->check_in->copy()->startOfDay()->subDay();
+    }
+
+    public function canBeCancelledByGuest(): bool
+    {
+        return $this->canBeCancelled() && now()->lessThanOrEqualTo($this->cancellationDeadline());
+    }
+
+    public function canBeCompleted(): bool
+    {
+        return $this->isConfirmed() && now()->greaterThanOrEqualTo($this->check_out);
+    }
+
     protected $table = "bookings";
 
     protected $fillable = [

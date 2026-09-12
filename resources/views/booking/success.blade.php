@@ -38,6 +38,20 @@
             @endif
 
             <div class="mt-8">
+                @if($booking->user_id === null && now()->lessThanOrEqualTo($booking->check_out->copy()->endOfDay()))
+                    <a href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('guest.bookings.show', $booking->check_out->copy()->endOfDay(), $booking) }}"
+                       class="inline-block px-6 py-3 mb-3 rounded-xl bg-green-600 hover:bg-green-500 font-semibold">
+                        Manage booking
+                    </a>
+                @elseif(auth()->check())
+                    @can('view', $booking)
+                        <a href="{{ route('bookings.show', $booking) }}"
+                           class="inline-block px-6 py-3 mb-3 rounded-xl bg-green-600 hover:bg-green-500 font-semibold">
+                            Manage booking
+                        </a>
+                    @endcan
+                @endif
+
                 <a href="{{ url('/') }}"
                    class="inline-block px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 font-semibold">
                     Back to home

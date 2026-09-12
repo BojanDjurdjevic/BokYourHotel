@@ -7,6 +7,7 @@ enum BookingStatus:string
     case Pending = 'pending';
     case Confirmed = 'confirmed';
     case Cancelled = 'cancelled';
+    case Completed = 'completed';
     case Rejected = 'rejected';
     case Expired = 'expired';
 
@@ -41,6 +42,7 @@ enum BookingStatus:string
     {
         return match ($this) {
             self::Cancelled,
+            self::Completed,
             self::Rejected,
             self::Expired => true,
             default => false,

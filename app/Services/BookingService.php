@@ -8,11 +8,13 @@ use App\Models\BoardType;
 use App\Models\Booking;
 use App\Models\Room;
 use App\Models\RoomInventory;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\QueryException;
 
 class BookingService
@@ -528,36 +530,65 @@ class BookingService
 
     // CONFIRM Booking
 
-    public function confirm(Booking $booking): Booking
+    public function confirm(Booking $booking, User $actor): Booking
     {
-        if (! $booking->isPending()) {
-            throw new BookingException(
-                'Only pending bookings can be confirmed.'
-            );
-        }
+        return DB::transaction(function () use ($booking, $actor) {
+            $booking = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($actor)->authorize('confirm', $booking);
 
-        $booking->update([
-            'status' => BookingStatus::Confirmed,
-        ]);
+            if (! $booking->canBeConfirmed()) {
+                throw new BookingException('Only pending bookings can be confirmed.');
+            }
 
-        return $booking->refresh();
+            $booking->update(['status' => BookingStatus::Confirmed]);
+
+            return $booking;
+        }, 3);
+    }
+
+    public function complete(Booking $booking, User $actor): Booking
+    {
+        return DB::transaction(function () use ($booking, $actor) {
+            $booking = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($actor)->authorize('complete', $booking);
+
+            if (! $booking->canBeCompleted()) {
+                throw new BookingException('Only confirmed bookings after check-out can be completed.');
+            }
+
+            $booking->update(['status' => BookingStatus::Completed]);
+
+            return $booking;
+        }, 3);
     }
 
     // CANCEL
 
-    public function cancel(Booking $booking, ?string $reason = null): Booking
+    // A null actor is only used by the signed guest cancellation endpoint.
+    public function cancel(Booking $booking, ?User $actor, ?string $reason = null): Booking
     {
-        if ($booking->isCancelled()) {
-
-            throw new BookingException(
-                'Booking is already cancelled.'
-            );
-        }
-
-        DB::transaction(function () use (
+        return DB::transaction(function () use (
             $booking,
+            $actor,
             $reason
         ) {
+            $booking = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+
+            if ($actor) {
+                Gate::forUser($actor)->authorize('cancel', $booking);
+            } else {
+                abort_unless($booking->user_id === null, 403);
+            }
+
+            if (! $booking->canBeCancelled()) {
+                throw new BookingException('Only pending or confirmed bookings can be cancelled.');
+            }
+
+            $staff = $actor && Gate::forUser($actor)->allows('manage', $booking);
+
+            if (! $staff && ! $booking->canBeCancelledByGuest()) {
+                throw new BookingException('Cancellation is allowed only until the start of the day before check-in.');
+            }
 
             $this->restoreAvailability(
                 $booking
@@ -575,52 +606,53 @@ class BookingService
 
             ]);
 
-        });
-
-        return $booking->refresh();
+            return $booking;
+        }, 3);
     }
 
     // RESTORE Availability
 
     private function restoreAvailability(Booking $booking): void
     {
-        foreach ($booking->items as $item) {
+        $quantities = [];
 
-            $period = $this->buildPeriod(
-
-                $item->check_in,
-
-                $item->check_out
-
-            );
-
-            foreach ($period as $date) {
-
-                $inventory = RoomInventory::firstOrCreate(
-
-                    [
-
-                        'room_id' => $item->room_id,
-
-                        'date' => $date
-
-                    ],
-
-                    [
-
-                        'available' => 0,
-
-                        'price' => $item->price_per_night
-
-                    ]
-
-                );
-
-                $inventory->increment(
-                    'available',
-                    $item->quantity
-                );
+        foreach ($booking->items()->get() as $item) {
+            foreach ($this->buildPeriod($item->check_in, $item->check_out) as $date) {
+                $day = $date->toDateString();
+                $quantities[$item->room_id][$day] = ($quantities[$item->room_id][$day] ?? 0) + $item->quantity;
             }
+        }
+
+        if (empty($quantities)) {
+            throw new BookingException('Booking items are missing. Please contact support.');
+        }
+
+        ksort($quantities);
+        $lockedInventories = [];
+
+        foreach ($quantities as $roomId => $days) {
+            ksort($days);
+
+            $inventories = RoomInventory::where('room_id', $roomId)
+                ->whereIn('date', array_keys($days))
+                ->orderBy('date')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy(fn ($inventory) => $inventory->date->toDateString());
+
+            foreach ($days as $day => $quantity) {
+                $inventory = $inventories->get($day);
+
+                if (! $inventory) {
+                    throw new BookingException('Inventory is missing. Please contact support to cancel this booking.');
+                }
+
+                $lockedInventories[] = [$inventory, $quantity];
+            }
+        }
+
+        foreach ($lockedInventories as [$inventory, $quantity]) {
+            $inventory->increment('available', $quantity);
         }
     }
 }
