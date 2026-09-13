@@ -17,7 +17,7 @@ class CreateBookingRequest extends FormRequest
 
             'hotel_id' => [
                 'required',
-                \Illuminate\Validation\Rule::exists('hotels', 'id')->where('published', true),
+                \Illuminate\Validation\Rule::exists('hotels', 'id')->where('published', true)->whereNull('archived_at'),
             ],
 
             'check_in' => [
@@ -65,12 +65,12 @@ class CreateBookingRequest extends FormRequest
 
             'items.*.room_id' => [
                 'required',
-                'exists:rooms,id',
+                \Illuminate\Validation\Rule::exists('rooms', 'id')->whereNull('archived_at'),
             ],
 
             'items.*.board_type_id' => [
                 'required',
-                'exists:board_types,id',
+                \Illuminate\Validation\Rule::exists('board_types', 'id')->whereNull('archived_at'),
             ],
 
             'items.*.quantity' => [

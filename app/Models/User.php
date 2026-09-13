@@ -32,6 +32,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'supplier_deactivated_at' => 'datetime',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
@@ -54,7 +55,7 @@ class User extends Authenticatable
 
     public function isSupplier(): bool
     {
-        return $this->role === self::ROLE_SUPPLIER;
+        return $this->role === self::ROLE_SUPPLIER && $this->supplier_deactivated_at === null;
     }
 
     public function isSuperAdmin(): bool

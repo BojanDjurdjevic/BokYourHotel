@@ -23,7 +23,7 @@ class HotelController extends Controller
             ->paginate(12);
         
         $incompleteHotels = $hotels->getCollection()->filter(
-        fn($hotel) => $hotel->setupProgress() < 100
+        fn($hotel) => ! $hotel->archived_at && $hotel->setupProgress() < 100
         );
 
         
@@ -42,7 +42,11 @@ class HotelController extends Controller
 
         $name = $data['name'];
 
-        $hotel = auth()->user()->hotels()->create($data);
+        $hotel = \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
+            $supplier = \App\Models\User::whereKey(auth()->id())->lockForUpdate()->firstOrFail();
+            Gate::forUser($supplier)->authorize('create', Hotel::class);
+            return $supplier->hotels()->create($data);
+        }, 3);
 
         return redirect()
             ->route('supplier.hotels.setup.info',$hotel)
@@ -97,7 +101,7 @@ class HotelController extends Controller
 
     public function destroy(Hotel $hotel)
     {
-        Gate::authorize('update', $hotel);
-        abort(405, 'Hotel deletion is not available.');
+        app(\App\Services\SupplierLifecycleService::class)->archiveHotel($hotel, auth()->user());
+        return redirect()->route('supplier.hotels.index')->with('success', 'Hotel archived. Booking and payment history has been retained.');
     }
 }

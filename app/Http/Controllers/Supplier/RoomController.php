@@ -18,6 +18,7 @@ class RoomController extends Controller
     {
         Gate::authorize('update', $hotel);
         abort_unless($room->hotel_id === $hotel->id, 404);
+        abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         return redirect()->route('supplier.hotels.rooms.edit', [$hotel, $room]);
     }
 
@@ -25,13 +26,15 @@ class RoomController extends Controller
     {
         Gate::authorize('update', $hotel);
         abort_unless($room->hotel_id === $hotel->id, 404);
-        abort(405, 'Room deletion is not available.');
+        abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
+        app(\App\Services\SupplierLifecycleService::class)->archiveRoom($room, auth()->user());
+        return redirect()->route('supplier.hotels.rooms.index', $hotel)->with('success', 'Room archived. Booking history has been retained.');
     }
 
     public function index(Hotel $hotel)
     {
         Gate::authorize('update', $hotel);
-        $rooms = $hotel->rooms()->with('featuredImage')->paginate(12);
+        $rooms = Room::where('hotel_id', $hotel->id)->with('featuredImage')->paginate(12);
 
         return view('supplier.rooms.index', compact('hotel','rooms'));
     }
@@ -43,7 +46,7 @@ class RoomController extends Controller
         $facilities = Facility::all();
         $roomTypes = RoomType::all();
         $bedTypes = BedType::all();
-        $boardTypes = BoardType::all();
+        $boardTypes = BoardType::whereNull('archived_at')->get();
 
         return view('supplier.rooms.create', compact(
             'hotel',
@@ -97,9 +100,10 @@ class RoomController extends Controller
     {
         Gate::authorize('update', $hotel);
         abort_unless($room->hotel_id === $hotel->id, 404);
+        abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         $roomTypes = RoomType::all();
         $bedTypes = BedType::all();
-        $boardTypes = BoardType::all();
+        $boardTypes = BoardType::whereNull('archived_at')->get();
 
         return view('supplier.rooms.edit', compact(
             'room',
@@ -114,6 +118,7 @@ class RoomController extends Controller
     {
         Gate::authorize('update', $hotel);
         abort_unless($room->hotel_id === $hotel->id, 404);
+        abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         //dd($request->validated());
         $room->update(
             $request->validated()

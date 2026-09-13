@@ -20,12 +20,13 @@ class Hotel extends Model
     ];
 
     protected $casts = [
+        'archived_at' => 'datetime',
         'facilities' => 'array',
     ];
 
     public function rooms()
     {
-        return $this->hasMany(Room::class);
+        return $this->hasMany(Room::class)->whereNull('rooms.archived_at');
     }
 
     public function images()
@@ -98,6 +99,7 @@ class Hotel extends Model
 
     public function canBePublished(): bool
     {
+        if ($this->archived_at || $this->supplier?->supplier_deactivated_at) return false;
         $steps = $this->setupChecklist();
         unset($steps['published']);
 

@@ -17,6 +17,7 @@
 
 </div>
 
+@if($errors->has('lifecycle')) <p role="alert" class="mb-4 text-red-400">{{ $errors->first('lifecycle') }}</p> @endif
 <div class="space-y-4">
 
 @forelse($rooms as $room)
@@ -51,6 +52,9 @@
             </div>
         </div>
 
+        @if($room->archived_at)
+            <p>Archived: history retained</p>
+        @else
         <!-- Actions -->
         <div class="flex gap-3 mt-3">
 
@@ -69,7 +73,12 @@
                Inventory
             </a>
 
+            <form method="post" action="{{ route('supplier.hotels.rooms.destroy', [$hotel, $room]) }}" onsubmit="return confirm('Archive this room? Booking history will be retained.');">
+                @csrf @method('DELETE')
+                <button class="px-3 py-1 text-amber-400">Archive room</button>
+            </form>
         </div>
+        @endif
 
     </div>
 

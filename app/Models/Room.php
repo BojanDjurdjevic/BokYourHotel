@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Room extends Model
 {
+    protected $casts = ['archived_at' => 'datetime'];
     protected $table = "rooms";
     protected $fillable = [
         'hotel_id',
@@ -29,7 +30,7 @@ class Room extends Model
 
     public function bookings()
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasManyThrough(Booking::class, BookingItem::class, 'room_id', 'id', 'id', 'booking_id');
     }
 
     public function images()
@@ -55,6 +56,7 @@ class Room extends Model
     public function boardTypes()
     {
         return $this->belongsToMany(BoardType::class, 'room_board_types')
+            ->whereNull('board_types.archived_at')
             ->withPivot('price')
             ->withTimestamps();
     }

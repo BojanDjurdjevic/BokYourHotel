@@ -16,6 +16,7 @@ class RoomSetupController extends Controller
     public function images(Room $room)
     {
         Gate::authorize('update', $room->hotel);
+        abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         $hotel = $room->hotel;
 
         return view('supplier.rooms.setup.images', compact('hotel', 'room'));
@@ -24,6 +25,7 @@ class RoomSetupController extends Controller
     public function storeImages(Request $request, Room $room)
     {
         Gate::authorize('update', $room->hotel);
+        abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         $request->validate([
             'images' => ['required', 'array', 'max:10'],
             'images.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
@@ -39,6 +41,7 @@ class RoomSetupController extends Controller
     public function facilities(Room $room)
     {
         Gate::authorize('update', $room->hotel);
+        abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         $hotel = $room->hotel;
         $facilities = Facility::all();
 
@@ -50,6 +53,7 @@ class RoomSetupController extends Controller
     public function facilitiesUpdate(Request $request, Room $room)
     {
         Gate::authorize('update', $room->hotel);
+        abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         $request->validate(['facilities' => ['nullable', 'array'], 'facilities.*' => ['integer', 'exists:facilities,id']]);
          $room->facilities()->sync(
             $request->facilities ?? []
@@ -63,6 +67,7 @@ class RoomSetupController extends Controller
     public function inventory(Room $room, Request $request)
     {
         Gate::authorize('update', $room->hotel);
+        abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         $request->validate(['month' => ['nullable', 'date_format:Y-m']]);
         $hotel = $room->hotel;
 
@@ -140,6 +145,7 @@ class RoomSetupController extends Controller
     public function bulkUpdate(Request $request, Room $room, \App\Services\InventoryService $inventory)
     {
         Gate::authorize('update', $room->hotel);
+        abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         $data = $request->validate(['rows' => ['required', 'array', 'max:366']]);
         $inventory->update($room, $request->user(), $data['rows']);
         return response()->json(['success' => true]);

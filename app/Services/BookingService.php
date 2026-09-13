@@ -48,6 +48,11 @@ class BookingService
             $data,
             $period
         ) {
+            // Serialize catalog retirement with booking creation.
+            $hotel = \App\Models\Hotel::whereKey($data['hotel_id'])->lockForUpdate()->first();
+            if (! $hotel || $hotel->archived_at || $hotel->supplier?->supplier_deactivated_at) {
+                throw new BookingException('This hotel is no longer available for new bookings.');
+            }
 
             /*
             * 1. Load selected rooms.
@@ -179,9 +184,9 @@ class BookingService
             ->pluck('room_id')
             ->unique();
 
-        return Room::query()
+        return Room::query()->whereNull('archived_at')
             ->whereIn('id', $roomIds)
-            ->with('boardTypes')
+            ->with(['boardTypes' => fn ($boards) => $boards->lockForUpdate()])
             ->get()
             ->keyBy('id');
     }
@@ -281,6 +286,7 @@ class BookingService
     {
         foreach ($items as $item) {
 
+            if (! isset($rooms[$item['room_id']])) throw new BookingException('Selected room is no longer available.');
             $room = $rooms[$item['room_id']];
 
             // Guest counts are totals for this booking item, across its rooms.

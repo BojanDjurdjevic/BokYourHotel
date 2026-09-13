@@ -48,9 +48,13 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        Auth::logout();
-
-        $user->delete();
+        if ($user->role === \App\Models\User::ROLE_SUPPLIER || $user->hotels()->exists()) {
+            app(\App\Services\SupplierLifecycleService::class)->deactivateSupplier($user);
+            Auth::logout();
+        } else {
+            Auth::logout();
+            $user->delete();
+        }
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

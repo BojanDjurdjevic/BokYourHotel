@@ -15,13 +15,13 @@
 
 </div>
 
+@if($errors->has('lifecycle')) <p role="alert" class="mb-4 text-red-400">{{ $errors->first('lifecycle') }}</p> @endif
 <div class="space-y-4">
     {{ $hotels->links() }}
 
     @forelse($hotels as $hotel)
 
-    <a
-        href="{{ route('supplier.hotels.setup.info',$hotel) }}"
+    <div
         class="flex gap-6 p-4 bg-gray-900 rounded-xl hover:bg-gray-800 transition"
     >
 
@@ -50,7 +50,9 @@
         Rooms: {{ $hotel->rooms_count }}
     </span>
 
-    @if ($hotel->published)
+    @if ($hotel->archived_at)
+        <span class="text-xs bg-gray-600 px-2 py-1 rounded">Archived: history retained</span>
+    @elseif ($hotel->published)
         <span class="text-xs bg-green-600 px-2 py-1 rounded">
             Published
         </span> 
@@ -65,7 +67,14 @@
 
 </div>
 
-</a>
+</div>
+@if(! $hotel->archived_at)
+    <a class="inline-block px-3 py-2" href="{{ route('supplier.hotels.setup.info', $hotel) }}">Manage hotel</a>
+    <form method="post" action="{{ route('supplier.hotels.destroy', $hotel) }}" onsubmit="return confirm('Archive this hotel? Existing booking history will be retained.');">
+        @csrf @method('DELETE')
+        <button class="px-3 py-2 text-amber-400">Archive hotel</button>
+    </form>
+@endif
 
 @empty
     <p class="text-gray-400">No hotels yet. Add your first hotel to start setup.</p>

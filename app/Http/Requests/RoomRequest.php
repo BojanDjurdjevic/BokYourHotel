@@ -12,7 +12,7 @@ class RoomRequest extends FormRequest
             $boards = $this->input('board_types', []);
             if (! is_array($boards)) return;
             $ids = array_keys($boards);
-            if (\App\Models\BoardType::whereIn('id', $ids)->count() !== count($ids)) {
+            if (\App\Models\BoardType::whereNull('archived_at')->whereIn('id', $ids)->count() !== count($ids)) {
                 $validator->errors()->add('board_types', 'Choose valid board options.');
             }
         }];

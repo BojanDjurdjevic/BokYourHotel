@@ -10,7 +10,8 @@ class HotelPolicy
 {
     public function before(User $user, string $ability): ?bool
     {
-        return $user->isSuperAdmin() && in_array($ability, ['viewAny', 'view', 'create', 'update'], true) ? true : null;
+        if ($user->supplier_deactivated_at) return false;
+        return $user->isSuperAdmin() && in_array($ability, ['viewAny', 'view', 'create'], true) ? true : null;
     }
 
     public function viewAny(User $user): bool
@@ -32,13 +33,12 @@ class HotelPolicy
     public function update(User $user, Hotel $hotel): bool
     {
         //dd(auth()user()->id(), $hotel->supplier_id);
-        return $user->isSupplier() && $user->id == $hotel->supplier_id;
-        //return true;
+        return ! $hotel->archived_at && ($user->isSuperAdmin() || ($user->isSupplier() && $user->id == $hotel->supplier_id));
     }
 
     public function delete(User $user, Hotel $hotel): bool
     {
-        return $user->isSupplier() && $user->id == $hotel->supplier_id;
+        return $this->update($user, $hotel);
     }
 
     public function restore(User $user, Hotel $hotel): bool

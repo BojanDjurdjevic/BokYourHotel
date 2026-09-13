@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class BoardType extends Model
 {
+    protected $casts = ['archived_at' => 'datetime'];
     protected $table = "board_types";
 
     protected $fillable = [

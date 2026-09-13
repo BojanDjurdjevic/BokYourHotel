@@ -9,10 +9,10 @@ class HotelSearchService
     public function query(array $data)
     {
         $nights = !empty($data['check_in']) ? (int) Carbon::parse($data['check_in'])->diffInDays(Carbon::parse($data['check_out'])) : 1;
-        $boards = DB::table('room_board_types')->select('room_id')->selectRaw('MIN(price) as board_price')
+        $boards = DB::table('room_board_types')->whereIn('board_type_id', DB::table('board_types')->select('id')->whereNull('archived_at'))->select('room_id')->selectRaw('MIN(price) as board_price')
             ->when($data['board_type'] ?? null, fn ($q, $id) => $q->where('board_type_id', $id))->groupBy('room_id');
         $rooms = DB::table('rooms as r')->joinSub($boards, 'b', 'b.room_id', '=', 'r.id')
-            ->where('r.capacity', '>=', ($data['adults'] ?? 1) + ($data['children'] ?? 0));
+            ->whereNull('r.archived_at')->where('r.capacity', '>=', ($data['adults'] ?? 1) + ($data['children'] ?? 0));
         foreach ($data['room_facilities'] ?? [] as $id) {
             $rooms->whereExists(fn ($q) => $q->selectRaw('1')->from('facility_room as f')->whereColumn('f.room_id', 'r.id')->where('f.facility_id', $id));
         }
@@ -33,7 +33,7 @@ class HotelSearchService
         $matches = DB::query()->fromSub($rooms, 'c')->select('hotel_id')->selectRaw('MIN(stay_price) as search_price')
             ->when(isset($data['min_price']), fn ($q) => $q->whereRaw('stay_price >= CAST(? AS DECIMAL(18,2))', [$data['min_price']]))
             ->when(isset($data['max_price']), fn ($q) => $q->whereRaw('stay_price <= CAST(? AS DECIMAL(18,2))', [$data['max_price']]))->groupBy('hotel_id');
-        $hotels = Hotel::query()->where('published', true)
+        $hotels = Hotel::query()->where('published', true)->whereNull('hotels.archived_at')
             ->when($data['city'] ?? null, function ($q, $city) use ($data) {
                 // Canonical selections are exact; legacy free-text city URLs remain supported.
                 return !empty($data['country']) ? $q->where('city', $city)->where('country', $data['country']) : $q->where('city', 'like', '%'.addcslashes($city, '%_\\').'%');
@@ -54,10 +54,10 @@ class HotelSearchService
     }
     public function options(): array {
         return [
-            'hotelFacilities' => DB::table('hotels')->where('published', true)->whereNotNull('facilities')->distinct()->pluck('facilities')
+            'hotelFacilities' => DB::table('hotels')->where('published', true)->whereNull('hotels.archived_at')->whereNotNull('facilities')->distinct()->pluck('facilities')
                 ->flatMap(fn ($json) => json_decode($json, true) ?? [])->unique()->sort()->values(),
             'roomFacilities' => DB::table('facilities')->orderBy('name')->get(['id','name']),
-            'boards' => DB::table('board_types')->orderBy('name')->get(['id','name']),
+            'boards' => DB::table('board_types')->whereNull('archived_at')->orderBy('name')->get(['id','name']),
         ];
     }
 }

@@ -15,6 +15,7 @@ class InventoryService
     public function snapshot(Room $room, User $actor, string $from, string $to): array
     {
         Gate::forUser($actor)->authorize('update', $room->hotel);
+        abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         $days = $this->days($from, $to);
         $rows = $room->inventories()->whereIn('date', $days)->get()->keyBy(fn ($row) => $row->date->toDateString());
         return array_map(fn ($day) => [
@@ -27,6 +28,7 @@ class InventoryService
     public function update(Room $room, User $actor, array $rows): void
     {
         Gate::forUser($actor)->authorize('update', $room->hotel);
+        abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         validator(['rows' => $rows], [
             'rows' => ['required', 'array', 'min:1', 'max:366'],
             'rows.*.date' => ['required', 'date_format:Y-m-d', 'distinct'],
@@ -36,7 +38,11 @@ class InventoryService
         ])->validate();
         usort($rows, fn ($a, $b) => strcmp($a['date'], $b['date']));
 
-        DB::transaction(function () use ($room, $rows) {
+        DB::transaction(function () use ($room, $rows, $actor) {
+            $hotel = \App\Models\Hotel::whereKey($room->hotel_id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($actor)->authorize('update', $hotel);
+            $room->refresh();
+            abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
             // Version zero represents a date that did not exist in the UI snapshot.
             $new = array_map(fn ($row) => [
                 'room_id' => $room->id, 'date' => $row['date'], 'available' => $room->total_units,
