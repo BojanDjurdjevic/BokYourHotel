@@ -7,7 +7,7 @@
 
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6">
             <div class="flex flex-wrap justify-between gap-3">
-                <h2 class="text-xl font-semibold">{{ $booking->hotel->name }}</h2>
+                <h2 class="text-xl font-semibold">{{ \App\Support\PublicLabel::clean($booking->hotel->name, 'Hotel') }}</h2>
                 <span class="text-gray-300">{{ ucfirst($booking->status->value) }}</span>
             </div>
 

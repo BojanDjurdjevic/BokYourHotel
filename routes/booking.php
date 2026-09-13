@@ -3,8 +3,12 @@
 use App\Http\Controllers\Booking\BookingController;
 use App\Http\Controllers\Booking\BookingManagementController;
 use App\Http\Controllers\Booking\GuestBookingController;
+use App\Http\Controllers\Booking\GuestBookingRecoveryController;
 use App\Http\Controllers\Booking\PaymentController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/guest/bookings/find', [GuestBookingRecoveryController::class, 'create'])->name('guest.bookings.find');
+Route::post('/guest/bookings/find', [GuestBookingRecoveryController::class, 'store'])->middleware('throttle:guest-booking-recovery')->name('guest.bookings.recover');
 
 Route::get('/hotels/{hotel}/booking', [BookingController::class, 'show'])->name('booking.show');
 

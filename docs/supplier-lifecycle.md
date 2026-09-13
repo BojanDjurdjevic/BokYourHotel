@@ -22,7 +22,9 @@ Verified using Laravel Boost against MySQL book_your_hotel after starting the ex
 
 Hotel facilities are JSON, room facilities use facility_room. Cascaded image DB deletion does not itself clean filesystem assets.
 
-Current outcomes:
+The findings in the next list are the pre-change audit results. They describe the unsafe behavior that this lifecycle implementation replaces; they are not the current supplier account behavior.
+
+Pre-change outcomes:
 1. Profile deletion logs out then hard-deletes user: owned hotels, rooms and bookings cascade. Payments cause a statement rollback/error; without payments, history disappears. Own guest bookings instead keep user_id=NULL.
 2. Hotel destroy endpoint returns 405; direct hotel deletion cascades rooms, images, inventories, bookings and items, unless a payment restricts it.
 3. Room destroy endpoint returns 405; direct room deletion removes items even on paid bookings (booking/payment remain, incomplete).
@@ -42,6 +44,8 @@ User-facing hotel/room removal always archives, including unused drafts. No auto
 Any pending or confirmed booking blocks hotel/room archive and supplier deactivation, regardless of payment or dates (includes in-progress and overdue unresolved bookings). Expired holds must be explicitly processed by the existing expiry flow. No automatic cancellation, refund or completion. Terminal completed/cancelled/expired history is retained.
 
 Supplier profile removal deactivates business access and atomically archives owned hotels and rooms, retaining the account and ownership. Guest account deletion retains the existing SET NULL behavior. This is business-access deactivation, not personal-data erasure.
+
+Current verification: the active MySQL schema has `RESTRICT` for `hotels.supplier_id`, `bookings.hotel_id`, and all three historical `booking_items` parent references. `bookings.user_id` is `SET NULL`, and `payments.booking_id` remains `NO ACTION`. `ProfileController` routes supplier profile removal through `SupplierLifecycleService::deactivateSupplier()`, so it does not hard-delete the supplier account or cascade through its business history. The lifecycle MySQL suite passes, including direct deletion restrictions and preservation of booking/payment/voucher history. The remaining `rooms.hotel_id` `CASCADE` is limited to auxiliary catalog cleanup when an unused hotel is explicitly removed through maintenance; it is not the supplier account deletion path.
 
 Existing room_name, board_name, quantity, adults, children, price_per_night, subtotal, nights, dates and currency snapshots already represent the purchased agreement and are populated server-side. Voucher and management already use them. No JSON dump, new snapshot columns, or backfill of guessed historical values. Room-type taxonomy/capacity are not substituted for the purchased room name and booked guest counts.
 

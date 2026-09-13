@@ -76,7 +76,7 @@
                         {{ config('facility_icons')[$facility->name] ?? '❔' }}
                     </span>
 
-                        {{ $facility->name }}
+                        {{ \App\Support\FacilityLabel::label($facility->name) }}
 
                     </span>
 

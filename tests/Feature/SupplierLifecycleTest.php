@@ -99,7 +99,7 @@ class SupplierLifecycleTest extends TestCase
         $this->assertSame($payment, $booking->payment()->first()->getAttributes());
         $this->post('/login', ['email' => $this->supplier->email, 'password' => 'password'])->assertSessionHasErrors('email');
         $this->actingAs($this->supplier)->get(route('supplier.hotels.index'))->assertForbidden();
-        $this->actingAs($this->owner)->get(route('bookings.voucher', $booking))->assertOk()->assertSee('Fake refund recorded')->assertSee('King suite');
+        $this->actingAs($this->owner)->get(route('bookings.voucher', $booking))->assertOk()->assertSee('Refund recorded in the local payment simulation')->assertSee('King suite');
     }
 
     public function test_archived_hotel_is_absent_from_public_surfaces_and_rejects_booking(): void

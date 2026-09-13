@@ -18,7 +18,13 @@ class PublicHotelController extends Controller
     public function show(Hotel $hotel)
     {
         abort_unless($hotel->published && ! $hotel->archived_at, 404);
-        $hotel->load(['images', 'rooms.featuredImage', 'rooms.facilities', 'rooms.boardTypes']);
+        $hotel->load([
+            'images' => fn ($query) => $query->orderBy('position')->orderBy('id'),
+            'rooms.featuredImage',
+            'rooms.images' => fn ($query) => $query->orderBy('position')->orderBy('id'),
+            'rooms.facilities',
+            'rooms.boardTypes',
+        ]);
 
         return view('hotels.show', compact('hotel'));
     }

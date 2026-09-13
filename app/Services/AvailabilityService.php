@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\BookingException;
 use App\Models\Hotel;
+use App\Support\PublicLabel;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -115,7 +116,7 @@ class AvailabilityService
                             )
                             : null,
 
-                    'room_type' => $room->roomType?->name,
+                    'room_type' => PublicLabel::clean($room->roomType?->name),
 
                     'board_types' =>
                         $room->boardTypes

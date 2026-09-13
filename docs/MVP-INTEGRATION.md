@@ -1,4 +1,4 @@
-> Latest phase (2026-09-13): [Search, notifications, vouchers and fictional media](SEARCH-NOTIFICATIONS-VOUCHERS.md). Historical missing-email/search/voucher findings below are superseded by that report; the documented FK/account-deletion P1 remains open.
+> Latest phase (2026-09-13): [Search, notifications, vouchers and fictional media](SEARCH-NOTIFICATIONS-VOUCHERS.md). Historical missing-email/search/voucher findings below are superseded by that report; the supplier lifecycle/cascade P1 is closed by the archive/deactivation implementation and restrictive history FKs.
 
 # BookYourHotel — MVP integration audit
 
@@ -58,7 +58,7 @@ Nema automatskog confirmation-a posle payment-a. Očuvano je postojeće pravilo 
 - Hotel endpoint-i i Livewire akcije proveravaju HotelPolicy; nested room mora pripadati hotelu iz URL-a. Superadmin hotel view/update pristup usklađen je sa postojećim role middleware bypass-om; nije uvedena nova role.
 - Guest koristi posebno potpisane show/submit/retry/manage/cancel URL-ove, samo za booking sa user_id NULL. Guest checkout i management linkovi ističu krajem check-out dana.
 - Booking number nije authorization. Potpis pokriva putanju/query, uključujući attempt na payment POST-u. POST body ne može zameniti potpisani attempt.
-- Potpisani link je bearer capability: svako kome ga gost prosledi dobija ista guest prava. UI traži čuvanje privatnog management linka. Ne šalje se e-mail i nema recovery/revocation sistema u ovom MVP-u.
+- Potpisani link je bearer capability: svako kome ga gost prosledi dobija ista guest prava. UI traži čuvanje privatnog management linka. Guest recovery šalje novi potpisani management link samo za booking sa `user_id = NULL`; revocation i retention politika ostaju otvoreni.
 - Checkout, guest management i receipt imaju no-referrer i private/no-store response headere. Sve mutation forme imaju CSRF; signed POST nije izuzet od CSRF.
 - POST command prihvata samo success/failure simulaciju. Browser bira ishod simulacije, ali ne može direktno zadati proizvoljan payment status ili zaobići lifecycle/authorization provere.
 
@@ -93,7 +93,7 @@ Stari `supplier/bookings/{pending,confirmed,index}` dummy template-i više nemaj
 - Pravi provider, webhook signature verification, provider idempotency, reconciliation, retry/outbox za eksterni refund i zasebni attempts/refund ledger nisu implementirani. Jedna lokalna transakcija ne može garantovati atomarnost sa budućim eksternim providerom.
 - Nema automatskog isteka unpaid rezervacija niti inventory release job-a; pending može držati inventory do otkazivanja. Potrebna poslovna odluka o hold TTL-u.
 - Postojeći supplier inventory endpoint-i apsolutno zadaju available. Stari admin/supplier ekran može prepisati novije stanje; nije redizajnirana inventory adjustment semantika. To je važna production prepreka, odvojena od dokazane booking/payment concurrency zaštite.
-- Postojeći FK cascade na hotel/room/board relacijama i masovni query delete mogu zaobići Booking deleting event. Nisu menjani po zahtevu. Aktivni booking hard-delete endpoint ne postoji; prazni hotel/room DELETE resource endpoint-i sada izričito vraćaju 405.
+- Pre supplier lifecycle taska, FK cascade na hotel/room/board relacijama i masovni query delete mogli su zaobići Booking deleting event. Aktuelni supplier/historical FK ugovor i archive/deactivate lifecycle opisani su u `docs/supplier-lifecycle.md`; pomoćne katalog/image kaskade ostaju dozvoljene za maintenance brisanje unused zapisa.
 - `Room::bookings()` je zastarela direktna relacija na uklonjeni bookings.room_id; nema aktivnog korisnika te relacije. Potrebno zasebno uklanjanje ili zamena preko items.
 - User ne implementira MustVerifyEmail; middleware verified sam po sebi ne nameće verifikaciju u tom stanju. Breeze/role sistem nije redizajniran.
 - Cene i dalje koriste postojeći decimal DB/float obračun, bez money-in-cents refaktora. Production zahteva jasna rounding/tax/currency pravila i numeričke granice svih aggregate totals.
@@ -123,7 +123,7 @@ Finalni rezultati:
 - Ceo PHP suite sa `RUN_BOOKING_MYSQL_TESTS=1`: **79 testova, 1052 assertions, sve prolazi, bez skipped testova**. Obuhvata postojeći create/availability, management, Breeze/profile, nove payment/security/route/Livewire testove i pet MySQL concurrency scenarija.
 - Zaseban MySQL concurrency run: **5 testova / 49 assertions**, sve prolazi. Ukupni suite već uključuje ovih pet testova; nisu dvaput uračunati.
 - Frontend Node: **8 testova**, sve prolazi (booking reset/stale response/submit, checkout duplicate guard, inventory load/save errors).
-- Routes: **81 pre → 89 posle** (dve public hotel i šest payment ruta). Nema duplicate names, duplicate method+URI, booking.booking.*, admin.admin.* ili /admin/admin/*. Route test proverava literalne reference i postojanje controller metoda.
+- Historical route snapshot for that integration phase was **81 pre → 89 after**. The current final route audit has **84** registered routes; there are no route deletions in the final polish diff, and the route integrity test passes.
 - PHP syntax: **62 promenjena/nova PHP i Blade fajla**, bez sintaksnih grešaka. `view:cache`, `git diff --check` i Vite build uspešni.
 - Nova payments migracija izvršena na lokalnom MySQL-u; Boost potvrđuje unique booking_id/reference/refund_reference i NO ACTION FK. Nema pending migracija. Fresh migracije uspešne i na SQLite i na izdvojenim MySQL bazama.
 - Browser na izdvojenoj SQLite bazi: Home → listing → details → availability → izbor sobe i dva gosta → create guest booking → failed payment → explicit retry → paid → receipt → signed management → cancellation → Refunded. Proveren stvarni native form submit sa CSRF, kao i vizuelni dark checkout. Supplier login/navigacija dodatno provereni; role/status kombinacije pokriva feature suite. Browser test nije zamena za MySQL concurrency dokaz.

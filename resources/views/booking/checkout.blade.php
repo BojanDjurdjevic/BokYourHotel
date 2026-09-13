@@ -1,9 +1,9 @@
 <x-app-layout>
     <div class="max-w-2xl mx-auto bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6">
-        <h1 class="text-3xl font-bold">Fake checkout</h1>
+        <h1 class="text-3xl font-bold">Payment checkout</h1>
         @include('booking._deadline')
         <a class="text-blue-400" href="{{ request()->routeIs('guest.payments.*') ? \Illuminate\Support\Facades\URL::temporarySignedRoute('guest.bookings.voucher', $booking->check_out->copy()->endOfDay(), $booking) : route('bookings.voucher', $booking) }}">Download / print voucher</a>
-        <p class="text-amber-300">Development simulation only. No money is charged. Never enter card details.</p>
+        <p class="text-amber-300">Payment simulation: no money is charged. Do not enter card details.</p>
         <dl class="space-y-3">
             <div><dt class="text-gray-400">Booking number</dt><dd>{{ $booking->booking_number }}</dd></div>
             <div><dt class="text-gray-400">Booking status</dt><dd>{{ ucfirst($booking->status->value) }}</dd></div>
@@ -38,7 +38,7 @@
                 </form>
             @endif
         @elseif(! config('payments.fake_enabled'))
-            <p class="text-amber-300">Fake payments are disabled in this environment.</p>
+            <p class="text-amber-300">Payment simulation is unavailable in this environment.</p>
         @endif
         <x-input-error :messages="$errors->all()" />
         <div class="flex flex-wrap gap-5">

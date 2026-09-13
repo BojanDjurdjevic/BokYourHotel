@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="max-w-6xl mx-auto">
-        <h1 class="text-3xl font-bold mb-6">{{ $title ?? 'Bookings' }}</h1>
+        <h1 class="text-3xl font-bold mb-6">{{ $title ?? (auth()->user()->isAdmin() || auth()->user()->isSupplier() || auth()->user()->isSuperAdmin() ? 'Bookings' : 'My bookings') }}</h1>
 
         <div class="space-y-4">
             @forelse($bookings as $booking)
@@ -10,7 +10,7 @@
                         <span class="font-semibold">{{ $booking->booking_number }}</span>
                         <span class="text-sm text-gray-400">{{ ucfirst($booking->status->value) }}</span>
                     </div>
-                    <p class="mt-2">{{ $booking->hotel->name }}</p>
+                    <p class="mt-2">{{ \App\Support\PublicLabel::clean($booking->hotel->name, 'Hotel') }}</p>
                     <p class="text-sm text-gray-400">Payment: {{ ucfirst($booking->payment?->status->value ?? 'not started') }} (simulation)</p>
                     <p class="text-sm text-gray-400 mt-1">
                         {{ $booking->check_in->format('d.m.Y') }} – {{ $booking->check_out->format('d.m.Y') }}

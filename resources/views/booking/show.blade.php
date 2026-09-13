@@ -18,7 +18,7 @@
             </p>
 
             <h1 class="text-3xl font-bold">
-                {{ $hotel->name }}
+                {{ \App\Support\PublicLabel::clean($hotel->name, 'Hotel') }}
             </h1>
 
             <p class="text-gray-400 mt-2">

@@ -42,16 +42,16 @@ class DemoSeeder extends Seeder
             }
             $types = [];
             foreach (['Classic King', 'Deluxe Twin', 'Junior Suite', 'Family Suite', 'Panorama Suite', 'Terrace Studio'] as $name) {
-                $types[] = DB::table('room_types')->insertGetId(['name' => 'Demo '.$name]);
+                $types[] = DB::table('room_types')->insertGetId(['name' => $name]);
             }
-            $bed = DB::table('bed_types')->insertGetId(['name' => 'Demo premium beds']);
+            $bed = DB::table('bed_types')->insertGetId(['name' => 'Premium beds']);
             $boards = [];
             foreach (['Room only' => 0, 'Breakfast' => 24, 'Half board' => 65] as $name => $price) {
                 $boards[] = ['id' => DB::table('board_types')->insertGetId(['code' => 'DEMO-'.count($boards), 'name' => $name]), 'price' => $price];
             }
             $facilities = [];
             foreach (['Wi-Fi', 'Air conditioning', 'City view', 'Coffee machine', 'Bathtub', 'Balcony'] as $name) {
-                $facilities[] = DB::table('facilities')->insertGetId(['name' => 'Demo '.$name]);
+                $facilities[] = DB::table('facilities')->insertGetId(['name' => $name]);
             }
             $counts = ['hotels' => 0, 'rooms' => 0, 'inventory' => 0, 'bookings' => 0, 'payments' => 0, 'hotel_ids' => [], 'anchor_date' => $date];
             foreach (require __DIR__.'/demo/destinations.php' as $cityIndex => [$city, $country]) {

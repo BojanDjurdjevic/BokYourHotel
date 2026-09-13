@@ -1,4 +1,4 @@
-> Latest phase (2026-09-13): [Search, notifications, vouchers and fictional media](SEARCH-NOTIFICATIONS-VOUCHERS.md). Historical missing-email/search/voucher findings below are superseded by that report; the documented FK/account-deletion P1 remains open.
+> Latest phase (2026-09-13): [Search, notifications, vouchers and fictional media](SEARCH-NOTIFICATIONS-VOUCHERS.md). Historical missing-email/search/voucher findings below are superseded by that report; the supplier lifecycle/cascade P1 is closed by the archive/deactivation implementation and restrictive history FKs.
 
 # Production readiness — baseline i plan
 
@@ -7,7 +7,7 @@ Datum audita: 2026-09-12. Aplikacija nije proglašena production-ready.
 ## Početni baseline
 
 - Čist working tree pre zadatka. Laravel 12, PHP 8.3, MySQL; Breeze, Blade/Livewire/Alpine/Tailwind.
-- 89 registrovanih ruta. Baseline izvršavanje: 79 testova / 1043 assertions, jedan MySQL worker startup timeout (20 s); nije potpuno zelen baseline. Prethodni MVP izveštaj je beležio 79/1052. Frontend baseline: 8/8 prolazi. Završni rezultati su navedeni ispod.
+- Current final route:list audit: **84 registered routes**. The earlier 89-route figure is a historical phase baseline; final polish adds two guest recovery routes and removes none.
 - Lokalna baza: 1 hotel, 4 sobe, 61 inventory red, 6 bookings, 0 payments. Postojeći razvojni podaci neće biti brisani.
 - Controller/service + Blade render, bez HTTP/session overhead-a, učitan actor van merenja: public listing 3; supplier hotels 7; supplier dashboard 3; supplier bookings index 4; public details 6; availability 6 upita. Milisekunde nisu stabilan performance kriterijum.
 - Postoje unique booking_number, payment booking_id/reference/refund_reference, inventory(room_id,date), room-board i room-facility indeksi. Bookings već ima (hotel_id,status); user_id i parent FK indeksi postoje. Inventory ima redundantni običan (room_id,date) pored unique indeksa; nema potrebe za novim identičnim indeksom.
@@ -24,7 +24,7 @@ Datum audita: 2026-09-12. Aplikacija nije proglašena production-ready.
 | P1 | Upload storage write rezultat se ignoriše; DB greška može ostaviti orphan; room fajl nije normalizovan | Provera write-a, WebP normalizacija, kompenzacioni cleanup i scoped path |
 | P2 | FK cascade i query-level delete mogu zaobići Booking deleting event | Dokumentovati; ne menjati masovno FK politiku |
 | P2 | Room::bookings je zastarela direktna relacija | Lokalna korekcija samo ako test pokaže bezbedan put preko items |
-| P2 | MustVerifyEmail nije implementiran; e-mail recovery/revocation guest linkova nedostaje | Ljudska/deployment odluka, bez Breeze redizajna |
+| P2 | MustVerifyEmail nije implementiran; guest-link revocation/retention i SMTP/queue operativa traže deployment odluku | Recovery flow postoji bez otkrivanja booking existence; bez Breeze redizajna |
 | P2 | Pravi provider, webhook/reconciliation, detaljan financial ledger ne postoje | Van scope-a |
 | P2 | Postoje dormant demo template-i/metode i external Sortable CDN | Ne aktivirati; bez širokog style refaktora |
 
@@ -41,7 +41,7 @@ Datum audita: 2026-09-12. Aplikacija nije proglašena production-ready.
 
 - Pravi payment provider i refund/reconciliation protokol.
 - Politika čuvanja istorije i lifecycle hotela/soba/board type-ova pre menjanja FK kaskada.
-- Verify-email, guest e-mail dostava/recovery/revocation i privatnost.
+- Verify-email, guest-link revocation/retention, privatnost i stvarna SMTP/queue dostava.
 - Hotelske vremenske zone i eventualno konkretno check-in vreme; sada rok koristi app timezone.
 - Deployment scheduler, queue, HTTPS, secure cookies, trusted proxies/hosts, secrets, backups i monitoring.
 - Licenciran lokalni image pack: ovaj zadatak ne preuzima fotografije i ne izmišlja attribution.
@@ -127,12 +127,12 @@ Import prihvata samo odobrene lokalne JPEG/PNG/WebP, do 8 MB i 40 MP, proverava 
 | P1 zatvoren | Neograničen broj booking items / bulk inventory redova i odsustvo abuse limita: max 20 items, max 366 dana/reda i ciljane Laravel rate limits. |
 | P1 zatvoren | Upload write failure, orphan pri neuspelom DB insert-u i raw room upload: kontrola write-a, cleanup, MIME/veličina/piksel granice, WebP i scoped putanje. |
 | P1 zatvoren | Poznate dependency advisories u instaliranim paketima: Composer 40 → 0; pnpm 49 → 0 na dan audita. |
-| P1 otvoren — ljudska odluka | Supplier account deletion kroz postojeći ProfileController može aktivirati users → hotels → bookings/rooms kaskade. Istorija bez payment zapisa može biti obrisana; payment FK NO ACTION može umesto toga izazvati DB grešku. Nisu menjani Breeze ni FK lifecycle, po eksplicitnom ograničenju. Ovo je deployment blokator. |
+| P1 zatvoren | Supplier profile removal sada deactivates the supplier and atomically archives owned hotels/rooms; restrictive supplier, hotel and booking-item history FKs prevent direct hard-delete cascades. MySQL lifecycle tests potvrđuju blokadu direktnog brisanja i očuvanje booking/payment/voucher istorije. |
 | P2 ostaje | Neaktivne legacy metode/relacije, javni details/availability učitavaju sve room konfiguracije jednog hotela, image galerije nisu globalno ograničene po hotelu. Za 3–6 konfiguracija nema potvrđenog N+1; za ogromne pojedinačne hotele treba posebno definisati granice/UI. |
 | P2 ostaje | City `%term%` filter i određena sortiranja rade filesort; na izmerenom datasetu nije opravdano dodavanje novih search indeksa/infrastrukture. |
 | P2 ostaje | Filesystem i DB nisu jedna transakcija: disk-delete pa DB-delete failure može ostaviti nevažeću image referencu; batch upload može biti delimično uspešan. Nema orphan reconciliation job-a ni storage quota. |
 | P2 ostaje | Featured image/order concurrent izmene nisu posebno serializovane; nema jedinstvenog featured indeksa. Nije booking/payment integritet. |
-| P2 ostaje | E-mail verifikacija/recovery/revocation signed guest linkova, privacy retention i concrete hotel timezone nisu završeni. |
+| P2 ostaje | E-mail verifikacija, guest-link revocation/retention, privacy retention i concrete hotel timezone nisu završeni. Guest recovery sada postoji uz generički odgovor i rate limit; stvarna SMTP/queue operativa ostaje deployment obaveza. |
 | P2 ostaje | Floating-point money računanje nije money-in-cents refaktorisano. Fake payment ostaje portfolio simulator, ne payment ledger/provider. |
 
 ## Performance i indeksi
@@ -196,7 +196,7 @@ Production scheduler mora pokretati `php artisan schedule:run` svakog minuta. `w
 ## Security, uploads i deployment konfiguracija
 
 - Booking/payment IDOR, supplier hotel/room/image ownership i admin/user granice ostaju server-side policy/Gate/scope provere. Signed route podrazumeva guest capability; booking number nije authorization. Izmenjen/pogrešan/istekao potpis odbija se. POST/CSRF middleware ostaje; signed URL ne zamenjuje CSRF.
-- Završna provera stvarne FK šeme podigla je početni retention P2 na otvoren P1 za supplier account deletion: hotels.supplier_id CASCADE, bookings.hotel_id CASCADE, rooms.hotel_id CASCADE, booking_items room/board/booking CASCADE; payments.booking_id NO ACTION. ProfileController poziva user->delete(), a DB cascade ne aktivira Booking deleting event. Običan customer account ima bookings.user_id SET NULL, pa taj direktni put čuva booking. Predlog: prvo definisati deactivation/retention ili zabranu supplier account deletion dok postoje hoteli/rezervacije, zatim zasebno implementirati i testirati; ništa od toga nije tiho uvedeno ovde.
+- Završna provera stvarne FK šeme potvrđuje zatvoren supplier account-deletion/history P1: `hotels.supplier_id`, `bookings.hotel_id` i `booking_items` history FK-ovi su `RESTRICT`; `bookings.user_id` je `SET NULL`, a `payments.booking_id` ostaje `NO ACTION`. `ProfileController` supplier profile removal šalje kroz `SupplierLifecycleService::deactivateSupplier()`, koji zadržava nalog i arhivira business podatke, uz blokadu dok postoje pending/confirmed bookings. `rooms.hotel_id` `CASCADE` ostaje samo za pomoćno brisanje unused kataloga, van supplier account deletion puta. Lifecycle MySQL testovi potvrđuju ovaj ugovor.
 - Guest management/payment odgovori ostaju private/no-store i no-referrer. Link ostaje bearer capability do kraja checkout dana; zaštita njegovog čuvanja, email dostava i opoziv su preostale poslovne odluke.
 - Kontroleri koriste validated/eksplicitno odabrana polja. Cene/status/user_id/refund ne preuzimaju se iz proizvoljnih browser polja. Nije potvrđeno nesanitizovano dinamičko SQL sortiranje ili SQL injection u aktivnim upitima. City filter koristi query binding; `%` wildcard je pretraga, ne SQL kod.
 - Aktivni `{!! !!}` u setup steps emituju fiksan znak ✓, ne user HTML. Opisi/imena/feedback koriste Blade escaping. Nije uveden blanket HTML filter bez potrebe.
@@ -228,7 +228,7 @@ composer audit
 pnpm.cmd audit --json
 ```
 
-PHP syntax: 128 app/database/routes/tests PHP fajlova provereno. Blade compilation, config:cache, route:cache i Vite production build prolaze. Route integrity testovi proveravaju duple names i URI+method, stvarne controller metode i literalne route reference. Rute 89 → 90: dodat samo supplier inventory preview; postojeći names/URI/actions ostaju, ciljanim rutama dodat throttle. Nova migracija je izvršena na lokalnoj MySQL bazi i u disposable test bazama; svi migrate:status redovi su Ran. Git diff --check prolazi.
+PHP syntax: 128 app/database/routes/tests PHP fajlova provereno. Blade compilation, config:cache, route:cache i Vite production build prolaze. Route integrity testovi proveravaju duple names i URI+method, stvarne controller metode i literalne route reference. Aktuelni route audit ima 84 registrovane rute; route diff u final polish-u nema obrisanih ruta, a guest recovery je dodao dve nove named rute. `RouteIntegrityTest` potvrđuje jedinstvene names/method+URI, realne controller actions i literalne route reference. Nova migracija je izvršena na lokalnoj MySQL bazi i u disposable test bazama; svi migrate:status redovi su Ran. Git diff --check prolazi.
 
 Composer update je ostao u postojećim major granicama: Laravel 12.69.2, Livewire 4.4.4 i ciljane tranzitivne zakrpe; nema Composer advisories/abandoned paketa. Frontend ostaje Vite 7.3.6/axios 1.20, esbuild 0.28.2 je u podržanom Vite rasponu. `concurrently>shell-quote` ima uski override ^1.8.5 jer parent pinuje ranjivu patch verziju. Pnpm audit: 0 advisories. To je rezultat na datum audita, ne trajna garancija.
 
@@ -248,8 +248,8 @@ Browser smoke pokušaj nije uspeo: postojeća browser veza nije dostupna, discov
 
 1. Pravi provider/webhook/refund/reconciliation i finansijska pravila; fake sistem ne može ući u realno naplaćivanje.
 2. Potvrditi da staff sme potvrditi unpaid booking i time ukloniti hold; definisati 30-min rok, grace postojećim rezervacijama i hotelske vremenske zone.
-3. Definisati FK/entity deletion i retention istorije, uključujući account deletion; bez toga aplikacija ne garantuje istoriju protiv svih DB/administrativnih puteva.
-4. Guest link delivery/recovery/revocation, email verification i zaštita ličnih podataka; ne oslanjati se na sačuvan browser link kao završeno korisničko rešenje.
+3. Potvrditi poslovnu politiku za retention/anonymization ličnih podataka. Supplier business account removal već koristi deactivation/archive i restrictive history FK-ove; ta politika određuje koliko dugo se zadržavaju identitet i poslovni kontekst.
+4. Guest link delivery/revocation, email verification i zaštita ličnih podataka; recovery sada postoji, ali bearer link i dalje zahteva retention/revocation politiku.
 5. Nabaviti/odobriti image licence i source pack; demo nalozi/dataset moraju biti odvojeni od stvarne produkcije.
 6. Izabrati deployment HTTPS/proxy/host/session/cache/scheduler politiku, monitoring, log retention, storage quota i backup/restore postupak. Testirati failover i stvarni HTTP workload na ciljnoj infrastrukturi.
 7. Zakazati ručni desktop/mobile browser acceptance test kada browser bude dostupan, i razmotriti P2 galerije/room-config limite za veće pojedinačne hotele.

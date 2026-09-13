@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 use App\Models\Hotel;
+use App\Support\FacilityLabel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -55,8 +56,10 @@ class HotelSearchService
     public function options(): array {
         return [
             'hotelFacilities' => DB::table('hotels')->where('published', true)->whereNull('hotels.archived_at')->whereNotNull('facilities')->distinct()->pluck('facilities')
-                ->flatMap(fn ($json) => json_decode($json, true) ?? [])->unique()->sort()->values(),
-            'roomFacilities' => DB::table('facilities')->orderBy('name')->get(['id','name']),
+                ->flatMap(fn ($json) => json_decode($json, true) ?? [])->unique()->sortBy(fn ($facility) => FacilityLabel::label($facility))->values()
+                ->map(fn ($facility) => ['value' => $facility, 'label' => FacilityLabel::label($facility)])->values(),
+            'roomFacilities' => DB::table('facilities')->get(['id','name'])->sortBy(fn ($facility) => FacilityLabel::label($facility->name))->values()
+                ->map(function ($facility) { $facility->label = FacilityLabel::label($facility->name); return $facility; }),
             'boards' => DB::table('board_types')->whereNull('archived_at')->orderBy('name')->get(['id','name']),
         ];
     }

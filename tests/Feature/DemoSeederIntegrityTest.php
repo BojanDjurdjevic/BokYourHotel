@@ -43,6 +43,9 @@ class DemoSeederIntegrityTest extends TestCase
         $this->assertDatabaseCount('bookings', 400);
         $this->assertDatabaseHas('users', ['id' => $existing->id, 'email' => $existing->email]);
         $this->artisan('demo:images')->assertSuccessful();
+        $featuredNames = DB::table('hotel_images')->where('is_featured', true)->pluck('path')
+            ->map(fn ($path) => basename($path))->unique();
+        $this->assertGreaterThanOrEqual(4, $featuredNames->count());
     }
 
     public function test_demo_namespace_collision_does_not_overwrite_accounts(): void

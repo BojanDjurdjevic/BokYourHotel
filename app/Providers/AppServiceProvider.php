@@ -42,6 +42,10 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(30)->by('actor:'.($request->user()?->id ?? $request->ip())),
             Limit::perMinute(15)->by('booking:'.($request->route('booking') instanceof \App\Models\Booking ? $request->route('booking')->getRouteKey() : $request->route('booking')).':'.$request->ip()),
         ]);
+        RateLimiter::for('guest-booking-recovery', fn (Request $request) => [
+            Limit::perMinute(5)->by('guest-recovery:'.$request->ip()),
+            Limit::perHour(20)->by('guest-recovery:'.$request->ip()),
+        ]);
         RateLimiter::for('image-upload', fn (Request $request) => Limit::perMinute(10)->by((string) $request->user()?->id));
     }
 }

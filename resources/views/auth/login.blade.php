@@ -43,5 +43,8 @@
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
+        <p class="mt-5 text-center text-sm text-gray-600 dark:text-gray-400">
+            Looking for a guest reservation? <a class="text-indigo-600 underline hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300" href="{{ route('guest.bookings.find') }}">Find my booking</a>
+        </p>
     </form>
 </x-guest-layout>

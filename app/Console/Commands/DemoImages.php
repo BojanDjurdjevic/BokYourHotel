@@ -38,10 +38,12 @@ class DemoImages extends Command
         }
         $count = 0;
         $ids = json_decode($run->summary, true)['hotel_ids'];
+        $pairedHotelCategories = ['exterior-city', 'exterior-resort', 'lobby-modern', 'lobby-classic'];
         foreach (Hotel::whereIn('id', $ids)->with(['rooms' => fn ($q) => $q->orderBy('id')])->orderBy('id')->get() as $index => $hotel) {
             foreach (['exterior', $index % 2 ? 'exterior-resort' : 'exterior-city', 'lobby', $index % 2 ? 'lobby-classic' : 'lobby-modern', 'reception', 'pool', 'restaurant', 'breakfast', 'rooftop', 'spa', 'gym'] as $category) {
                 if (empty($assets[$category])) continue;
-                $asset = $assets[$category][$index % count($assets[$category])];
+                $assetIndex = in_array($category, $pairedHotelCategories, true) ? intdiv($index, 2) : $index;
+                $asset = $assets[$category][$assetIndex % count($assets[$category])];
                 $count += $this->attach($hotel, 'hotels', $asset);
             }
             foreach ($hotel->rooms as $r => $room) {
@@ -51,6 +53,7 @@ class DemoImages extends Command
                     $count += $this->attach($room, 'rooms', $assets[$category][($index + $r) % count($assets[$category])]);
                 }
             }
+            $this->reconcileDemoFeaturedImage($hotel, $index, $assets);
         }
         $populatedHotels = DB::table('hotel_images')->whereIn('hotel_id', $ids)->where('path', 'like', 'hotels/%/demo-%')->distinct()->count('hotel_id');
         $populatedRooms = DB::table('room_images')->join('rooms', 'rooms.id', '=', 'room_images.room_id')->whereIn('rooms.hotel_id', $ids)
@@ -74,5 +77,20 @@ class DemoImages extends Command
             throw $e;
         }
         return 1;
+    }
+
+    private function reconcileDemoFeaturedImage(Hotel $hotel, int $index, array $assets): void
+    {
+        $featured = $hotel->images()->where('is_featured', true)->first();
+        $demoPrefix = 'hotels/'.$hotel->id.'/demo-';
+        if ($featured && ! str_starts_with($featured->path, $demoPrefix)) return;
+
+        $category = $index % 2 ? 'exterior-resort' : 'exterior-city';
+        if (empty($assets[$category])) return;
+
+        $asset = $assets[$category][intdiv($index, 2) % count($assets[$category])];
+        $desiredPath = 'hotels/'.$hotel->id.'/'.$asset['name'];
+        $hotel->images()->where('path', 'like', $demoPrefix.'%')->update(['is_featured' => false]);
+        $hotel->images()->where('path', $desiredPath)->update(['is_featured' => true]);
     }
 }

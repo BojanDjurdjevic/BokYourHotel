@@ -81,6 +81,12 @@ See [the exact 36-file list and import instructions](../resources/demo/README.md
 
 - Search: `app/Http/Controllers/{PublicHotelController,DestinationController}.php`, `app/Http/Requests/{HotelSearchRequest,AddHotelRequest}.php`, `app/Services/HotelSearchService.php`, `app/Models/Hotel.php`, `database/seeders/DemoSeeder.php`, both new migrations, `routes/web.php`, `resources/views/hotels/{index,show,_search,_filters}.blade.php`, `resources/views/welcome.blade.php`, `resources/views/supplier/hotels/setup/info.blade.php`, booking controller/show prefill.
 - Notifications: `app/Enums/BookingNoticeType.php`, `app/Events/BookingActivity.php`, `app/Notifications/{BookingNotice,SendBookingNotice}.php`, `app/Providers/AppServiceProvider.php`, `app/Http/Controllers/NotificationController.php`, booking/payment service event hooks, `resources/views/emails/booking-notice.blade.php`, `resources/views/notifications/index.blade.php`, navigation links and web routes.
+
+### Guest booking recovery and SMTP
+
+Guests can use `Find my booking` with a booking number and email address. A valid guest match receives the existing signed management notification; the response is generic for matches, misses and authenticated-user bookings. The endpoint uses a dedicated IP rate limit and never creates a guest link for a booking with a non-null `user_id`.
+
+For a normal Laravel SMTP transport, set `MAIL_MAILER=smtp`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS` and `MAIL_FROM_NAME` in the deployment environment. `MAIL_ENCRYPTION` is accepted for standard `tls`/`ssl` settings and `MAIL_SCHEME` remains supported. Local testing can continue using `log`, `array`, `sync` or the existing fake notification setup; no credentials belong in the repository.
 - Voucher: `app/Http/Controllers/Booking/VoucherController.php`, `resources/views/booking/{voucher,manage,checkout}.blade.php`, `routes/booking.php`.
 - Media: `app/Console/Commands/DemoImages.php`, `resources/demo/{manifest.json,README.md}`, 21 image category directories containing only `.gitkeep`.
 - Tests/profiling: `tests/Feature/{HotelSearchTest,BookingNotificationTest,BookingVoucherTest,DemoMediaPackTest}.php`, `tests/Frontend/search.test.mjs`, `tests/Support/{CreatesBookingScenario,search-profile}.php`; adjusted `ReadinessHardeningTest`, `RouteIntegrityTest` and `readiness-profile.php` for the new unread query, Notification::route false positive and controller signature. `BookingManagementConcurrencyTest` now checks buffered worker READY output, avoiding a Windows waitUntil startup race while retaining the timeout and actual two-worker database-lock assertions.
@@ -93,7 +99,7 @@ Final execution results are recorded below. Tests cover published/distinct desti
 - Frontend: 14/14 Node tests passed (baseline 11).
 - Vite production build passed: 58 modules, approximately 41.70 kB CSS / 51.52 kB JS before gzip.
 - PHP syntax: 145 files passed; Blade compilation, route cache/clear and git diff --check passed.
-- Routes: 90 → 95; no duplicate names or method/URI combinations. Route-reference feature tests cover active references.
+- Historical route snapshot for that phase was **90 → 95**. The current final route audit has **84** registered routes; final polish adds only the two guest recovery routes and has no route deletions.
 - Both new migrations show Ran in the local MySQL database. Existing data was not reset.
 - In-app browser was unavailable (browser list empty), so no manual browser success is claimed. Server-rendered feature tests and Alpine tests cover the flows but do not replace visual browser QA.
 - Two full-suite attempts encountered the same legacy Windows worker READY/waitUntil timeout; the isolated expiration test passed. Inspection showed both workers already executing SELECT ... FOR UPDATE while the parent still awaited READY. The test harness now observes already-buffered output. Final rerun result follows.
@@ -118,8 +124,8 @@ The MySQL suite creates/removes its own randomly named disposable databases and 
 ## Remaining findings and decisions
 
 - P0: no new confirmed issue in these implemented paths.
-- Existing P1 remains: supplier account deletion interacts with legacy FK cascades/history and payment constraints. Breeze/account deletion/FK lifecycle was explicitly out of scope and still requires a business retention decision before deployment.
+- Supplier account deletion/history cascade P1 is closed by the supplier lifecycle implementation: supplier profile removal deactivates the account and archives owned business data, while restrictive history FKs prevent direct hard-delete cascades. MySQL lifecycle tests cover the retention contract. Personal-data retention/anonymization remains a separate deployment policy decision.
 - P2: legacy migration rollback paths include an incorrect historical inventory index/table reference and a nullable-user reversal that cannot succeed with guest records. New tests isolate in-memory databases without invoking these unrelated old down paths. Do not assume a blanket production rollback is safe.
-- P2: durable notification delivery/recovery, guest link revocation/retention beyond checkout, real email delivery setup, timezone/check-in-time policy, curated media rights and geographically appropriate image mapping remain human/operational decisions.
+- P2: durable notification delivery, guest link revocation/retention beyond checkout, real email delivery setup, timezone/check-in-time policy, curated media rights and geographically appropriate image mapping remain human/operational decisions. Guest recovery itself is implemented with a generic response and dedicated rate limit.
 - P2: direct PDF generation is absent by design; the printable downloadable HTML fallback is documented. Search supports a single room unit for the party, not a multi-room allocation engine.
 - Previously documented real payment provider, storage/database atomicity and deployment monitoring obligations remain. This task did not alter Breeze, role rules, FK cascades, cancellation/payment/expiry transitions, availability math, supplier inventory locking, introduce external APIs/search services, or fetch images.

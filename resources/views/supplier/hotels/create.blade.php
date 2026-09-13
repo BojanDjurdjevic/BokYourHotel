@@ -88,7 +88,7 @@
                     @checked(in_array($facility, $hotel->facilities ?? []))
                 >
 
-                {{ ucfirst(str_replace('_',' ',$facility)) }}
+                {{ \App\Support\FacilityLabel::label($facility) }}
 
                 </label>
 

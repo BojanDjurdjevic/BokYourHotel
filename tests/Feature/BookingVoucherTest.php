@@ -43,6 +43,6 @@ class BookingVoucherTest extends TestCase
         $booking=$this->reservation();
         app(\App\Services\FakePaymentService::class)->submit($booking,$this->owner,1,'success');
         app(\App\Services\BookingService::class)->cancel($booking,$this->owner,'Changed plans');
-        $this->get(route('bookings.voucher',$booking))->assertOk()->assertSee('CANCELLED')->assertSee('Fake refund recorded');
+        $this->get(route('bookings.voucher',$booking))->assertOk()->assertSee('CANCELLED')->assertSee('Refund recorded in the local payment simulation');
     }
 }
