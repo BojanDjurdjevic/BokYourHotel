@@ -61,7 +61,7 @@ class MvpIntegrationTest extends TestCase
     {
         $this->actingAs($this->supplier);
         foreach (['supplier.dashboard', 'supplier.hotels.index', 'supplier.myhotels', 'supplier.pending', 'supplier.bookings', 'supplier.revenue'] as $name) {
-            $this->get(route($name))->assertOk();
+            $this->get(route($name))->assertOk()->assertSee('Supplier Panel');
         }
         foreach (['supplier.hotels.edit', 'supplier.hotels.setup.info', 'supplier.hotels.setup.rooms', 'supplier.hotels.setup.inventory', 'supplier.hotels.setup.images', 'supplier.hotels.setup.publish', 'supplier.inventory.calendar'] as $name) {
             $this->get(route($name, $this->hotel))->assertOk();
@@ -118,10 +118,11 @@ class MvpIntegrationTest extends TestCase
             'check_in' => now()->addDays(3), 'check_out' => now()->addDays(5),
             'subtotal' => 100, 'total' => 100, 'currency' => 'EUR', 'status' => BookingStatus::Pending,
         ];
-        Booking::create($data + ['hotel_id' => $this->hotel->id, 'booking_number' => 'OWN-PENDING']);
+        $pendingBooking = Booking::create($data + ['hotel_id' => $this->hotel->id, 'booking_number' => 'OWN-PENDING']);
         Booking::create(array_replace($data, ['hotel_id' => $this->hotel->id, 'booking_number' => 'OWN-CONFIRMED', 'status' => BookingStatus::Confirmed]));
         Booking::create($data + ['hotel_id' => $this->otherHotel->id, 'booking_number' => 'FOREIGN-PENDING']);
         $this->actingAs($this->supplier)->get(route('supplier.pending'))->assertOk()->assertSee('OWN-PENDING')->assertDontSee('OWN-CONFIRMED')->assertDontSee('FOREIGN-PENDING');
+        $this->get(route('bookings.show', $pendingBooking))->assertOk()->assertSee('Confirm booking');
         $this->get(route('supplier.bookings'))->assertOk()->assertSee('OWN-CONFIRMED')->assertDontSee('OWN-PENDING');
         $this->actingAs(User::factory()->create(['role' => 'admin']))->get(route('bookings.index'))->assertSee('FOREIGN-PENDING');
         $this->get(route('admin.dashboard'))->assertForbidden();
@@ -164,5 +165,32 @@ class MvpIntegrationTest extends TestCase
         ])->assertSessionHas('success');
         $this->put(route('supplier.hotels.setup.publishHotel', $this->hotel))->assertSessionHas('success');
         $this->get(route('hotels.show', $this->hotel))->assertOk()->assertSee('Visible Hotel');
+    }
+
+    public function test_room_image_manager_lists_scopes_and_manages_webp_images(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $first = $this->room->images()->create(['path' => "rooms/{$this->room->id}/first.webp", 'is_featured' => true]);
+        $second = $this->room->images()->create(['path' => "rooms/{$this->room->id}/second.webp", 'is_featured' => false]);
+        \Illuminate\Support\Facades\Storage::disk('public')->put($first->path, 'first');
+        \Illuminate\Support\Facades\Storage::disk('public')->put($second->path, 'second');
+
+        $this->actingAs($this->supplier);
+        Livewire::test('supplier.room-images-manager', ['room' => $this->room])
+            ->assertSee('Uploaded room images')
+            ->set('images', [\Illuminate\Http\UploadedFile::fake()->image('room.jpg', 1600, 900)])
+            ->call('upload')
+            ->assertHasNoErrors();
+
+        $uploaded = $this->room->images()->latest('id')->firstOrFail();
+        $this->assertStringEndsWith('.webp', $uploaded->path);
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($uploaded->path);
+        $this->assertLessThanOrEqual(1200, getimagesize(\Illuminate\Support\Facades\Storage::disk('public')->path($uploaded->path))[0]);
+
+        Livewire::test('supplier.room-images-manager', ['room' => $this->room])
+            ->call('setFeatured', $second->id)
+            ->call('deleteImage', $second->id);
+        $this->assertTrue((bool) $first->refresh()->is_featured);
+        $this->assertDatabaseMissing('room_images', ['id' => $second->id]);
     }
 }

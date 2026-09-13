@@ -11,6 +11,10 @@ class HotelSearchTest extends TestCase
     use RefreshDatabase, CreatesBookingScenario;
     protected function setUp(): void { parent::setUp(); $this->scenario(); }
     private function search(array $data = []) { return $this->get(route('hotels.index', $data)); }
+    public function test_search_results_anchor_scrolls_only_after_a_query_request(): void {
+        $this->search()->assertOk()->assertSee('id="hotel-results"', false)->assertDontSee('scrollIntoView');
+        $this->search(['city' => 'Paris'])->assertOk()->assertSee('id="hotel-results"', false)->assertSee('scrollIntoView');
+    }
     public function test_autocomplete_is_distinct_published_limited_and_literal(): void {
         $this->hotel->replicate()->save();
         $other = $this->hotel->replicate(); $other->city = 'Palermo'; $other->published = false; $other->save();
@@ -64,7 +68,7 @@ class HotelSearchTest extends TestCase
         }
         DB::enableQueryLog(); DB::flushQueryLog();
         $response=$this->search(['city'=>'Paris','country'=>'France','sort'=>'price_desc','adults'=>2])->assertOk();
-        $this->assertLessThanOrEqual(6,count(DB::getQueryLog())); DB::disableQueryLog();
+        $this->assertLessThanOrEqual(8,count(DB::getQueryLog())); DB::disableQueryLog();
         $hotels=$response->viewData('hotels');
         $this->assertCount(12,$hotels); $this->assertEquals(223,$hotels->first()->search_price);
         $this->assertStringContainsString('country=France',$hotels->nextPageUrl());

@@ -1,5 +1,6 @@
 <details open class="rounded-xl border border-gray-800 bg-gray-900 p-4">
     <summary class="cursor-pointer font-semibold">Filter your stay</summary>
+    @php($selectedHotelFacilities = collect(request('hotel_facilities', []))->map(fn ($value) => \App\Support\FacilityLabel::key($value)))
     <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <fieldset class="space-y-2">
             <legend class="mb-2 font-medium">Hotel stars</legend>
@@ -10,7 +11,7 @@
         <fieldset class="space-y-2">
             <legend class="mb-2 font-medium">Hotel facilities</legend>
             @foreach($hotelFacilities as $facility)
-                <label class="flex min-h-11 items-center gap-2"><input type="checkbox" name="hotel_facilities[]" value="{{ $facility['value'] }}" @checked(in_array($facility['value'], request('hotel_facilities', [])))> <span>{{ $facility['label'] }}</span></label>
+                <label class="flex min-h-11 items-center gap-2"><input type="checkbox" name="hotel_facilities[]" value="{{ $facility['value'] }}" @checked($selectedHotelFacilities->contains($facility['key']))> <span>{{ $facility['label'] }}</span></label>
             @endforeach
         </fieldset>
         <fieldset class="space-y-2">
@@ -24,7 +25,7 @@
                 <label for="board_type" class="mb-2 block font-medium">Board type</label>
                 <select id="board_type" name="board_type" class="min-h-12 w-full rounded-xl border border-gray-700 bg-gray-950 px-3 py-3 text-base text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50">
                     <option value="">Any board type</option>
-                    @foreach($boards as $board)<option value="{{ $board->id }}" @selected(request('board_type') == $board->id)>{{ $board->name }}</option>@endforeach
+                    @foreach($boards as $board)<option value="{{ $board->id }}" @selected(request('board_type') == $board->id)>{{ $board->label }}</option>@endforeach
                 </select>
             </div>
             <div class="grid grid-cols-2 gap-3">

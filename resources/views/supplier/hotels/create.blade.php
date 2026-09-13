@@ -22,7 +22,7 @@
                 <input
                     type="text"
                     name="name"
-                    class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
+                    class="min-h-12 w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-3 text-base text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
                     required
                     value="{{ old('name') }}"
                 />
@@ -35,7 +35,7 @@
                     <input
                         type="text"
                         name="city"
-                        class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
+                        class="min-h-12 w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-3 text-base text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
                         required
                         value="{{ old('city') }}"
                     />
@@ -46,7 +46,7 @@
                     <input
                         type="text"
                         name="country"
-                        class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
+                        class="min-h-12 w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-3 text-base text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
                         required
                         value="{{ old('country') }}"
                     >
@@ -59,7 +59,7 @@
                 <input
                     type="text"
                     name="address"
-                    class="w-full rounded-lg bg-gray-900 border-gray-700 p-2"
+                    class="min-h-12 w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-3 text-base text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
                     value="{{ old('address') }}"
                 >
             </div>
@@ -69,7 +69,7 @@
                 <textarea
                     name="description"
                     rows="4"
-                    class="w-full rounded-lg bg-gray-900 border-gray-700"
+                    class="min-h-32 w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-3 text-base text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
                     value="{{ old('description') }}"
                 ></textarea>
             </div>
@@ -85,7 +85,7 @@
                     type="checkbox"
                     name="facilities[]"
                     value="{{ $facility }}"
-                    @checked(in_array($facility, $hotel->facilities ?? []))
+                    @checked(collect(old('facilities', []))->map(fn ($item) => \App\Support\FacilityLabel::key($item))->contains(\App\Support\FacilityLabel::key($facility)))
                 >
 
                 {{ \App\Support\FacilityLabel::label($facility) }}

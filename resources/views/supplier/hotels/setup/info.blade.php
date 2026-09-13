@@ -86,10 +86,10 @@
                 type="checkbox"
                 name="facilities[]"
                 value="{{ $facility }}"
-                @checked(in_array($facility, $hotel->facilities ?? []))
+                @checked(collect($hotel->facilities ?? [])->map(fn ($item) => \App\Support\FacilityLabel::key($item))->contains(\App\Support\FacilityLabel::key($facility)))
             >
 
-            {{ ucfirst(str_replace('_',' ',$facility)) }}
+                {{ \App\Support\FacilityLabel::label($facility) }}
 
             </label>
 

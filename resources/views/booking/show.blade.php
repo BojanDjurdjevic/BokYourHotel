@@ -444,6 +444,7 @@
                                 <button
                                     type="button"
                                     @click="addRoom(room)"
+                                    :disabled="isRoomAdded(room)"
                                     class="
                                         mt-5
                                         px-5
@@ -451,11 +452,15 @@
                                         rounded-xl
                                         bg-blue-600
                                         hover:bg-blue-500
+                                        disabled:cursor-not-allowed
+                                        disabled:bg-gray-700
+                                        disabled:text-gray-400
                                         font-medium
                                         transition
                                     "
                                 >
-                                    Add to booking
+                                    <span x-show="!isRoomAdded(room)">Add to booking</span>
+                                    <span x-show="isRoomAdded(room)" x-cloak>Added to booking</span>
                                 </button>
 
                             </div>
@@ -1502,12 +1507,7 @@
                     const quantity =
                         this.selectedQuantities[room.id] ?? 1
 
-                    const existingItem =
-                        this.bookingItems.find(
-                            item =>
-                                item.room_id === room.id &&
-                                item.board_type_id === board.id
-                        )
+                    const existingItem = this.bookingItems.find(item => item.room_id === room.id)
 
                     if (existingItem) {
 
@@ -1539,6 +1539,10 @@
                         board_total: board.total,
 
                     })
+                },
+
+                isRoomAdded(room) {
+                    return this.bookingItems.some(item => item.room_id === room.id)
                 },
 
                 decreaseQuantity(roomId) {

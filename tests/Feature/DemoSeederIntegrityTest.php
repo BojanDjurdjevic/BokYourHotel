@@ -45,7 +45,20 @@ class DemoSeederIntegrityTest extends TestCase
         $this->artisan('demo:images')->assertSuccessful();
         $featuredNames = DB::table('hotel_images')->where('is_featured', true)->pluck('path')
             ->map(fn ($path) => basename($path))->unique();
-        $this->assertGreaterThanOrEqual(4, $featuredNames->count());
+        $this->assertGreaterThanOrEqual(8, $featuredNames->count());
+        $hotelIds = json_decode(DB::table('demo_seed_runs')->where('name', 'portfolio-v1')->value('summary'), true)['hotel_ids'];
+        $this->assertSame(100, DB::table('hotel_images')->whereIn('hotel_id', $hotelIds)->where('is_featured', true)->count());
+        $assetCategories = collect(json_decode(file_get_contents(resource_path('demo/manifest.json')), true)['assets'])
+            ->mapToGroups(function ($asset) {
+                $path = resource_path('demo/images/'.$asset['filename']);
+                return ['demo-'.hash_file('sha256', $path).'.webp' => $asset['category']];
+            })->map(fn ($categories) => $categories->all());
+        foreach (DB::table('rooms')->whereIn('hotel_id', $hotelIds)->get(['id', 'name']) as $room) {
+            $name = strtolower($room->name);
+            $primary = str_contains($name, 'family') ? 'family' : (str_contains($name, 'suite') ? 'suite' : (str_contains($name, 'deluxe') ? 'deluxe' : (str_contains($name, 'twin') ? 'twin' : (str_contains($name, 'king') ? 'king' : 'standard'))));
+            $path = DB::table('room_images')->where('room_id', $room->id)->orderBy('id')->value('path');
+            $this->assertContains($primary, $assetCategories[basename($path)] ?? [], "Room {$room->id} must start with a room-appropriate demo image.");
+        }
     }
 
     public function test_demo_namespace_collision_does_not_overwrite_accounts(): void

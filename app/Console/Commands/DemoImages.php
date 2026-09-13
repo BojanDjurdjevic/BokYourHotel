@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Hotel;
+use App\Models\Room;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -47,13 +48,9 @@ class DemoImages extends Command
                 $count += $this->attach($hotel, 'hotels', $asset);
             }
             foreach ($hotel->rooms as $r => $room) {
-                $roomCategory = str_contains(strtolower($room->name), 'family') ? 'family' : (str_contains(strtolower($room->name), 'suite') ? 'suite' : ($r === 0 ? 'standard' : 'deluxe'));
-                foreach ([$roomCategory, $r === 0 ? 'standard-room' : ($r === 1 ? 'deluxe-room' : 'suite'), $r % 2 ? 'twin' : 'king', 'bathroom', $index % 2 ? 'sea-view' : 'city-view', 'balcony'] as $category) {
-                    if (empty($assets[$category])) continue;
-                    $count += $this->attach($room, 'rooms', $assets[$category][($index + $r) % count($assets[$category])]);
-                }
+                $count += $this->reconcileDemoRoomImages($room, $assets);
             }
-            $this->reconcileDemoFeaturedImage($hotel, $index, $assets);
+            $count += $this->reconcileDemoFeaturedImage($hotel, $assets);
         }
         $populatedHotels = DB::table('hotel_images')->whereIn('hotel_id', $ids)->where('path', 'like', 'hotels/%/demo-%')->distinct()->count('hotel_id');
         $populatedRooms = DB::table('room_images')->join('rooms', 'rooms.id', '=', 'room_images.room_id')->whereIn('rooms.hotel_id', $ids)
@@ -79,18 +76,80 @@ class DemoImages extends Command
         return 1;
     }
 
-    private function reconcileDemoFeaturedImage(Hotel $hotel, int $index, array $assets): void
+    private function reconcileDemoFeaturedImage(Hotel $hotel, array $assets): int
     {
         $featured = $hotel->images()->where('is_featured', true)->first();
         $demoPrefix = 'hotels/'.$hotel->id.'/demo-';
-        if ($featured && ! str_starts_with($featured->path, $demoPrefix)) return;
+        if ($featured && ! str_starts_with($featured->path, $demoPrefix)) return 0;
 
-        $category = $index % 2 ? 'exterior-resort' : 'exterior-city';
-        if (empty($assets[$category])) return;
+        $categories = ['exterior-city', 'exterior-resort', 'lobby-modern', 'lobby-classic', 'reception', 'rooftop', 'pool', 'restaurant'];
+        $category = $categories[$this->stableIndex((string) $hotel->id, count($categories))];
+        if (empty($assets[$category])) {
+            $category = collect($categories)->first(fn ($name) => ! empty($assets[$name]));
+        }
+        if (! $category) return 0;
 
-        $asset = $assets[$category][intdiv($index, 2) % count($assets[$category])];
+        $asset = $assets[$category][$this->stableIndex($hotel->id.':'.$category, count($assets[$category]))];
         $desiredPath = 'hotels/'.$hotel->id.'/'.$asset['name'];
+        $added = 0;
+        if (! $hotel->images()->where('path', $desiredPath)->exists()) {
+            $added = $this->attach($hotel, 'hotels', $asset);
+        }
         $hotel->images()->where('path', 'like', $demoPrefix.'%')->update(['is_featured' => false]);
         $hotel->images()->where('path', $desiredPath)->update(['is_featured' => true]);
+        return $added;
+    }
+
+    private function reconcileDemoRoomImages(Room $room, array $assets): int
+    {
+        $plan = $this->roomImagePlan($room, $assets);
+        $desiredPaths = collect($plan)->map(fn ($asset) => 'rooms/'.$room->id.'/'.$asset['name'])->values()->all();
+        $demoPrefix = 'rooms/'.$room->id.'/demo-';
+        $existing = $room->images()->where('path', 'like', $demoPrefix.'%')->orderBy('id')->get();
+        $manualFeatured = $room->images()->where('is_featured', true)->where('path', 'not like', $demoPrefix.'%')->exists();
+
+        if ($existing->pluck('path')->values()->all() === $desiredPaths) {
+            if (! $manualFeatured && $desiredPaths) {
+                $room->images()->where('path', 'like', $demoPrefix.'%')->update(['is_featured' => false]);
+                $room->images()->where('path', $desiredPaths[0])->update(['is_featured' => true]);
+            }
+            return 0;
+        }
+
+        foreach ($existing as $image) {
+            Storage::disk('public')->delete($image->path);
+            $image->delete();
+        }
+
+        $count = 0;
+        foreach ($plan as $asset) $count += $this->attach($room, 'rooms', $asset);
+        if (! $manualFeatured && $desiredPaths) {
+            $room->images()->where('path', 'like', $demoPrefix.'%')->update(['is_featured' => false]);
+            $room->images()->where('path', $desiredPaths[0])->update(['is_featured' => true]);
+        }
+        return $count;
+    }
+
+    private function roomImagePlan(Room $room, array $assets): array
+    {
+        $name = strtolower($room->name);
+        $primary = str_contains($name, 'family') ? 'family' : (str_contains($name, 'suite') ? 'suite' : (str_contains($name, 'deluxe') ? 'deluxe' : (str_contains($name, 'twin') ? 'twin' : (str_contains($name, 'king') ? 'king' : 'standard'))));
+        $roomPool = ['standard', 'deluxe', 'twin', 'king', 'suite', 'family'];
+        $secondaryPool = array_values(array_filter($roomPool, fn ($category) => $category !== $primary && ! empty($assets[$category])));
+        $secondary = $secondaryPool ? $secondaryPool[$this->stableIndex($room->id.':secondary', count($secondaryPool))] : null;
+        $view = $this->stableIndex($room->id.':view', 2) ? 'sea-view' : 'city-view';
+        $extras = ['bathroom', $view, 'balcony'];
+        $rotation = $this->stableIndex($room->id.':extras', count($extras));
+        $extras = array_merge(array_slice($extras, $rotation), array_slice($extras, 0, $rotation));
+        $categories = array_values(array_filter(array_unique(array_merge([$primary, $secondary], $extras)), fn ($category) => ! empty($assets[$category])));
+
+        return array_map(function ($category) use ($room, $assets) {
+            return $assets[$category][$this->stableIndex($room->id.':'.$category, count($assets[$category]))];
+        }, $categories);
+    }
+
+    private function stableIndex(string $seed, int $count): int
+    {
+        return $count > 0 ? abs(crc32($seed)) % $count : 0;
     }
 }

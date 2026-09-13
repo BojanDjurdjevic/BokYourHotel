@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\User;
+use App\Support\CatalogOptions;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -47,11 +48,11 @@ class DemoSeeder extends Seeder
             $bed = DB::table('bed_types')->insertGetId(['name' => 'Premium beds']);
             $boards = [];
             foreach (['Room only' => 0, 'Breakfast' => 24, 'Half board' => 65] as $name => $price) {
-                $boards[] = ['id' => DB::table('board_types')->insertGetId(['code' => 'DEMO-'.count($boards), 'name' => $name]), 'price' => $price];
+                $boards[] = ['id' => CatalogOptions::ensureBoard($name, 'DEMO-'.count($boards)), 'price' => $price];
             }
             $facilities = [];
             foreach (['Wi-Fi', 'Air conditioning', 'City view', 'Coffee machine', 'Bathtub', 'Balcony'] as $name) {
-                $facilities[] = DB::table('facilities')->insertGetId(['name' => $name]);
+                $facilities[] = CatalogOptions::ensureFacility($name);
             }
             $counts = ['hotels' => 0, 'rooms' => 0, 'inventory' => 0, 'bookings' => 0, 'payments' => 0, 'hotel_ids' => [], 'anchor_date' => $date];
             foreach (require __DIR__.'/demo/destinations.php' as $cityIndex => [$city, $country]) {

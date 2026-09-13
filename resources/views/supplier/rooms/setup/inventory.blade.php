@@ -117,7 +117,7 @@
 
                                 <div>
                                     <label class="block mb-2 text-sm text-zinc-300">
-                                        Availability
+                                        Available units
                                     </label>
 
                                     <input
@@ -130,7 +130,7 @@
 
                                 <div>
                                     <label class="block mb-2 text-sm text-zinc-300">
-                                        Price (€)
+                                        Price per night (EUR)
                                     </label>
 
                                     <input

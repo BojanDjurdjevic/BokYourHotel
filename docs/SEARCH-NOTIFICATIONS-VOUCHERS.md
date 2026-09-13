@@ -36,11 +36,11 @@ Migration `2026_09_14_000001_add_search_and_notifications.php` adds nullable `ho
 
 ## Notifications and transaction boundary
 
-One `BookingActivity` event carries a scalar snapshot and a `BookingNoticeType` value. Six business types are supported: BookingCreated, BookingConfirmed, BookingCancelled, PaymentSucceeded, PaymentRefunded and BookingExpired. PaymentFailed stays immediate UI feedback to avoid noisy retry email. Demo seeding does not emit historical notifications. Suppliers/admins are not broadcast generic customer notices.
+One `BookingActivity` event carries a scalar snapshot and a `BookingNoticeType` value. Six business types are supported: BookingCreated, BookingConfirmed, BookingCancelled, PaymentSucceeded, PaymentRefunded and BookingExpired. PaymentFailed stays immediate UI feedback to avoid noisy retry email. Demo seeding does not emit historical notifications. Suppliers are not broadcast generic customer notices; they receive only booking-created and booking-cancelled notices for their own hotels.
 
 The event implements `ShouldDispatchAfterCommit`; successful service transitions record it inside their existing transaction. Its listener is registered once. The queued Laravel Notification also requests `afterCommit()`. Consequently outer rollback, failed cancellation/restore and failed payment do not enqueue mail/database notifications. Snapshots preserve the event's status/reason instead of silently showing a later booking state when a worker runs.
 
-Owners receive database + mail; guests receive mail routed to guest_email. Cancellation includes reference, hotel, reason where supplied and payment state. Refund copy explicitly says this is a fake-system refund record, not a bank transfer. Duplicate successful POSTs do not emit another success transition notice.
+Owners and supplier recipients receive database + mail through their normal User notification channels; guests receive mail routed to guest_email. Cancellation includes reference, hotel, reason where supplied and payment state. Refund copy explicitly says this is a fake-system refund record, not a bank transfer. Duplicate successful POSTs do not emit another success transition notice.
 
 The notification center is authenticated, paginated, scoped to the current user, and supports CSRF-protected PATCH mark-as-read. Navigation shows unread count. Booking links continue through existing authorization.
 
@@ -71,7 +71,9 @@ Public flow: Home autocomplete → filtered hotel results → hotel details → 
 
 ## Fictional media pack
 
-Current report: **0/36 files found, 0 approved valid assets, 0 demo hotels and 0 demo rooms populated, 0 new image relations**. All 21 planned categories are missing. No images were downloaded, generated or replaced by fake image files.
+Current report: **36/36 files found, 36 approved valid assets, 100 demo hotels and 450 demo rooms populated**. The local fictional media pack is complete across all 21 planned categories. The importer is idempotent; the last repeat run added 0 new image relations.
+
+The local catalog audit is reproducible with `php artisan demo:catalog` and the deliberate cleanup with `php artisan demo:catalog --apply`. It archives duplicate board rows, remaps room-board pivots, removes only duplicate `Demo ...` facility rows after remapping room pivots, and canonicalizes demo hotel JSON facility lists. Booking items, payments and their historical snapshots are not changed. The command is restricted to local/testing environments.
 
 The v2 manifest includes filename/category/source_type/note/license_note/approved. Supported provenance types are generated-demo-asset, local-original and licensed-local; planned records are not approved. Import validates local containment, MIME, file size/dimensions and approval. Missing or invalid assets produce no phantom database references. Legacy approved local manifests remain compatible.
 

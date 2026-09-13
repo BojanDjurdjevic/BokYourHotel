@@ -11,7 +11,7 @@
         </div>
         <x-input-error :messages="$errors->get('city')" />
     </form>
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+    <div id="hotel-results" class="scroll-mt-24 grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         @forelse($hotels as $hotel)
             <article class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
                 @if($hotel->featuredImage)
@@ -32,4 +32,11 @@
         @endforelse
     </div>
     {{ $hotels->links() }}
+    @if(request()->query())
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                requestAnimationFrame(() => document.getElementById('hotel-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+            });
+        </script>
+    @endif
 </x-app-layout>

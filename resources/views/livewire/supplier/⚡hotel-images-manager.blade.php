@@ -129,8 +129,6 @@ new class extends Component
 
 <div class="space-y-6">
     
-    <h2 class="text-xl font-semibold">Hotel images</h2>
-
     {{-- File input --}}
     <div>
         <input type="file" wire:model="images" multiple class="mb-4 p-2 bg-gray-700 rounded-lg">

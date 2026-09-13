@@ -2,6 +2,8 @@
 namespace App\Services;
 use App\Models\Hotel;
 use App\Support\FacilityLabel;
+use App\Support\CatalogLabel;
+use App\Support\CatalogOptions;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -10,12 +12,20 @@ class HotelSearchService
     public function query(array $data)
     {
         $nights = !empty($data['check_in']) ? (int) Carbon::parse($data['check_in'])->diffInDays(Carbon::parse($data['check_out'])) : 1;
-        $boards = DB::table('room_board_types')->whereIn('board_type_id', DB::table('board_types')->select('id')->whereNull('archived_at'))->select('room_id')->selectRaw('MIN(price) as board_price')
-            ->when($data['board_type'] ?? null, fn ($q, $id) => $q->where('board_type_id', $id))->groupBy('room_id');
+        $activeBoards = DB::table('board_types')->whereNull('archived_at')->get(['id', 'name']);
+        $boards = DB::table('room_board_types')->whereIn('board_type_id', $activeBoards->pluck('id'))
+            ->select('room_id')->selectRaw('MIN(price) as board_price')
+            ->when($data['board_type'] ?? null, function ($q, $id) use ($activeBoards) {
+                $selected = $activeBoards->firstWhere('id', (int) $id);
+                $ids = $selected ? $activeBoards->filter(fn ($board) => CatalogLabel::key($board->name) === CatalogLabel::key($selected->name))->pluck('id') : [(int) $id];
+                return $q->whereIn('board_type_id', $ids);
+            })->groupBy('room_id');
         $rooms = DB::table('rooms as r')->joinSub($boards, 'b', 'b.room_id', '=', 'r.id')
             ->whereNull('r.archived_at')->where('r.capacity', '>=', ($data['adults'] ?? 1) + ($data['children'] ?? 0));
-        foreach ($data['room_facilities'] ?? [] as $id) {
-            $rooms->whereExists(fn ($q) => $q->selectRaw('1')->from('facility_room as f')->whereColumn('f.room_id', 'r.id')->where('f.facility_id', $id));
+        $facilities = DB::table('facilities')->get(['id', 'name']);
+        foreach (collect($data['room_facilities'] ?? [])->map(fn ($id) => $facilities->firstWhere('id', (int) $id)?->name)->filter()->map(fn ($name) => FacilityLabel::key($name))->unique() as $facilityKey) {
+            $ids = $facilities->filter(fn ($facility) => FacilityLabel::key($facility->name) === $facilityKey)->pluck('id');
+            $rooms->whereExists(fn ($q) => $q->selectRaw('1')->from('facility_room as f')->whereColumn('f.room_id', 'r.id')->whereIn('f.facility_id', $ids));
         }
         $price = '(r.price_per_night + b.board_price)';
         if (!empty($data['check_in'])) {
@@ -40,7 +50,12 @@ class HotelSearchService
                 return !empty($data['country']) ? $q->where('city', $city)->where('country', $data['country']) : $q->where('city', 'like', '%'.addcslashes($city, '%_\\').'%');
             })
             ->when($data['stars'] ?? [], fn ($q, $stars) => $q->whereIn('star_rating', $stars));
-        foreach ($data['hotel_facilities'] ?? [] as $facility) $hotels->whereJsonContains('facilities', $facility);
+        foreach ($data['hotel_facilities'] ?? [] as $facility) {
+            $aliases = FacilityLabel::aliases($facility);
+            $hotels->where(function ($query) use ($aliases) {
+                foreach ($aliases as $alias) $query->orWhereJsonContains('facilities', $alias);
+            });
+        }
         $requiresRoom = !empty($data['check_in']) || isset($data['adults']) || isset($data['children']) || !empty($data['room_facilities']) || !empty($data['board_type']) || isset($data['min_price']) || isset($data['max_price']) || in_array($data['sort'] ?? '', ['price_asc','price_desc']);
         $join = $requiresRoom ? 'joinSub' : 'leftJoinSub';
         $hotels->$join($matches, 'matches', 'matches.hotel_id', '=', 'hotels.id')
@@ -56,11 +71,10 @@ class HotelSearchService
     public function options(): array {
         return [
             'hotelFacilities' => DB::table('hotels')->where('published', true)->whereNull('hotels.archived_at')->whereNotNull('facilities')->distinct()->pluck('facilities')
-                ->flatMap(fn ($json) => json_decode($json, true) ?? [])->unique()->sortBy(fn ($facility) => FacilityLabel::label($facility))->values()
-                ->map(fn ($facility) => ['value' => $facility, 'label' => FacilityLabel::label($facility)])->values(),
-            'roomFacilities' => DB::table('facilities')->get(['id','name'])->sortBy(fn ($facility) => FacilityLabel::label($facility->name))->values()
-                ->map(function ($facility) { $facility->label = FacilityLabel::label($facility->name); return $facility; }),
-            'boards' => DB::table('board_types')->whereNull('archived_at')->orderBy('name')->get(['id','name']),
+                ->flatMap(fn ($json) => json_decode($json, true) ?? [])->map(fn ($facility) => ['key' => FacilityLabel::key($facility), 'value' => FacilityLabel::key($facility), 'label' => FacilityLabel::label($facility)])
+                ->unique('key')->sortBy('label')->values(),
+            'roomFacilities' => CatalogOptions::facilities(),
+            'boards' => CatalogOptions::boards(),
         ];
     }
 }

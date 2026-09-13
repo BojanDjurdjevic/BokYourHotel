@@ -48,10 +48,10 @@ class BookingNotificationTest extends TestCase
         $this->reservation();
         $this->assertDatabaseCount('jobs',0);
         DB::commit();
-        $this->assertDatabaseCount('jobs',2); // separate database + mail jobs
+        $this->assertDatabaseCount('jobs',4); // customer and supplier database + mail jobs
         $this->assertDatabaseCount('notifications',0);
         $this->artisan('queue:work',['--stop-when-empty'=>true,'--tries'=>1])->assertSuccessful();
-        $this->assertDatabaseCount('notifications',1);
+        $this->assertDatabaseCount('notifications',2);
         $this->assertDatabaseCount('jobs',0);
     }
     public function test_rolled_back_payment_and_cancellation_produce_no_notifications(): void {
@@ -120,9 +120,26 @@ class BookingNotificationTest extends TestCase
                 $this->assertTrue(\Illuminate\Support\Facades\URL::hasValidSignature(\Illuminate\Http\Request::create($mail->viewData[$key])));
                 $this->assertStringContainsString($booking->booking_number,$mail->viewData[$key]);
             }
+            $html = view($mail->view, $mail->viewData)->render();
+            preg_match_all('/href="([^"]+)"/', $html, $matches);
+            $renderedManage = collect($matches[1])->first(fn ($url) => str_contains($url, '/guest/bookings/'));
+            $this->assertNotNull($renderedManage);
+            $this->assertTrue(\Illuminate\Support\Facades\URL::hasValidSignature(\Illuminate\Http\Request::create(html_entity_decode($renderedManage))));
             $this->get($mail->viewData['voucherUrl'])->assertOk();
             return true;
         });
+    }
+
+    public function test_supplier_receives_only_new_booking_and_cancellation_notifications(): void {
+        $booking = $this->reservation();
+        Notification::fake();
+        app(FakePaymentService::class)->submit($booking, $this->owner, 1, 'success');
+        app(BookingService::class)->confirm($booking, $this->supplier);
+        app(BookingService::class)->cancel($booking, $this->supplier, 'Supplier test');
+
+        Notification::assertSentTo($this->supplier, BookingNotice::class, fn ($notice) => $notice->data['type'] === 'Booking cancelled');
+        Notification::assertNotSentTo($this->supplier, BookingNotice::class, fn ($notice) => $notice->data['type'] === 'Payment succeeded');
+        Notification::assertNotSentTo($this->supplier, BookingNotice::class, fn ($notice) => $notice->data['type'] === 'Booking confirmed');
     }
     public function test_confirm_and_expire_events_are_discarded_on_outer_rollback(): void {
         $booking=$this->reservation();

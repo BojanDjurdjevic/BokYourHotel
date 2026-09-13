@@ -11,6 +11,7 @@ use App\Models\BedType;
 use App\Models\BoardType;
 use App\Http\Requests\RoomRequest;
 use App\Models\Facility;
+use App\Support\CatalogOptions;
 
 class RoomController extends Controller
 {
@@ -43,10 +44,10 @@ class RoomController extends Controller
     {
         Gate::authorize('update', $hotel);
         //dd($hotel->supplier_id, auth()->id());
-        $facilities = Facility::all();
+        $facilities = CatalogOptions::facilities();
         $roomTypes = RoomType::all();
         $bedTypes = BedType::all();
-        $boardTypes = BoardType::whereNull('archived_at')->get();
+        $boardTypes = CatalogOptions::boards();
 
         return view('supplier.rooms.create', compact(
             'hotel',
@@ -103,7 +104,7 @@ class RoomController extends Controller
         abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         $roomTypes = RoomType::all();
         $bedTypes = BedType::all();
-        $boardTypes = BoardType::whereNull('archived_at')->get();
+        $boardTypes = CatalogOptions::boards();
 
         return view('supplier.rooms.edit', compact(
             'room',

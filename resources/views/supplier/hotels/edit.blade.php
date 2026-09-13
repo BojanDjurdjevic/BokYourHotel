@@ -5,7 +5,7 @@
     Edit Hotel
     </h1>
 
-    <form method="POST" action="{{ route('supplier.hotels.update', $hotel) }}">
+    <form method="POST" action="{{ route('supplier.hotels.update', $hotel) }}" class="space-y-6">
     @csrf
     @method('PUT')
 
@@ -16,7 +16,7 @@
         type="text"
         name="name"
         value="{{ old('name', $hotel->name) }}"
-        class="w-full border rounded p-2"
+        class="min-h-12 w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-3 text-base text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
     >
     </div>
 
@@ -27,7 +27,7 @@
         type="text"
         name="city"
         value="{{ old('city', $hotel->city) }}"
-        class="w-full border rounded p-2"
+        class="min-h-12 w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-3 text-base text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
     >
     </div>
 
@@ -38,7 +38,7 @@
         type="text"
         name="country"
         value="{{ old('country', $hotel->country) }}"
-        class="w-full border rounded p-2"
+        class="min-h-12 w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-3 text-base text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
     >
     </div>
 
@@ -48,7 +48,7 @@
         type="text"
         name="address"
         value="{{ old('address', $hotel->address) }}"
-        class="w-full border rounded p-2"
+        class="min-h-12 w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-3 text-base text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
     >
     </div>
 
@@ -57,7 +57,7 @@
 
     <textarea
         name="description"
-        class="w-full border rounded p-2"
+        class="min-h-32 w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-3 text-base text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
         rows="4"
     >{{ old('description', $hotel->description) }}</textarea>
     </div>
@@ -73,7 +73,7 @@
             type="checkbox"
             name="facilities[]"
             value="{{ $facility }}"
-            @checked(in_array($facility, $hotel->facilities ?? []))
+            @checked(collect($hotel->facilities ?? [])->map(fn ($item) => \App\Support\FacilityLabel::key($item))->contains(\App\Support\FacilityLabel::key($facility)))
         >
 
         {{ \App\Support\FacilityLabel::label($facility) }}

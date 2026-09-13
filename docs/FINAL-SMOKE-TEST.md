@@ -2,6 +2,20 @@
 
 Run this checklist against the deployment-like local environment after setting `APP_ENV`, `APP_DEBUG`, database, storage, queue, mail and fake-payment configuration. Record the date, environment and any failed step.
 
+## Final QA additions
+
+- [ ] Public filters and supplier room forms expose one option per semantic board/facility; no `Demo` or snake_case label is visible.
+- [ ] Search submit lands at the results anchor while a plain first page load stays at the top.
+- [ ] Demo hotel cards use deterministic varied featured images; room cards use deterministic room-appropriate image sets.
+- [ ] Recovery email is checked from the rendered link or decoded HTML, not by copying `&amp;` from a raw log line.
+- [ ] User and supplier notification badges reflect queued database notifications after a worker processes the queue.
+- [ ] Supplier Overview, Hotels, Bookings, Pending and Revenue share the same green Supplier Panel sidebar.
+- [ ] Supplier inventory fields clearly say From, To, Available units and Price per night (EUR).
+- [ ] Hotel and room image management show existing previews and support upload, featured selection and delete with ownership boundaries.
+- [ ] Supplier sees Confirm booking for an eligible pending booking and Complete booking only when the existing lifecycle permits it.
+
+For local database queues, run `php artisan queue:work --queue=default --tries=3 --timeout=60` while checking notifications. With `MAIL_MAILER=log`, validate the actual URL before HTML escaping or open the rendered link after decoding HTML entities.
+
 ## Public and guest
 
 - [ ] Home loads with no debug text or broken assets.

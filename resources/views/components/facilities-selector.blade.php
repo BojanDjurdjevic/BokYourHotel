@@ -25,7 +25,7 @@
             </span>
 
             <span>
-                {{ $facility->name }}
+                {{ $facility->label ?? \App\Support\FacilityLabel::label($facility->name) }}
             </span>
 
         </label>

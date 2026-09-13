@@ -1,4 +1,5 @@
-<x-app-layout>
+@php($layout = auth()->user()?->isSupplier() ? 'layouts.dashboard' : 'app-layout')
+<x-dynamic-component :component="$layout">
     <div class="max-w-6xl mx-auto">
         <h1 class="text-3xl font-bold mb-6">{{ $title ?? (auth()->user()->isAdmin() || auth()->user()->isSupplier() || auth()->user()->isSuperAdmin() ? 'Bookings' : 'My bookings') }}</h1>
 
@@ -23,4 +24,4 @@
 
         <div class="mt-6">{{ $bookings->links() }}</div>
     </div>
-</x-app-layout>
+</x-dynamic-component>

@@ -10,6 +10,7 @@ use App\Models\Room;
 use App\Models\RoomInventory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Support\CatalogOptions;
 
 class RoomSetupController extends Controller
 {
@@ -43,7 +44,7 @@ class RoomSetupController extends Controller
         Gate::authorize('update', $room->hotel);
         abort_if($room->archived_at, 403, 'Archived rooms cannot be changed.');
         $hotel = $room->hotel;
-        $facilities = Facility::all();
+        $facilities = CatalogOptions::facilities();
 
         //dd($facilities);
 
