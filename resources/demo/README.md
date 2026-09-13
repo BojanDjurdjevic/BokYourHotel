@@ -1,6 +1,6 @@
 # Fictional local demo image pack
 
-Pack status: **26/36 supplied and approved** in the current working tree. The supplied files are fictional AI-generated demo assets; no images were downloaded from external sources or fabricated as placeholders in the repository. The manifest contains the planned filenames and records provenance for each supplied asset.
+Pack status: **36/36 supplied and approved** in the current working tree. The supplied files are fictional AI-generated demo assets; no images were downloaded from external sources or fabricated as placeholders in the repository. The manifest contains the planned filenames and records provenance for each supplied asset.
 
 Add source files under `resources/demo/images/`, then review each manifest record:
 - `filename`, `category`, `source_type`, `note`, `license_note`, `approved`.
@@ -13,16 +13,7 @@ Accepted files: local JPEG/PNG/WebP, at most 8 MB and 40 MP; realpath must remai
 
 ## Exact source files still needed
 
-- `exterior-city/exterior-city-02.webp`
-- `exterior-resort/exterior-resort-02.webp`
-- `lobby-modern/lobby-modern-02.webp`
-- `restaurant/restaurant-02.webp`
-- `pool/pool-01.webp`
-- `pool/pool-02.webp`
-- `rooftop/rooftop-01.webp`
-- `rooftop/rooftop-02.webp`
-- `spa/spa-01.webp`
-- `spa/spa-02.webp`
+All planned source files are present and approved in the current working tree.
 
 ## Import
 
@@ -31,12 +22,12 @@ php artisan demo:images
 # demo:seed also invokes this importer after its non-destructive dataset check.
 ```
 
-Current report after the first import:
+Current report after the completed import:
 ```
-26/36 assets found; 26 approved valid assets.
+36/36 assets found; 36 approved valid assets.
 100 hotels populated; 450 rooms populated.
-Missing categories: pool, rooftop, spa
-New local image relations: 2825 on first import; 0 on an unchanged repeat run.
+Missing categories:
+New local image relations: 400 in this completion run; 0 on an unchanged repeat run.
 ```
 
 Missing categories means no usable approved asset in that category, including present but unapproved files. Found counts manifest entries whose files exist safely under the root; it is distinct from the approved-valid count. Populated counts existing demo image relations after import, so repeat runs can have zero new relations but populated hotels/rooms.

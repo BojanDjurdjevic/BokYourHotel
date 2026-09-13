@@ -36,9 +36,9 @@
             "filename": "exterior-city/exterior-city-02.webp",
             "category": "exterior-city",
             "source_type": "generated-demo-asset",
-            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
-            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
-            "approved": false
+            "note": "Fictional AI-generated demo asset for the BookYourHotel portfolio. No real hotel or property represented.",
+            "license_note": "Generated specifically as a fictional demo asset for the BookYourHotel portfolio project; no external source image used.",
+            "approved": true
         },
         {
             "filename": "exterior-resort/exterior-resort-01.webp",
@@ -52,9 +52,9 @@
             "filename": "exterior-resort/exterior-resort-02.webp",
             "category": "exterior-resort",
             "source_type": "generated-demo-asset",
-            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
-            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
-            "approved": false
+            "note": "Fictional AI-generated demo asset for the BookYourHotel portfolio. No real hotel or property represented.",
+            "license_note": "Generated specifically as a fictional demo asset for the BookYourHotel portfolio project; no external source image used.",
+            "approved": true
         },
         {
             "filename": "lobby-modern/lobby-modern-01.webp",
@@ -68,9 +68,9 @@
             "filename": "lobby-modern/lobby-modern-02.webp",
             "category": "lobby-modern",
             "source_type": "generated-demo-asset",
-            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
-            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
-            "approved": false
+            "note": "Fictional AI-generated demo asset for the BookYourHotel portfolio. No real hotel or property represented.",
+            "license_note": "Generated specifically as a fictional demo asset for the BookYourHotel portfolio project; no external source image used.",
+            "approved": true
         },
         {
             "filename": "lobby-classic/lobby-classic-01.webp",
@@ -116,9 +116,9 @@
             "filename": "restaurant/restaurant-02.webp",
             "category": "restaurant",
             "source_type": "generated-demo-asset",
-            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
-            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
-            "approved": false
+            "note": "Fictional AI-generated demo asset for the BookYourHotel portfolio. No real hotel or property represented.",
+            "license_note": "Generated specifically as a fictional demo asset for the BookYourHotel portfolio project; no external source image used.",
+            "approved": true
         },
         {
             "filename": "breakfast/breakfast-01.webp",
@@ -140,49 +140,49 @@
             "filename": "pool/pool-01.webp",
             "category": "pool",
             "source_type": "generated-demo-asset",
-            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
-            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
-            "approved": false
+            "note": "Fictional AI-generated demo asset for the BookYourHotel portfolio. No real hotel or property represented.",
+            "license_note": "Generated specifically as a fictional demo asset for the BookYourHotel portfolio project; no external source image used.",
+            "approved": true
         },
         {
             "filename": "pool/pool-02.webp",
             "category": "pool",
             "source_type": "generated-demo-asset",
-            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
-            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
-            "approved": false
+            "note": "Fictional AI-generated demo asset for the BookYourHotel portfolio. No real hotel or property represented.",
+            "license_note": "Generated specifically as a fictional demo asset for the BookYourHotel portfolio project; no external source image used.",
+            "approved": true
         },
         {
             "filename": "rooftop/rooftop-01.webp",
             "category": "rooftop",
             "source_type": "generated-demo-asset",
-            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
-            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
-            "approved": false
+            "note": "Fictional AI-generated demo asset for the BookYourHotel portfolio. No real hotel or property represented.",
+            "license_note": "Generated specifically as a fictional demo asset for the BookYourHotel portfolio project; no external source image used.",
+            "approved": true
         },
         {
             "filename": "rooftop/rooftop-02.webp",
             "category": "rooftop",
             "source_type": "generated-demo-asset",
-            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
-            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
-            "approved": false
+            "note": "Fictional AI-generated demo asset for the BookYourHotel portfolio. No real hotel or property represented.",
+            "license_note": "Generated specifically as a fictional demo asset for the BookYourHotel portfolio project; no external source image used.",
+            "approved": true
         },
         {
             "filename": "spa/spa-01.webp",
             "category": "spa",
             "source_type": "generated-demo-asset",
-            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
-            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
-            "approved": false
+            "note": "Fictional AI-generated demo asset for the BookYourHotel portfolio. No real hotel or property represented.",
+            "license_note": "Generated specifically as a fictional demo asset for the BookYourHotel portfolio project; no external source image used.",
+            "approved": true
         },
         {
             "filename": "spa/spa-02.webp",
             "category": "spa",
             "source_type": "generated-demo-asset",
-            "note": "Planned fictional asset; not yet supplied. No real hotel branding.",
-            "license_note": "Approval pending: record provenance and usage permission when the asset is supplied.",
-            "approved": false
+            "note": "Fictional AI-generated demo asset for the BookYourHotel portfolio. No real hotel or property represented.",
+            "license_note": "Generated specifically as a fictional demo asset for the BookYourHotel portfolio project; no external source image used.",
+            "approved": true
         },
         {
             "filename": "gym/gym-01.webp",
