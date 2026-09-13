@@ -1,6 +1,23 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+      x-data="{ theme: window.__bookYourHotelTheme }"
+      @bookyourhotel-theme-changed.window="theme = $event.detail.theme">
     <head>
+        <script>
+            (() => {
+                const saved = window.localStorage.getItem('bookyourhotel-theme');
+                const theme = saved === 'light' ? 'light' : 'dark';
+                document.documentElement.classList.toggle('dark', theme === 'dark');
+                window.__bookYourHotelTheme = theme;
+                window.toggleBookYourHotelTheme = () => {
+                    const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+                    document.documentElement.classList.toggle('dark', next === 'dark');
+                    window.localStorage.setItem('bookyourhotel-theme', next);
+                    window.__bookYourHotelTheme = next;
+                    window.dispatchEvent(new CustomEvent('bookyourhotel-theme-changed', { detail: { theme: next } }));
+                };
+            })();
+        </script>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -15,14 +32,17 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-slate-100 dark:bg-gray-900">
+            <div class="fixed right-4 top-4">
+                <x-theme-toggle />
+            </div>
             <div>
                 <a href="/">
                     <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
+            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-slate-50 dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
                 {{ $slot }}
             </div>
         </div>

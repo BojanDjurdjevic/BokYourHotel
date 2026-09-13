@@ -76,3 +76,25 @@ For local database queues, run `php artisan queue:work --queue=default --tries=3
 - [ ] `FAKE_PAYMENTS_ENABLED=false` unless this is an intentional portfolio/demo environment.
 - [ ] Public storage is linked and all approved local demo images load.
 - [ ] Backups, restore procedure, logs and basic monitoring have been verified.
+
+## Presentation QA
+
+### Theme
+
+- [ ] A fresh browser starts in the dark theme.
+- [ ] Toggle to light, refresh, and confirm light persists; toggle back to dark and confirm dark persists after refresh.
+- [ ] No visible theme flash occurs during page load.
+- [ ] Light theme uses a soft gray/slate background, readable controls and readable gallery/modal states.
+
+### Supplier mobile navigation
+
+- [ ] Desktop sidebar remains visible on desktop and hidden on mobile.
+- [ ] Mobile supplier sub-navigation is visible below the global header.
+- [ ] Overview, My Hotels, Bookings, Pending and Revenue are reachable, with the active section highlighted.
+- [ ] Horizontal scrolling and keyboard focus work at 320–390px widths and on tablet layouts.
+- [ ] Supplier navigation works without relying on the browser Back button.
+
+### README
+
+- [ ] Every README screenshot link points to an existing file.
+- [ ] README commands match the local project and fake payment is clearly disclosed.

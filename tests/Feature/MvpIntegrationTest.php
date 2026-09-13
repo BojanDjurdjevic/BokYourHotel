@@ -83,6 +83,24 @@ class MvpIntegrationTest extends TestCase
         $this->getJson(route('supplier.inventory.calendar.data', ['hotel' => $this->hotel, 'room_id' => $this->otherRoom->id, 'month' => now()->format('Y-m')]))->assertNotFound();
     }
 
+    public function test_shared_layout_exposes_theme_toggle_and_supplier_mobile_navigation(): void
+    {
+        $this->get('/')->assertOk()
+            ->assertSee('bookyourhotel-theme')
+            ->assertSee('toggleBookYourHotelTheme');
+
+        $this->actingAs($this->supplier)->get(route('supplier.dashboard'))
+            ->assertOk()
+            ->assertSee('Supplier sections')
+            ->assertSee('Overview')
+            ->assertSee('My Hotels')
+            ->assertSee('Bookings')
+            ->assertSee('Pending')
+            ->assertSee('Revenue')
+            ->assertSee('md:hidden')
+            ->assertSee('hidden md:block');
+    }
+
     public function test_inventory_setup_cannot_write_foreign_room_and_validates_decoded_rows(): void
     {
         $this->actingAs($this->supplier);

@@ -3,6 +3,10 @@
         $bgColor = auth()->user()->role == 'superadmin' ? 'bg-purple-900' : 'bg-emerald-900';
     @endphp
 
+    @if(auth()->user()?->isSupplier())
+        @include('layouts.partials.supplier-mobile-nav')
+    @endif
+
     <div class="flex h-screen">
         {{-- Sidebar --}}
         <aside class="hidden md:block w-64 {{ $bgColor }} border-r border-gray-800 p-6 sticky top-0">
