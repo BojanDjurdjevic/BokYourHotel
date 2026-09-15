@@ -4,6 +4,10 @@
 
 **BookYourHotel** is a hotel booking and supplier management SaaS-style portfolio MVP.
 
+## [Live Demo](https://bookyourhotelapp.com)
+
+The deployed application uses simulated payments only; no real money is charged.
+
 Customers and guests can search hotels, check availability, create a booking, use a simulated payment flow and receive a voucher. Suppliers manage hotels, rooms, facilities, images, inventory and bookings. The platform also includes guest booking recovery, notifications and transaction-safe booking and inventory operations.
 
 ## Screenshots

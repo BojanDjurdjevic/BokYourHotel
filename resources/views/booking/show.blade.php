@@ -476,7 +476,8 @@
             <div
                 x-show="bookingItems.length"
                 x-cloak
-                class="
+                id="booking-cart"
+                class="scroll-mt-24
                     mt-8
                     p-6
                     bg-gray-900
@@ -1538,6 +1539,24 @@
 
                         board_total: board.total,
 
+                    })
+
+                    this.scrollToBookingCart()
+                },
+
+                scrollToBookingCart() {
+
+                    this.$nextTick(() => {
+                        const cart = document.getElementById('booking-cart')
+
+                        if (!cart) return
+
+                        const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+
+                        cart.scrollIntoView({
+                            behavior: reducedMotion ? 'auto' : 'smooth',
+                            block: 'start',
+                        })
                     })
                 },
 
