@@ -7,9 +7,9 @@
         @include('layouts.partials.supplier-mobile-nav')
     @endif
 
-    <div class="flex h-screen">
+    <div class="flex min-h-screen min-w-0">
         {{-- Sidebar --}}
-        <aside class="hidden md:block w-64 {{ $bgColor }} border-r border-gray-800 p-6 sticky top-0">
+        <aside class="supplier-sidebar hidden md:block w-64 {{ $bgColor }} border-r border-gray-800 p-6 sticky top-0">
             <h2 class="text-lg font-semibold mb-8">
                 {{ ucfirst(auth()->user()->role) }} Panel
             </h2>
@@ -24,7 +24,7 @@
         </aside>
 
         {{-- Main content --}}
-        <main class="flex-1 overflow-y-auto p-6">
+        <main class="min-w-0 flex-1 overflow-y-auto p-6">
             {{ $slot }}
         </main>
     </div>

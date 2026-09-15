@@ -1,5 +1,6 @@
-<nav aria-label="Supplier sections" class="order-first block border-b border-emerald-800 bg-emerald-950 px-4 py-3 md:hidden dark:border-emerald-800 dark:bg-emerald-950">
-    <div class="flex min-w-max gap-2 overflow-x-auto pb-1">
+<nav aria-label="Supplier sections" class="order-first block w-full max-w-full min-w-0 overflow-hidden border-b border-emerald-800 bg-emerald-950 px-4 py-3 md:hidden dark:border-emerald-800 dark:bg-emerald-950">
+    <div class="supplier-mobile-scrollbar w-full min-w-0 overflow-x-auto overscroll-x-contain pb-1">
+        <div class="flex min-w-max gap-2 whitespace-nowrap">
         @php
             $supplierNav = [
                 ['label' => 'Overview', 'route' => 'supplier.dashboard', 'active' => request()->routeIs('supplier.dashboard')],
@@ -18,5 +19,6 @@
                ])
                @if($item['active']) aria-current="page" @endif>{{ $item['label'] }}</a>
         @endforeach
+        </div>
     </div>
 </nav>

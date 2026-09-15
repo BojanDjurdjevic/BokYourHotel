@@ -22,11 +22,18 @@ html:not(.dark) .border-zinc-700,
 html:not(.dark) .border-zinc-800 { border-color: #cbd5e1 !important; }
 html:not(.dark) .text-zinc-300,
 html:not(.dark) .text-zinc-400 { color: #475569 !important; }
+html:not(.dark) .supplier-sidebar .text-gray-100,
+html:not(.dark) .supplier-sidebar .text-gray-200,
+html:not(.dark) .supplier-sidebar .text-gray-300,
+html:not(.dark) .supplier-sidebar .text-gray-400 { color: #ecfdf5 !important; }
+html:not(.dark) .supplier-sidebar .hover\:text-white:hover { color: #fff !important; }
 html:not(.dark) input,
 html:not(.dark) select,
 html:not(.dark) textarea { color-scheme: light; }
 html:not(.dark) .bg-gray-900\/95 { background-color: rgb(248 250 252 / 0.95) !important; }
 html:not(.dark) .bg-gray-900\/60 { background-color: rgb(248 250 252 / 0.60) !important; }
+.supplier-mobile-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.supplier-mobile-scrollbar::-webkit-scrollbar { display: none; }
 html:not(.dark) .bg-blue-600.text-white,
 html:not(.dark) .bg-blue-700.text-white,
 html:not(.dark) .bg-emerald-600.text-white,
