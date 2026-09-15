@@ -10,12 +10,19 @@ use Illuminate\Support\Facades\Storage;
 
 class DemoImages extends Command
 {
-    protected $signature = 'demo:images';
+    protected $signature = 'demo:images {--allow-production : Explicitly allow demo image import in production}';
     protected $description = 'Import only approved, locally present demo image assets';
 
     public function handle(): int
     {
-        if (! app()->environment(['local', 'testing'])) return self::FAILURE;
+        //if (! app()->environment(['local', 'testing'])) return self::FAILURE;
+        $allowedEnvironment = app()->environment(['local', 'testing'])
+            || (app()->environment('production') && $this->option('allow-production'));
+
+        if (! $allowedEnvironment) {
+            $this->error('Demo image import is restricted to local/testing. Use --allow-production explicitly for the portfolio deployment.');
+            return self::FAILURE;
+        }
         $run = DB::table('demo_seed_runs')->where('name', 'portfolio-v1')->first();
         if (! $run) { $this->error('Run demo:seed first.'); return self::FAILURE; }
         $directory = config('demo.asset_directory', resource_path('demo'));
