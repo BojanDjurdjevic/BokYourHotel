@@ -1,7 +1,7 @@
 <?php
 namespace Tests\Feature;
 use App\Enums\BookingNoticeType;
-use App\Models\{Booking,RoomInventory};
+use App\Models\{Booking,RoomInventory,User};
 use App\Notifications\BookingNotice;
 use App\Services\{BookingService,FakePaymentService};
 use Illuminate\Support\Facades\{DB,Notification};
@@ -34,6 +34,24 @@ class BookingNotificationTest extends TestCase
         Notification::fake();
         $guest=$this->reservation(true);
         Notification::assertSentOnDemand(BookingNotice::class, fn($n,$channels,$recipient)=>$recipient->routes['mail']===$guest->guest_email && $n->via($recipient)===['mail']);
+    }
+    public function test_demo_users_keep_database_notifications_without_mail_and_real_users_keep_both_channels(): void {
+        $notice = new BookingNotice(['booking_number' => 'BYH-TEST', 'check_out' => '2026-10-07', 'type' => 'Booking created']);
+
+        $demo = User::factory()->create(['email' => 'supplier01@demo.bookyourhotel.test']);
+        $real = User::factory()->create(['email' => 'real.user@example.test']);
+
+        $this->assertSame(['database'], $notice->via($demo));
+        $this->assertSame(['database', 'mail'], $notice->via($real));
+    }
+    public function test_demo_anonymous_recipient_gets_no_mail_and_real_guest_keeps_mail(): void {
+        $notice = new BookingNotice(['booking_number' => 'BYH-TEST', 'check_out' => '2026-10-07', 'type' => 'Booking created']);
+
+        $demo = Notification::route('mail', 'guest@demo.bookyourhotel.test');
+        $real = Notification::route('mail', 'guest@example.test');
+
+        $this->assertSame([], $notice->via($demo));
+        $this->assertSame(['mail'], $notice->via($real));
     }
     public function test_jobs_are_dispatched_only_after_commit_and_never_on_rollback(): void {
         config(['queue.default'=>'database']);

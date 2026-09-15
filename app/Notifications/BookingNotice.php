@@ -13,7 +13,23 @@ class BookingNotice extends Notification implements ShouldQueue
     use Queueable;
     public int $tries = 3;
     public function __construct(public array $data) { $this->afterCommit(); }
-    public function via(object $notifiable): array { return $notifiable instanceof User ? ['database','mail'] : ['mail']; }
+    public function via(object $notifiable): array
+    {
+        if ($notifiable instanceof User) {
+            return self::isDemoEmail($notifiable->email) ? ['database'] : ['database', 'mail'];
+        }
+
+        $email = method_exists($notifiable, 'routeNotificationFor')
+            ? $notifiable->routeNotificationFor('mail')
+            : null;
+
+        return self::isDemoEmail($email) ? [] : ['mail'];
+    }
+
+    private static function isDemoEmail(mixed $email): bool
+    {
+        return str_ends_with(strtolower(trim((string) $email)), '@demo.bookyourhotel.test');
+    }
     public function toDatabase(object $notifiable): array { return $this->data; }
     public function toMail(object $notifiable): MailMessage {
         $guest = ! ($notifiable instanceof User);
