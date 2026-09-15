@@ -18,9 +18,12 @@ class DemoSeeder extends Seeder
         $this->seed(now()->toDateString());
     }
 
-    public function seed(string $date): array
+    public function seed(string $date, bool $allowProduction = false): array
     {
-        abort_unless(app()->environment(['local', 'testing']), 403);
+        $allowedEnvironment = app()->environment(['local', 'testing'])
+            || (app()->environment('production') && $allowProduction);
+
+        abort_unless($allowedEnvironment, 403);
         return DB::transaction(function () use ($date) {
             $existing = DB::table('demo_seed_runs')->where('name', 'portfolio-v1')->first();
             if ($existing) return json_decode($existing->summary, true);

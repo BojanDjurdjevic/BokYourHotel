@@ -28,12 +28,12 @@ class DemoSeed extends Command
             ['date' => ['required', 'date_format:Y-m-d']]
         )->validate();
 
-        $summary = app(DemoSeeder::class)->seed($date);
+        $summary = app(DemoSeeder::class)->seed($date, (bool) $this->option('allow-production'));
 
         $this->call('demo:images', [
             '--allow-production' => (bool) $this->option('allow-production'),
         ]);
-        
+
         $this->line(json_encode($summary, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         $this->info('Existing demo runs are left unchanged. Logins: supplier01@demo.bookyourhotel.test, user@demo.bookyourhotel.test, admin@demo.bookyourhotel.test, superadmin@demo.bookyourhotel.test; password: Demo-Local-2026!');
         return self::SUCCESS;
